@@ -1,0 +1,4 @@
+User-agent: *
+disallow: scripts/
+disallow: legacy/
+disallow: legal.html

@@ -1,0 +1,67 @@
+<form id="sell-form" name="submit-textbooks" method="POST" action="index.php" onsubmit="return submitSellForm()">
+    <button type="reset" value="Reset" id="sell-reset">Clear Form</button>
+    <h1>Sell a Textbook</h1><h2>Live life on the wild side and ditch <a href="https://en.wikipedia.org/wiki/The_Elements_of_Style" class="hide-link" target="_blank">Strunk and White</a>.</h2>
+    <div><div id="sell-noscript-warning" class='form-message-wrapper' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+    <script>
+        document.getElementById('sell-noscript-warning').style.display = 'none';
+    </script>
+    <div class="sell-form-input">
+    <div class="left-form">
+        <div class='yourname-container'>
+            <p class="input-text"><label for="your-name">Your Name <span class="required">*</span></label></p>
+            <p class="form-error"><label for="name" id='yourname-message'></label></p>
+            <input type="text" name="name" id='your-name' maxlength="50" cookie='yourname'>
+            <br><br>
+        </div>
+        <div class='email-container'>
+            <p class="input-text"><label for="email">Email <span class="required">*</span></label></p>
+            <p class="form-error"><label for="email"  id='email-message'></label></p>
+            <input type="email" name="email" id='email' maxlength="254" cookie='email'>
+            <br><br>
+        </div>
+        <div class='textbooktitle-container'>
+            <p class="input-text"><label for="textbook-title">Title (include edition) <span class="required">*</span></label></p>
+            <p class="form-error"><label for="title" id='textbooktitle-message'></label></p>
+            <input type="text" name="title" id='textbook-title' maxlength="75" spellcheck="true">
+            <br><br>
+        </div>
+        <div class='author-container'>
+            <p class="input-text"><label for="author">Author <span class="required">*</span></label></p>
+            <p class="form-error"><label for="author" id='author-message'></label></p>
+            <input type="text" name="author" id='author' maxlength='50'>
+            <br><br>
+        </div>
+    </div>
+    <div class="right-form">
+        <div class="course-container">
+            <p class="input-text"><label for="course">Course (ex: BIOL 380A) <span class="required">*</span></label></p>
+            <p class="form-error"><label for="course" id='course-message'></label></p>
+            <input type="text" class="course" id="course" maxlength='15'>
+            <br><br>
+        </div>
+        <div class='price-container'>
+            <p class="input-text"><label for="price">Price <span class="required">*</span></label></p>
+            <p class="form-error"><label for="price" id='price-message'></label></p>
+            <input type="text" name="price" id='price' autocomplete="off">
+            <br><br>
+        </div>
+        <div class='comments-container'>
+            <p class="input-text"><label for="comments">Comments</label></p>
+            <p class="form-error"><label for="comments"  id='comments-message'></label></p>
+            <textarea rows="6" name="comments" id="comments" maxlength='1000' spellcheck="true"></textarea><br><br>
+        </div>
+    </div>
+    <div class="newsletter-form">
+        <label>
+            <input type="checkbox" name="newsletter" id='newsletter' value='subscribed' cookie='newsletter' checked>
+            <div>This is cool. Keep me informed. You can always unsubscribe, but you won't want to!</div>
+        </label>
+        <br>
+    </div>
+    <div id="sell-form-message"><div id="sell-form-message-wrapper" class='form-message-wrapper'></div></div>
+    <br>
+    <input type="hidden" name="request" id="requestId" value="submit"/>
+    <input type="hidden" name="didcheck" id="didcheck" value="false"/>
+    <input id='sell-submit' type="submit" value="LIST TEXTBOOK">
+    </div>
+</form>
