@@ -1,5 +1,11 @@
+#This is a configuration file for AWS CodeDeploy which automates deployment from GitHub to the live server. Learn how to edit it here: http://docs.aws.amazon.com/codedeploy/latest/userguide/app-spec-ref.html
 version: 0.0
 os: linux
 files:
-- source: /
+- source: /root/
   destination: /var/www/html/live/
+hooks:
+  BeforeInstall:
+  - location: server-initialization.sh
+    timeout: 3000
+    runas: root
