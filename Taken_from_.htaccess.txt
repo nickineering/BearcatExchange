@@ -1,0 +1,13 @@
+### HEADER CACHING ####
+<filesMatch ".(flv|gif|jpg|jpeg|png|ico)$">
+Header set Cache-Control "max-age=0"
+</filesMatch>
+<filesMatch ".(js|css|pdf|swf)$">
+Header set Cache-Control "max-age=0"
+</filesMatch>
+<filesMatch ".(html|htm|txt)$">
+Header set Cache-Control "max-age=0"
+</filesMatch>
+<filesMatch ".(pl|php|cgi|spl|scgi|fcgi)$">
+Header set Cache-Control "max-age=0"
+</filesMatch>

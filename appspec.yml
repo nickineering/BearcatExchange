@@ -3,9 +3,15 @@ version: 0.0
 os: linux
 files:
 - source: /root/
-  destination: /var/www/html/be/live
+  destination: /var/www/be/live
+- source: /bearcatexchange.com.conf
+  destination: /etc/apache2/sites-available/bearcatexchange.com.conf
 hooks:
   BeforeInstall:
   - location: server-initialization.sh
+    timeout: 3000
+    runas: root
+  AfterInstall:
+  - location: server-after-install.sh
     timeout: 3000
     runas: root

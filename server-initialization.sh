@@ -10,23 +10,22 @@ if [ ! -f /home/ubuntu/custom.log ]
         apt-get install python-software-properties
         curl https://bootstrap.pypa.io/get-pip.py -O /home/ubuntu/
         python3.4 get-pip.py
-        apt-get install ruby2.0 apache2 php5 libapache2-mod-php5 php5-mcrypt php5-cli php5-fpm php5-gd libssh2-php mysql-server php5-mysqlnd git unzip zip postfix php5-curl mailutils php5-json phpmyadmin -y
+        apt-get install ruby2.0 apache2 php5 libapache2-mod-php5 php5-mcrypt php5-cli php5-fpm php5-gd libssh2-php mysql-server php5-mysqlnd git unzip zip postfix php5-curl mailutils php5-json phpmyadmin php-pear -y
         php5enmod mcrypt
-        pip3.4 install awscli
-        cd /var/www/html/
+        pear install mail
+        pip3.4 install awscli django
+        cd /var/www/
         aws s3 cp s3://aws-codedeploy-us-east-1/latest/install . --region us-east-1
         chmod +x ./install
         ./install auto
         service codedeploy-agent start
         service codedeploy-agent status
-        chmod 777 /etc/apache2/sites-available/000-default.conf
-        echo "
-
-#Added by Nick
-Include /etc/phpmyadmin/apache.conf" >> /etc/apache2/sites-enabled/000-default.conf
         service apache2 restart
-        mkdir /var/www/html/be/live/ -p
+        mkdir /var/www/be/live/ -p
+        chown -R $USER:$USER /var/www/be
+        chmod -R 755 /var/www
         rm /var/www/html/index.html
+        echo "<?php phpinfo(); ?>" < /var/www/html/index.php
 
 #        This must be done manually:
 #        nano /etc/phpmyadmin/config.inc.php

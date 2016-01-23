@@ -1,0 +1,89 @@
+# TIME CHEAT SHEET
+#      300   5 MIN
+#      600  10 MIN
+#      900  15 MIN
+#     1800  30 MIN
+#     2700  45 MIN
+#
+#     3600   1 HR
+#     7200   2 HR
+#    10800   3 HR
+#    14400   4 HR
+#    18000   5 HR
+#    36000  10 HR
+#    39600  11 HR
+#    43200  12 HR
+#    46800  13 HR
+#    50400  14 HR
+#    54000  15 HR
+#    86400  24 HR
+#
+#    86400   1 DAY
+#   172800   2 DAY
+#   259200   3 DAY
+#   345600   4 DAY
+#   432000   5 DAY
+#   518400   6 DAY
+#   604800   7 DAY
+#
+#   604800   1 WEEK
+#  1209600   2 WEEK
+#  1814400   3 WEEK
+#  2419200   4 WEEK
+#
+#  2419200   1 MONTH
+#  4838400   2 MONTH
+#  7257600   3 MONTH
+#  9676800   4 MONTH
+# 12096000   5 MONTH
+# 14515200   6 MONTH
+# 16934400   7 MONTH
+# 19353600   8 MONTH
+# 21772800   9 MONTH
+# 24192000  10 MONTH
+# 26611200  11 MONTH
+# 29030400  12 MONTH
+
+ServerSignature Off
+
+SetEnv TZ America/New_York
+
+ServerSignature EMail
+SetEnv SERVER_ADMIN support@bearcatexchange.com
+
+#Options +FollowSymLinks
+
+AddDefaultCharset utf-8
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html
+
+RewriteCond %{HTTP_HOST} ^www\.bearcatexchange\.com$ [NC]
+RewriteRule ^(.*)$ http://bearcatexchange.com/$1 [R=301,L]
+
+### Protect Files ####
+<filesMatch ".(htaccess|htpasswd|ini|phps|fla|log|sh)$">
+Order Allow,Deny
+Deny from all
+</filesMatch>
+
+ErrorDocument 400 http://bearcatexchange.com/?e=400
+ErrorDocument 401 http://bearcatexchange.com/?e=401
+ErrorDocument 403 http://bearcatexchange.com/?e=403
+ErrorDocument 404 http://bearcatexchange.com/?e=404
+ErrorDocument 405 http://bearcatexchange.com/?e=405
+ErrorDocument 408 http://bearcatexchange.com/?e=408
+ErrorDocument 414 http://bearcatexchange.com/?e=414
+ErrorDocument 500 http://bearcatexchange.com/?e=500
+ErrorDocument 502 http://bearcatexchange.com/?e=502
+ErrorDocument 504 http://bearcatexchange.com/?e=504
+ErrorDocument 508 http://bearcatexchange.com/?e=508
+
+Redirect 301 /textbooks-data.php /
