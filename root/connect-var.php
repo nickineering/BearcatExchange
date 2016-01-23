@@ -1,4 +1,3 @@
 <?php
-$con = mysqli_connect("localhost", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange");//Development version
-//$con = mysqli_connect("localhost", "nick", "Gc4CXzCrz8RR8WCxxPuWjs", "bearcatexchangedev");//This is a testing incorrect value.
+$con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange", 3306);
 ?>
