@@ -549,7 +549,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
             <!--End page content area-->
             <!--Begin Copyright-->
             <footer id="other-nav">
-                <p id="copyright">&#169; 2015</p>
+                <p id="copyright">&#169; 2016</p>
                 <p>Nicholas Ferrara &amp; Rohit Kapur</p><p>Independent Student Website</p>
                 <hr>
                 <p id='legal-link'><a href='#legal'>Terms and Privacy</a></p>

@@ -25,7 +25,7 @@ if [ ! -f /home/ubuntu/custom.log ]
 #Added by Nick
 Include /etc/phpmyadmin/apache.conf" >> /etc/apache2/sites-enabled/000-default.conf
         service apache2 restart
-        mkdir /var/www/html/live
+        mkdir /var/www/html/be/live/ -p
         rm /var/www/html/index.html
 
 #        This must be done manually:

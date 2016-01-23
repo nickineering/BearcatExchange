@@ -3,7 +3,7 @@ version: 0.0
 os: linux
 files:
 - source: /root/
-  destination: /var/www/html/live/
+  destination: /var/www/html/be/live
 hooks:
   BeforeInstall:
   - location: server-initialization.sh
