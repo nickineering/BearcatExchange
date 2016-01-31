@@ -25,6 +25,9 @@ if [ ! -f /home/ubuntu/custom.log ]
         chown -R $USER:$USER /var/www/be
         chmod -R 755 /var/www
         rm /var/www/html/index.html
+        cd /var/www/be/live/
+        curl -sS https://getcomposer.org/installer | php
+        php composer.phar install
         echo "<?php phpinfo(); ?>" < /var/www/html/index.php
 
 #        This must be done manually:

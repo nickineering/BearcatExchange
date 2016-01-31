@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
 $serverError = false;
 $errorCode = (isset($_GET['e'])) ? $_GET["e"] : 0;
@@ -152,11 +153,31 @@ function contactSeller() {
     mysqli_query($con, $insert);
     $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, price FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
-    $headers = 'From: Bearcat Exchange <support@bearcatexchange.com>'."\r\n".'Reply-To: '.$name.'<'.$email.'>';
     $bodyTitle = "A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!";
     $removalLink = "http://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
     $bodyMessage = "<p>$message</p><p style='margin-bottom: 1em'>--$name</p><p>Don't forget, your asking price is <strong>$".$textbookListing['price']."</strong>. You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it.</p > ";
-    sendEmail($seller['name'].' <'.$seller['email'].'>', $headers, 'A buyer for your textbook '.$textbookListing['title'], $bodyTitle, $bodyMessage);
+    $mail = new PHPMailer;
+    //$mail->SMTPDebug = 3;                               // Enable verbose debug output
+    $mail->isSMTP();
+    $mail->Host = 'email-smtp.us-east-1.amazonaws.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'AKIAJV3FTVKKHHAHE4YQ';
+    $mail->Password = 'ArnoeqtqrnOBa/q6fDICu+vYlwYHr3/bmCv6XnSMSvrP';
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+    $mail->setFrom('support@bearcatexchange.com', 'Bearcat Exchange');
+    $mail->addAddress($seller['email'], $seller['name']);
+    $mail->addReplyTo($email, $name);
+    $mail->isHTML(true);
+    $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
+    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
+    if(!$mail->send()) {
+        printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.");
+        //echo 'Mailer Error: ' . $mail->ErrorInfo;
+    }
+    else {
+        $result["misc"] = 'success';
+    }
     mysqli_close($con);
     $result["misc"] = 'success';
     die(json_encode($result));
@@ -178,11 +199,6 @@ function verifyLink() {
 function onValidate($localCon, $user, $textbookId, $textbookTitle) {
     mysqli_query($localCon, 'UPDATE textbooks SET status = "sold" WHERE `user_id` = '.$user.' AND `id` = '.$textbookId);
     printMessage('Your textbook <i>'.$textbookTitle.'</i> was marked as sold. Congratulations!');
-}
-
-function sendEmail($to, $headers, $subject, $bodyTitle, $bodyMessage) {
-    $emailMessage = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
-    mail($to, $subject, $emailMessage, $headers."\r\n".'Content-type: text/html');
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter) {
