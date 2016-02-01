@@ -5,7 +5,9 @@ files:
 - source: /root/
   destination: /var/www/be/live
 - source: /bearcatexchange.com.conf
-  destination: /etc/apache2/sites-available/bearcatexchange.com.conf
+  destination: /etc/apache2/sites-available/
+#- source: /backup_database.sh
+#  destination: /home/ubuntu/automated/
 hooks:
   BeforeInstall:
   - location: server-initialization.sh

@@ -1,18 +1,21 @@
 #!/bin/bash
-if [ ! -f /home/ubuntu/custom.log ]
+if [ ! -f /home/ubuntu/automated/custom.log ]
     then
-        echo "Proccess began at " >> /home/ubuntu/custom.log
-        date >> /home/ubuntu/custom.log
-        exec >> /home/ubuntu/custom.log 2>&1
+        mkdir /home/ubuntu/automated/
+        cd /home/ubuntu/automated/
+        echo "Proccess began at " >> /home/ubuntu/automated/custom.log
+        date >> /home/ubuntu/automated/custom.log
+        exec >> /home/ubuntu/automated/custom.log 2>&1
         add-apt-repository ppa:ondrej/php5-5.6
         apt-get update -y && apt-get dist-upgrade -y
         apt-get autoremove -y && apt-get autoclean -y
         apt-get install python-software-properties
-        curl https://bootstrap.pypa.io/get-pip.py -O /home/ubuntu/
-        python3.4 get-pip.py
+        curl https://bootstrap.pypa.io/get-pip.py -O /home/ubuntu/automated/
+        python3.4 /home/ubuntu/automated/get-pip.py
         apt-get install ruby2.0 apache2 php5 libapache2-mod-php5 php5-mcrypt php5-cli php5-fpm php5-gd libssh2-php mysql-server php5-mysqlnd git unzip zip postfix php5-curl mailutils php5-json phpmyadmin php-pear -y
         php5enmod mcrypt
         pear install mail
+        curl -sS https://getcomposer.org/installer /var/www/be/live/ | php
         pip3.4 install awscli django
         cd /var/www/
         aws s3 cp s3://aws-codedeploy-us-east-1/latest/install . --region us-east-1
@@ -25,10 +28,6 @@ if [ ! -f /home/ubuntu/custom.log ]
         chown -R $USER:$USER /var/www/be
         chmod -R 755 /var/www
         rm /var/www/html/index.html
-        cd /var/www/be/live/
-        curl -sS https://getcomposer.org/installer | php
-        php composer.phar install
-        echo "<?php phpinfo(); ?>" < /var/www/html/index.php
 
 #        This must be done manually:
 #        nano /etc/phpmyadmin/config.inc.php
@@ -44,4 +43,3 @@ if [ ! -f /home/ubuntu/custom.log ]
 #$cfg['Servers'][$i]['user']          = 'root';
 #$cfg['Servers'][$i]['password']      = 'codebook';
 fi
-
