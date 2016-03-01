@@ -1,4 +1,7 @@
 User-agent: *
-disallow: scripts/
-disallow: legacy/
-disallow: legal.html
+disallow: *
+allow: images/
+allow: index.php
+allow: favicon.ico
+disallow: /#legal
+disallow: /?e=*
