@@ -34,6 +34,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         mv install automated/
         service codedeploy-agent start
         service codedeploy-agent status
+        mkdir /home/ubuntu/.aws
         cd /var/www/
         service apache2 restart
         mkdir /var/www/be/live/ -p

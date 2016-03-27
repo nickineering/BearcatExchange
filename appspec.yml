@@ -6,3 +6,7 @@ files:
   destination: /var/www/be/live
 - source: /bearcatexchange.com.conf
   destination: /etc/apache2/sites-available/
+- source: /backup_database.sh
+  destination: /home/ubuntu/automated/
+- source: /config
+  destination: /home/ubuntu/.aws/
