@@ -9,6 +9,7 @@ if [ ! -f /home/ubuntu/automated/custom-after-install.log ]
         #Without that change local .htaccess files will not work.
         a2enmod rewrite
         service apache2 restart
-        #crontab -l | { cat; echo "0 0 */3 * * /home/ubuntu/automated/backup_database.sh"; } | crontab -
-        php /var/www/be/live/composer.phar install
+        #crontab -l | { cat; echo "0 0 */3 * * /home/ubuntu/automated/backup_database.sh"; } | crontab
+        cd /var/www/be/live/
+        php composer.phar install
 fi
