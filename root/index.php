@@ -21,7 +21,13 @@ $errorCodes = array(
     603 => array("Error 603 Failed to Load UTF8 Charsset in Database", $programingErrorMessage)
 );
 session_start();
-require 'connect-var.php';
+$serverList = array('localhost', '127.0.0.1');
+if(in_array($_SERVER['HTTP_HOST'], $serverList)) {
+    $con = mysqli_connect("localhost", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange");
+}
+else {
+    $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange", 3306);
+}
 if (!mysqli_set_charset($con, "utf8")) {
     $errorCode = 603;
 }
