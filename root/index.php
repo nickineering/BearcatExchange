@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
+$loggedIn = false;
 $serverError = false;
 $errorCode = (isset($_GET['e'])) ? $_GET["e"] : 0;
 $errorCodes = array(
@@ -38,19 +39,50 @@ if($_REQUEST['isjson'] == true && $errorCode != 0){
     $errors['misc'] = "Sorry, please submit again or email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>. " . $errorCodes[$errorCode][0];
     die(json_encode($errors));
 }
-else if (isset($_REQUEST['request']) || (isset($_GET['email']) && isset($_GET['h']))) {
-    $errors['misc'] = '';
-    $getAnotherLinkInstructions = "aybe you should use a newer link. Send yourself a message through your listing to get a link sent to your email now. ";
-    switch ($_REQUEST['request']) {
-        case "submit-sell-form";
-            submitTextbook();
-            break;
-        case "contact-seller";
-            contactSeller();
-            break;
-        default;
-            verifyLink();
-            break;
+else {
+    if(isset($_COOKIE['user-session'])){
+        if(ctype_alnum($_COOKIE['user-session'])) {
+            $session = mysqli_query($con, "SELECT user, time, status FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
+            if (mysqli_num_rows($session) != 0) {
+                $session = mysqli_fetch_array($session);
+                $diff = strtotime(date("Y-m-d H:i:s")) - strtotime($session['time']);
+                if ($diff < 60 * 60 * 24 * 45) {
+                    if($session['status'] == 1){
+                        $loggedIn = true;
+                        $theUser = findUser($con, $session['user']);
+                    }
+                }
+            }
+        }
+    }
+    if (isset($_REQUEST['request']) || (isset($_GET['email']) && isset($_GET['h']))) {
+        $errors['misc'] = '';
+        $getAnotherLinkInstructions = "aybe you should use a newer link. Send yourself a message through your listing to get a link sent to your email now. ";
+        $mail = new PHPMailer;
+        //$mail->SMTPDebug = 3;                               // Enable verbose debug output
+        $mail->isSMTP();
+        $mail->Host = 'email-smtp.us-east-1.amazonaws.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'AKIAJV3FTVKKHHAHE4YQ';
+        $mail->Password = 'ArnoeqtqrnOBa/q6fDICu+vYlwYHr3/bmCv6XnSMSvrP';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+        $mail->setFrom('support@bearcatexchange.com', 'Bearcat Exchange');
+        $mail->isHTML(true);
+        switch ($_REQUEST['request']) {
+            case "submit-sell-form";
+                submitTextbook();
+                break;
+            case "contact-seller";
+                contactSeller();
+                break;
+            case "login";
+                login();
+                break;
+            default;
+                verifyLink();
+                break;
+        }
     }
 }
 
@@ -127,6 +159,7 @@ function submitTextbook() {
 function contactSeller() {
     global $con;
     global $errors;
+    global $mail;
     $name = ucwords(check_input($_POST['yourname']));
     if (strlen($name) > 50) {
         $errors['misc'].= "Abbreviate your name to 50 characters or less";
@@ -162,19 +195,8 @@ function contactSeller() {
     $bodyTitle = "A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!";
     $removalLink = "http://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
     $bodyMessage = "<p>$message</p><p style='margin-bottom: 1em'>--$name</p><p>Don't forget, your asking price is <strong>$".$textbookListing['price']."</strong>. You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it.</p > ";
-    $mail = new PHPMailer;
-    //$mail->SMTPDebug = 3;                               // Enable verbose debug output
-    $mail->isSMTP();
-    $mail->Host = 'email-smtp.us-east-1.amazonaws.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'AKIAJV3FTVKKHHAHE4YQ';
-    $mail->Password = 'ArnoeqtqrnOBa/q6fDICu+vYlwYHr3/bmCv6XnSMSvrP';
-    $mail->SMTPSecure = 'tls';
-    $mail->Port = 587;
-    $mail->setFrom('support@bearcatexchange.com', 'Bearcat Exchange');
     $mail->addAddress($seller['email'], $seller['name']);
     $mail->addReplyTo($email, $name);
-    $mail->isHTML(true);
     $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
     $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
     if(!$mail->send()) {
@@ -187,6 +209,47 @@ function contactSeller() {
     mysqli_close($con);
     $result["misc"] = 'success';
     die(json_encode($result));
+}
+
+function login () {
+    global $con;
+    global $errors;
+    global $mail;
+    $email = strtolower($_POST['email']);
+    validateEmail($email);
+    $userData = findUser($con, $email);
+    if($userData == false) {
+        $result['misc'] .= "We couldn't find any items listed by that email. Did you spell it correctly?";
+        mysqli_close($con);
+        die(json_encode($result));
+    }
+    else {
+        $bodyTitle = "Click the link below to edit your textbook listings!";
+        $removalLink = "http://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
+        $bodyMessage = "<p><a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it. If you did not request this email simply ignore it.</p > ";
+        $mail->addAddress($userData['email'], $userData['name']);
+        $mail->Subject = 'Edit your textbook listings';
+        $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
+        if(!$mail->send()) {
+            printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.");
+        }
+        else {
+            $result["misc"] = 'success';
+        }
+        mysqli_close($con);
+        die(json_encode($userData));
+    }
+}
+
+function logout ($status) {
+    global $con;
+    if(isset($_COOKIE['user-session'])){
+        if(ctype_alnum($_COOKIE['user-session'])) {
+            $insert = "UPDATE `sessions` SET `status` = $status WHERE `hash` LIKE '".$_COOKIE['user-session']."'";
+            mysqli_query($con, $insert);
+            $loggedIn = false;
+        }
+    }
 }
 
 function verifyLink() {
@@ -208,23 +271,34 @@ function onValidate($localCon, $user, $textbookId, $textbookTitle) {
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter) {
-    $checkEmail = mysqli_query($localCon, "SELECT id, newsletter FROM users WHERE email = '$localEmail'");
-    if (mysqli_num_rows($checkEmail) != 0) {
-        $checkEmail = mysqli_fetch_array($checkEmail);
-        $userId = $checkEmail['id'];
-        if ($checkEmail['newsletter'] == 'unsubscribed' && $checkEmail['newsletter'] != $localNewsletter) {
-            mysqli_query($localCon, "UPDATE users SET newsletter = '$localNewsletter' WHERE email = '$localEmail'");
-        }
-    }
-    else {
+    $findUserResult = findUser($localCon, $localEmail, $localNewsletter);
+    if($findUserResult == false) {
         $userInsert = "INSERT INTO `users` (`email`, `name`, `joined`, `newsletter`) VALUES ('$localEmail', '$localName', CURRENT_TIMESTAMP, '$localNewsletter');";
         mysqli_query($localCon, $userInsert);
         $userId = mysqli_insert_id($localCon);
     }
-    //    print_r(error_get_last());
-    //    echo 'The new user id is ' . $userId . ' Last insert ID: ' . mysqli_insert_id($con);
-    //    die ();
-    return $userId;
+    else {
+        return $findUserResult['id'];
+    }
+}
+
+function findUser($localCon, $identifier, $localNewsletter) {
+    if(is_numeric($identifier)) {
+        $userData = mysqli_query($localCon, "SELECT id, name, email, newsletter FROM users WHERE id = '$identifier'");
+    }
+    else {
+        $userData = mysqli_query($localCon, "SELECT id, name, email, newsletter FROM users WHERE email = '$identifier'");
+    }
+    if (mysqli_num_rows($userData) != 0) {
+        $userData = mysqli_fetch_array($userData);
+        if ($userData['newsletter'] == 'unsubscribed' && $localNewsletter == 'subscribed') {
+            mysqli_query($localCon, "UPDATE users SET newsletter = '$localNewsletter' WHERE email = '".$userData['email']."'");
+        }
+        return $userData;
+    }
+    else {
+        return false;
+    }
 }
 
 function get_ip() {
@@ -368,30 +442,47 @@ function createHash($userid, $textbook) {
 }
 
 function checkHash($localCon, $complete, $user, $hash) {
+    global $con;
     global $getAnotherLinkInstructions;
+    global $theUser;
+    global $loggedIn;
     $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
     $hashArray = mysqli_query($localCon, $hashSearch);
     if (mysqli_num_rows($hashArray) == 1) {
         $hashArray = mysqli_fetch_array($hashArray);
         $textbookId = intval($hashArray['textbook']);
-        $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
-        if (mysqli_num_rows($textbook) == 1) {
-            $textbook = mysqli_fetch_array($textbook);
-            if ($textbook['status'] == 'sold') {
-                printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ');
+        if ($textbookId == -1) {
+            if ($loggedIn == true){
+                logout(3);
             }
-            else {
-                $diff = strtotime(date("Y-m-d H:i:s")) - strtotime($hashArray['time']);
-                if ($diff < 60 * 60 * 24 * 30) {
-                    $complete($localCon, $user, $textbookId, $textbook['title']);
-                }
-                else {
-                    printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'warning');
-                }
-            }
+            printMessage("You are now logged in");
+            $theUser = findUser($con, $hashArray['user']);
+            $theUser['loggedIn'] = true;
+            $loggedIn = true;
+            $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
+            setcookie("user-session", $theUser['session'], time() + (60*60*24*45), "/");
+            mysqli_query($localCon, "INSERT INTO `sessions` (`user`, `status`, `hash`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."')");
         }
         else {
-            printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'warning');
+            $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
+            if (mysqli_num_rows($textbook) == 1) {
+                $textbook = mysqli_fetch_array($textbook);
+                if ($textbook['status'] == 'sold') {
+                    printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ');
+                }
+                else {
+                    $diff = strtotime(date("Y-m-d H:i:s")) - strtotime($hashArray['time']);
+                    if ($diff < 60 * 60 * 24 * 30) {
+                        $complete($localCon, $user, $textbookId, $textbook['title']);
+                    }
+                    else {
+                        printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'warning');
+                    }
+                }
+            }
+            else {
+                printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'warning');
+            }
         }
     }
     else {
@@ -444,7 +535,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
                 echo "miscMessage(".'"'. $_SESSION['status'].'"'. ", ".'"'.$_SESSION['priority'].'"'.");";
                 unset($_SESSION['status']);
             }
-            echo "setJavaScriptData($errorCode);";
+            echo "setJavaScriptData($errorCode, " . json_encode($theUser) . ");";
         ?>'>
         <script src="send-form.js" defer></script>
         <script src="scripts/modernizr.min.js" defer></script>
@@ -470,6 +561,13 @@ function generateErrorText($localErrorCode, $makeDiv) {
                         <h5>SELL<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
+
+                <a href="#account">
+                    <div class="navbar-link" id="accountLink">
+                        <h5><span class="mobile-hidden">EDIT </span> LISTINGS</h5>
+                    </div>
+                </a>
+
                 <a href="#faq">
                     <div class="navbar-link" id="faqLink">
                         <h5><span class="mobile-hidden">COMMON </span> QUESTIONS</h5>
@@ -562,6 +660,42 @@ function generateErrorText($localErrorCode, $makeDiv) {
                     </div>
                     <div id='extra-page'></div>
                     <div id='sell-text'><?php include 'sell-text.html'; ?></div>
+                    <div id='account-text'>
+                        <?php if(!$loggedIn) { ?>
+                        <form id="login-form" class="page-form" name="login" method="POST" action="index.php" onsubmit="return submitLoginForm()">
+                            <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
+                            <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+                            <script>
+                                document.getElementById('login-noscript-warning').style.display = 'none';
+                            </script>
+                            <div class="login-form-input">
+                                <div class='email-container'>
+                                    <p class="input-text"><label for="login-email">Enter the same email you listed your item with to get started <span class="required">*</span></label></p>
+                                    <p class="form-error"><label for="login-email"  id='login-email-message'></label></p>
+                                    <input type="email" name="email" id='login-email' maxlength="254" cookie='email'>
+                                    <br><br>
+                                </div>
+                                <div id="login-form-message" class="page-form-message"><div id="login-form-message-wrapper" class='form-message-wrapper'></div></div>
+                                <br>
+                                <input type="hidden" name="request" id="requestId" value="login1"/>
+                                <input id='login-submit' type="submit" value="VERIFY">
+                            </div>
+                        </form>
+                        <?php } else { ?>
+                        <form id="account-form" class="page-form" name="account" method="POST" action="index.php" onsubmit="return submitAccountForm()">
+                            <h1>Edit Your Listings</h1><h2>These are all of the items you listed with <?php echo $theUser['email'] . ", " .  $theUser['name'] . ". "; ?></h2>
+                            <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+                            <script>
+                                document.getElementById('account-noscript-warning').style.display = 'none';
+                            </script>
+                            <div id="account-form-message" class="account-form-message"><div id="account-form-message-wrapper" class='form-message-wrapper'></div></div>
+                            <br>
+                            <input type="hidden" name="request" id="requestId" value="account"/>
+                            <input type="hidden" name="didcheck" id="didcheck" value="false"/>
+                            <input id='account-submit' type="submit" value="SUBMIT">
+                        </form>
+                        <?php } ?>
+                    </div>
                     <div id='faq-text'><?php include 'faq-text.html'; ?></div>
                 </div>
             </div>

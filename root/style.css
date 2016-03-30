@@ -57,6 +57,7 @@ h2 {
     margin-bottom: 10px;
     font-weight: 400;
     font-size: 1.4em;
+    line-height: normal;
 }
 #textbooks,
 button,
@@ -68,7 +69,7 @@ input[type="submit"] {
     margin-top: 5px;
     margin-bottom: 5px;
 }
-#sell-form h1 {
+.page-form h1 {
     margin-top: 20px;
 }
 ::-moz-selection {
@@ -210,21 +211,20 @@ input[type="submit"] {
     text-align: center;
     font-weight: 600;
 }
-#sell-form {
+.page-form {
     border: 2px solid gray;
     border-radius: 10px;
     background-color: #f9f9f9;
+    padding-left: 20px;
+    padding-right: 20px;
+    color: #007a5e;
 }
-#sell-form-message {
+.page-form-message {
     text-align: center;
     clear: both;
 }
-#sell-form-message-wrapper {
+.form-message-wrapper {
     border-radius: 6px;
-}
-.left-form,
-.right-form {
-    color: #007a5e;
 }
 .newsletter-form {
     color: #007a5e;
@@ -241,13 +241,13 @@ input[type="submit"] {
     float: right;
     padding-right: 10px;
 }
-#sell-form input[type="text"],
-#sell-form input[type="email"] {
+.page-form input[type="text"],
+.page-form input[type="email"] {
     height: 30px;
     border: 1px solid grey;
     border-radius: 5px;
 }
-#sell-form textarea {
+.page-form textarea {
     margin-top: 0;
     height: 108px;
     border: 1px solid grey;
@@ -527,7 +527,7 @@ div.alert-box span.close:focus {
         margin-bottom: 0;
         padding-top: 16px;
     }
-    #sell-form {
+    .page-form {
         position: absolute;
         top: 100px;
         right: 20px;
@@ -658,12 +658,13 @@ div.alert-box span.close:focus {
         margin-top: 0;
         margin-bottom: 0;
     }
-    #sell-form {
+    .page-form {
         margin-bottom: 15px;
+        font-size: 18px;
     }
-    #sell-form-input {
-        width: 100%;
-        display: inline-block;
+    .right-form {
+        float: right;
+        padding-left: 1%;
     }
     .left-form,
     .right-form {
@@ -671,12 +672,10 @@ div.alert-box span.close:focus {
         margin-top: 20px;
         margin-bottom: 0;
         width: 47%;
-        font-size: 18px;
     }
     .left-form,
     .newsletter-form {
         float: left;
-        padding-left: 2%;
         padding-right: 1%;
     }
     .newsletter-form {
@@ -685,13 +684,8 @@ div.alert-box span.close:focus {
         width: 94%;
         font-size: 15px;
     }
-    .right-form {
-        float: right;
-        padding-left: 1%;
-        padding-right: 2%;
-    }
-    #sell-form input[type="text"],
-    #sell-form input[type="email"] {
+    .page-form input[type="text"],
+    .page-form input[type="email"] {
         width: 100%;
     }
     .right-form textarea {
@@ -732,7 +726,7 @@ div.alert-box span.close:focus {
         padding: 40px;
     }
     @media screen and (max-height: 700px) {
-        #sell-form {
+        ..page-form {
             height: 570px;
         }
     }
@@ -831,7 +825,7 @@ div.alert-box span.close:focus {
         right: 280px;
         width: calc(100% - 285px);
     }
-    #sell-form {
+    .page-form {
         height: 100%;
     }
     #clear img {
@@ -882,11 +876,11 @@ div.alert-box span.close:focus {
     #google-plus-link {
         display: none;
     }
-    #sell-form {
+    .page-form {
         margin-bottom: 20px;
         padding-bottom: 20px;
     }
-    #sell-form h1 {
+    .page-form h1 {
         margin-top: 10px;
     }
     div.alert-message {
@@ -933,7 +927,7 @@ div.alert-box span.close:focus {
         font-size: 18px;
         ;
     }
-    #sell-form {
+    .page-form {
         height: calc(100% - 135px);
     }
     .left-form p,
@@ -946,9 +940,9 @@ div.alert-box span.close:focus {
         margin-left: 10px;
         font-size: 14px;
     }
-    #sell-form input[type="text"],
-    #sell-form input[type="email"],
-    #sell-form .name-email {
+    .page-form input[type="text"],
+    .page-form input[type="email"],
+    .page-form .name-email {
         margin-right: 10px;
         margin-left: 10px;
         width: calc(100% - 20px);
