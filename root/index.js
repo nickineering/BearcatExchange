@@ -1,5 +1,5 @@
 var condition = ["New", "Like New", "Very Good", "Good", "Acceptable", "Ask"];
-var pageTitles = {buy : 'Buy Textbooks', sell : 'Sell Textbooks', faq : 'Common Questions', legal : 'Terms and Privacy', feedback : 'Give Feedback'};
+var pageTitles = {buy : 'Buy Textbooks', sell : 'Sell Textbooks', account : 'Edit Listings', faq : 'Common Questions', legal : 'Terms and Privacy', feedback : 'Give Feedback'};
 var textbooks;
 var selectedRows = [];
 window.onhashchange = pageChangeHandler;
@@ -240,10 +240,18 @@ $(document).on( "change", "input[cookie]", function() {
     $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
 });
 
-function setJavaScriptData (localErrorCode){
+function setJavaScriptData (localErrorCode, userData){
     errorCode = localErrorCode;
     if(errorCode >= 500){
-        $('#sell-noscript-warning').css('display', 'block');
+        $('.form-noscript-warning').css('display', 'block');
+    }
+    if(userData.name) {
+        $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
+        $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
+        $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
+    }
+    if (userData.loggedIn) {
+        window.location.hash = "account";
     }
 }
 
@@ -562,6 +570,30 @@ function infoBoxSubmit(id){
     return false;
 }
 
+function submitLoginForm(){
+    var submitButton = $('#submit-login');
+    submitButton.val('SENDING');
+    submitButton.attr('disabled','disabled');
+    var loginInputs = {//get the values submit
+        email : {
+            category : 'text',
+            fieldValue : $('#login-email').val(),
+            required : true,
+            makeCookie :true
+        },
+        request : {
+            category : 'novalidate',
+            fieldValue : 'login'
+        }
+    };
+    if(validateInputs(loginInputs, 'login-form', receivedLoginFormResponse, loginFormMiscMessage) == false) {
+        submitButton.removeAttr('disabled');
+        submitButton.val('VERIFY');
+        infoBoxMiscMessage('Fix the errors shown and then submit again.');
+    }
+    return false;
+}
+
 function validateInputs(inputs, formName, responseFunction, miscMessageFunction){//Accepts an object of objects and the id of the form being submited with no hashtag. All objects in the object must have a string property named fieldValue which will be sent to the server along with the name of the object in lowercase.
     var errors = new Array();//If something is added, the form will not submit.
     for(var input in inputs) {//Apply validation to each field before sending.
@@ -680,6 +712,27 @@ function receivedSellFormResponse(data) {
         else{
             sellFormMiscMessage('Fix the errors shown and then submit again.');
         }
+    }
+}
+
+function loginFormMiscMessage(message) {
+    $('#login-form-message-wrapper').css('display', 'inline-block');
+    $('#login-form-message-wrapper').html(message);
+}
+
+function receivedLoginFormResponse(data) {
+    var submitButton = $('#login-submit');
+    submitButton.removeAttr('disabled');
+    submitButton.val('VERIFY');
+//    console.log(JSON.stringify(data, null, 2));
+    if(data.name){
+        $.updateCookie('prefs', 'name', data.name, { expires: 90 });
+        $.updateCookie('prefs', 'email', data.email, { expires: 90 });
+        $.updateCookie('prefs', 'userid', data.id, { expires: 90 });
+        loginFormMiscMessage('We sent you an email with a link. Click that link to continue. ');
+    }
+    if(data.misc){
+        sellFormMiscMessage(data.misc);
     }
 }
 
