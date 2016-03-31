@@ -594,6 +594,19 @@ function submitLoginForm(){
     return false;
 }
 
+function logout(){
+    var logoutInputs = {//get the values submit
+        request : {
+            category : 'novalidate',
+            fieldValue : 'logout'
+        }
+    };
+    if(validateInputs(logoutInputs, 'logout', receivedLogoutResponse, miscMessage) == false) {
+        miscMessage('Logout failed', "error");
+    }
+    return false;
+}
+
 function validateInputs(inputs, formName, responseFunction, miscMessageFunction){//Accepts an object of objects and the id of the form being submited with no hashtag. All objects in the object must have a string property named fieldValue which will be sent to the server along with the name of the object in lowercase.
     var errors = new Array();//If something is added, the form will not submit.
     for(var input in inputs) {//Apply validation to each field before sending.
@@ -733,6 +746,15 @@ function receivedLoginFormResponse(data) {
     }
     if(data.misc){
         sellFormMiscMessage(data.misc);
+    }
+}
+
+function receivedLogoutResponse(data) {
+    if(data.misc == "success"){
+        location.reload();
+    }
+    else{
+        miscMessage("There was an error logging you out");
     }
 }
 

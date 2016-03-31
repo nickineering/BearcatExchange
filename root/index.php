@@ -79,11 +79,33 @@ else {
             case "login";
                 login();
                 break;
+            case "logout";
+                logout();
+                break;
             default;
                 verifyLink();
                 break;
         }
     }
+}
+
+function logout ($status = 2) {
+    global $con;
+    $result["misc"] = 'failed';
+    if(isset($_COOKIE['user-session'])){
+        if(ctype_alnum($_COOKIE['user-session'])) {
+            $session = mysqli_query($con, "SELECT user, time, status FROM sessions WHERE status = 1 AND hash = '".$_COOKIE['user-session']."'");
+            if (mysqli_num_rows($session) != 0) {
+                $insert = "UPDATE `sessions` SET `status` = $status WHERE `hash` LIKE '".$_COOKIE['user-session']."'";
+                mysqli_query($con, $insert);
+                $loggedIn = false;
+                $result["misc"] = 'success';
+                printMessage("You are now logged out");
+            }
+        }
+    }
+    mysqli_close($con);
+    die(json_encode($result));
 }
 
 function submitTextbook() {
@@ -238,17 +260,6 @@ function login () {
         }
         mysqli_close($con);
         die(json_encode($userData));
-    }
-}
-
-function logout ($status) {
-    global $con;
-    if(isset($_COOKIE['user-session'])){
-        if(ctype_alnum($_COOKIE['user-session'])) {
-            $insert = "UPDATE `sessions` SET `status` = $status WHERE `hash` LIKE '".$_COOKIE['user-session']."'";
-            mysqli_query($con, $insert);
-            $loggedIn = false;
-        }
     }
 }
 
@@ -461,7 +472,7 @@ function checkHash($localCon, $complete, $user, $hash) {
             $loggedIn = true;
             $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
             setcookie("user-session", $theUser['session'], time() + (60*60*24*45), "/");
-            mysqli_query($localCon, "INSERT INTO `sessions` (`user`, `status`, `hash`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."')");
+            mysqli_query($localCon, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
         }
         else {
             $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
@@ -592,6 +603,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
             <span id="clear" onclick='clearSearchBar();' ><img src="images/clear.svg"></span>
             <a class="top-right-button" id='facebook-link' href="https://facebook.com/bearcatexchange" target='_blank'><p>f</p></a>
             <a class="top-right-button" id='google-plus-link' href="https://plus.google.com/104887107850990243147" rel="publisher" target='_blank'><p>g+</p></a>
+            <a class="top-right-button" id='logout' onclick="logout();" target='_blank'><p>Logout</p></a>
             <!--Begin page content area-->
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
             <div id="content" class="content">
@@ -682,12 +694,46 @@ function generateErrorText($localErrorCode, $makeDiv) {
                             </div>
                         </form>
                         <?php } else { ?>
-                        <form id="account-form" class="page-form" name="account" method="POST" action="index.php" onsubmit="return submitAccountForm()">
+                        <form id="account-form" name="account" method="POST" action="index.php" onsubmit="return submitAccountForm()">
                             <h1>Edit Your Listings</h1><h2>These are all of the items you listed with <?php echo $theUser['email'] . ", " .  $theUser['name'] . ". "; ?></h2>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
                             </script>
+                            <table id="owned-items" class="display" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
+                                        <th class="authorHeader" title="Alphabetize by author">Author</th>
+                                        <th class="courseHeader desktop" title="Sort by course">Course</th>
+                                        <th class="priceHeader desktop" title="Lowest price first">Price</th>
+                                        <th class="timePostedHeader" title="Most recent first">Time Posted</th>
+                                        <th class="commentsHeader never"></th>
+                                    </tr>
+                                </thead>
+                                <tbody><?php
+                                      $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
+                                      if (mysqli_num_rows($result) > 0) {
+                                          $numOfRows = mysqli_num_rows($result);
+                                          $i = 0;
+                                          while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+                                    ?>
+
+                                    <tr id="<?php echo $row['id']; ?>">
+                                        <td class="title titleTextbooksColumn"><?php echo $row['title']; ?></td>
+                                        <td class="author"><?php echo $row["author"]; ?></td>
+                                        <td class="course"><?php echo $row["course"]; ?></td>
+                                        <td class="price"><?php echo $row["price"]; ?></td>
+                                        <td class="time sorting_1"><?php echo $row["time"]; ?></td>
+                                        <td class="comments"><?php echo $row["comments"]; ?></td>
+                                    </tr><?php
+                                          }
+                                          $i++;
+                                      }
+                                    ?>
+
+                                </tbody>
+                            </table>
                             <div id="account-form-message" class="account-form-message"><div id="account-form-message-wrapper" class='form-message-wrapper'></div></div>
                             <br>
                             <input type="hidden" name="request" id="requestId" value="account"/>
