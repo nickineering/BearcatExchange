@@ -540,8 +540,8 @@ div.alert-box span.close:focus {
         right: 0;
     }
     #search-bar {
-        right: 350px;
-        width: calc(100% - 435px);
+        right: 497px;
+        width: calc(100% - 582px);
     }
     .top-right-button {
         position: fixed;
@@ -563,27 +563,31 @@ div.alert-box span.close:focus {
         color: white;
         font-size: 35px;
     }
+    #logout {
+        right: 20px;
+        width: 137px;
+        cursor: pointer;
+    }
+    #logout p {
+        padding-top: 8px;
+    }
     #facebook-link {
         /*    background-color: #2A5782 ; */
-
-        right: 20px;
+        right: 167px;
         padding-top: 1px;
         padding-bottom: 1px;
     }
     #facebook-link p {
         /*    background-color: #E03B33 ;*/
-
         margin-top: 11px;
     }
     #google-plus-link {
         /*    background-color: #E03B33 ; */
-
-        right: 92px;
+        right:239px;
         padding-bottom: 2px;
     }
     #google-plus-link p {
         /*    background-color: #E03B33 ;*/
-
         margin-top: 6px;
         margin-bottom: 6px;
     }
