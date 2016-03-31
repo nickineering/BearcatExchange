@@ -53,7 +53,8 @@ $(document).ready(function() {
         $('#legal-link').append('<br>Analytics is off');
     }
     var infoBox = $('#info-box').html();
-    Mustache.parse(infoBox);   // optional, speeds up future uses
+    Handlebars.parse(infoBox);   // optional, speeds up future uses
+    var handlebarsInfoBoxCompilation = Handlebars.compile(infoBox);
     //textbooks = $('#textbooks').dataTable();
     $('#textbooks').dataTable({
         responsive: true,
@@ -112,7 +113,7 @@ $(document).ready(function() {
                         else {
                             rowData.boxTitle = rowData.title;
                         }
-                        var renderedInfoBox = Mustache.render(infoBox, rowData);
+                        var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
                         $('#info-box-area').append(renderedInfoBox);
                         var infoBoxInstance = $('#info-box-' + id);
                         var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
