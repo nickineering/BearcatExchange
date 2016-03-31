@@ -553,7 +553,8 @@ function generateErrorText($localErrorCode, $makeDiv) {
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
         <script src="scripts/jquery.cookie.js" defer></script>
-        <script src="scripts/mustache.min.js" defer></script>
+<!--        <script src="scripts/mustache.min.js" defer></script>-->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
         <script src="index.js" defer></script>
         <div id='wrapper'>
             <!--Begin Nav Bar-->
@@ -595,7 +596,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
             <!--End Nav Bar-->
             <!--"Popup Information Window"-->
             <div id='info-box-area'></div>
-            <script type="text/template" id='info-box'>
+            <script type="text/x-handlebars-template" id='info-box'>
                 <?php include 'info-box.html'; ?>
             </script>
             <!--End Popup Information Window-->
