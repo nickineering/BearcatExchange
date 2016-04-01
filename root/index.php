@@ -649,16 +649,19 @@ function timeSince ($sinceDate) {
 
                 <a href="#feedback">
                     <div class="navbar-link" id="feedbackLink">
-                        <h5><span class="mobile-hidden">GIVE US </span>FEEDBACK</h5>
+                        <h5><span class="mobile-hidden">SEND US </span>FEEDBACK</h5>
                     </div>
                 </a>
                 </div>
             </nav>
             <!--End Nav Bar-->
-            <!--"Popup Information Window"-->
+            <!--Popup Information Window-->
             <div id='info-box-area'></div>
             <script type="text/x-handlebars-template" id='info-box'>
                 <?php include 'info-box.html'; ?>
+            </script>
+            <script type="text/x-handlebars-template" id='info-box-edit'>
+                <?php include 'info-box-edit.html'; ?>
             </script>
             <!--End Popup Information Window-->
             <!--Login Button-->
@@ -783,7 +786,7 @@ function timeSince ($sinceDate) {
                                           $even = false;
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                     ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
-                                        <td class="status"><input type="checkbox" name="status-<?php echo $row['id']; ?>" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
+                                        <td class="status"><input type="checkbox" name="status" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
                                         <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>
