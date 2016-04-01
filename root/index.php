@@ -565,10 +565,6 @@ function timeSince ($sinceDate) {
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="data-tables.css">
-<!--        <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">-->
-<!--        <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/fixedheader/2.1.2/css/dataTables.fixedHeader.css">-->
-        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/responsive/1.0.3/css/dataTables.responsive.css">
         <link href="style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="favicon.ico"/>
         <meta property="og:image" content="http://bearcatexchange.com/images/facebook-logo.jpg" />
@@ -668,38 +664,37 @@ function timeSince ($sinceDate) {
                 </div>
                 <div id="pages">
                     <div id='buy-text'>
-                        <table id="textbooks" class="display items" cellspacing="0" width="100%">
+                        <table id="textbooks" class="items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
                                     <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
                                     <th class="authorHeader" title="Alphabetize by author">Author</th>
-                                    <th class="courseHeader desktop" title="Sort by course">Course</th>
-                                    <th class="priceHeader desktop" title="Lowest price first">Price</th>
+                                    <th class="courseHeader" title="Sort by course">Course</th>
+                                    <th class="priceHeader" title="Lowest price first">Price</th>
                                     <th class="timePostedHeader" title="Most recent first">Time Posted</th>
-                                    <th class="commentsHeader never"></th>
+                                    <th class="commentsHeader"></th>
                                 </tr>
                             </thead>
                             <tbody><?php
-                                $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments` FROM `textbooks` WHERE  `id` > 0 AND status = 'unsold' ORDER BY `id` DESC");
+                                $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments` FROM `textbooks` WHERE status = 'unsold' ORDER BY `id` DESC");
                                 if (mysqli_num_rows($result) > 0) {
                                     $numOfRows = mysqli_num_rows($result);
-                                    $i = 0;
+                                    $even = false;
                                     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                 ?>
 
-                                <tr item="<?php echo $row['id']; ?>">
-                                    <td class="title titleTextbooksColumn"><?php echo $row['title']; ?></td>
+                                <tr item="<?php echo $row['id']; ?>" class="<?php echo ($even)?'even':'odd'; ?>">
+                                    <td class="title"><?php echo $row['title']; ?></td>
                                     <td class="author"><?php echo $row["author"]; ?></td>
                                     <td class="course"><?php echo $row["course"]; ?></td>
-                                    <td class="price"><?php echo $row["price"]; ?></td>
-                                    <td class="time sorting_1"><?php echo $row["time"]; ?></td>
+                                    <td class="price">$<?php echo $row["price"]; ?></td>
+                                    <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                     <td class="comments"><?php echo $row["comments"]; ?></td>
                                 </tr><?php
+                                        $even = !$even;
                                     }
-                                    $i++;
                                 }
                                 ?>
-
                             </tbody>
                         </table>
                     </div>
@@ -733,14 +728,14 @@ function timeSince ($sinceDate) {
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
                             </script>
-                            <table id="owned-items" class="display items" cellspacing="0" width="100%">
+                            <table id="owned-items" class="items" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th class="statusHeader" title='Mark as sold'>Sold</th>
                                         <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
                                         <th class="authorHeader" title="Alphabetize by author">Author</th>
-                                        <th class="courseHeader desktop" title="Sort by course">Course</th>
-                                        <th class="priceHeader desktop" title="Lowest price first">Price</th>
+                                        <th class="courseHeader" title="Sort by course">Course</th>
+                                        <th class="priceHeader" title="Lowest price first">Price</th>
                                         <th class="timePostedHeader" title="Most recent first">Time Posted</th>
                                         <th class="commentsHeader never"></th>
                                     </tr>
@@ -755,11 +750,11 @@ function timeSince ($sinceDate) {
 
                                     <tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
                                         <td class="status"><input type="checkbox" name="status-<?php echo $row['id']; ?>" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
-                                        <td class="title titleTextbooksColumn"><?php echo $row['title']; ?></td>
+                                        <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>
                                         <td class="price">$<?php echo $row["price"]; ?></td>
-                                        <td class="time sorting_1" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
+                                        <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                         <td class="comments"><?php echo $row["comments"]; ?></td>
                                     </tr><?php
                                               $even = !$even;
@@ -768,7 +763,6 @@ function timeSince ($sinceDate) {
                                     ?>
                                 </tbody>
                             </table>
-                            <div id="account-form-message" class="account-form-message"><div id="account-form-message-wrapper" class='form-message-wrapper'></div></div>
                             <br>
                             <input type="hidden" name="request" id="requestId" value="account"/>
                         </form>
@@ -777,9 +771,6 @@ function timeSince ($sinceDate) {
                     <div id='faq-text'><?php include 'faq-text.html'; ?></div>
                 </div>
             </div>
-            <script type="text/javascript" src="http://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" defer></script>
-            <script src="//cdn.datatables.net/responsive/2.0.0/js/dataTables.responsive.js" defer></script>
-<!--            <script type="text/javascript" src="http://cdn.datatables.net/fixedheader/2.1.2/js/dataTables.fixedHeader.min.js"></script>-->
             <!--End page content area-->
             <!--Begin Copyright-->
             <footer id="other-nav">
