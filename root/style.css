@@ -1,7 +1,4 @@
-.hidden {
-    display: none
-}
-#clear {
+.hidden, #clear, .commentsHeader {
     display: none
 }
 /*
@@ -51,6 +48,8 @@ h2 {
 h1 {
     margin-top: 5px;
     margin-bottom: 15px;
+    font-size: 32px;
+    font-weight: bold;
 }
 h2 {
     margin-top: 10px;
@@ -64,6 +63,44 @@ button,
 label,
 input[type="submit"] {
     cursor: pointer;
+}
+#owned-items {
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+}
+#owned-items .comments {
+    display:none;
+}
+#owned-items td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-top: 1px solid #dddddd;
+}
+#owned-items {
+    border-bottom: 2px solid lightgray;
+}
+#owned-items thead th {
+    padding-top:20px;
+    padding-bottom: 20px;
+/*
+    padding-left: 18px;
+    padding-right: 18px;
+*/
+    border-bottom: 1px solid lightgray;
+    font-weight: bold;
+}
+#owned-items .odd {
+    background-color: #f9f9f9;
+}
+#owned-items tbody tr:hover {
+    background-color: whitesmoke;
+}
+.sold {
+    font-style: italic;
+    background-color: #dddddd !important;
 }
 #welcome-text p {
     margin-top: 5px;
@@ -147,6 +184,7 @@ textarea:focus {
     border: 1px solid #007a5e;
     box-shadow: 0 0 7px rgba(0, 122, 94, 1);
 }
+/*
 input[type="checkbox"] {
     display: none;
 }
@@ -155,14 +193,10 @@ input[type="checkbox"] + div {
     background-size: 18px 18px;
     background-repeat: no-repeat;
     padding-left: 25px;
-    background-image: url(images/unchecked.png);
+    background-image: url(images/unchecked.png) !important;
 }
 input[type="checkbox"]:checked + div {
-    background-image: url(images/checked.png);
-}
-/*
-input[type="checkbox"] + div:hover {
-background-image: url(images/half_checked.png);
+    background-image: url(images/checked.png) !important;
 }
 */
 input[type="submit"],
@@ -593,7 +627,7 @@ div.alert-box span.close:focus {
     }
     #clear img {
         right: 214px;
-        left: calc(100% - 204px);
+        left: calc(100% - 353px);
     }
     div.alert-message {
         left: 272px;
@@ -629,7 +663,7 @@ div.alert-box span.close:focus {
         z-index: 10;
         background-color: white;
     }
-    table.display tbody .selected td {
+    .selected {
         background-color: #ffd97a!important;
     }
     .titleTextbooksColumn {

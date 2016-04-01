@@ -98,37 +98,47 @@ $(document).ready(function() {
             //            else {
             //                poolImmediately = true;
             //            }
-            $('#textbooks tbody').on('click', 'tr', function () {
-                closeAlertBox();
-                var id = this.id;
-                var idInSelectedRows = selectedRows.indexOf(id);
-                if (idInSelectedRows == -1){
-                    if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
-                        selectedRows.push(id);
-                        $(this).addClass('selected');
-                        var rowData = {id: id, title: $("#" + id + " .title").html(), author: $("#" + id + " .author").html(), course: $("#" + id + " .course").html(), price: $("#" + id + " .price").html(), time: $("#" + id + " .time").html(), comments: $("#" + id + " .comments").html()};
-                        if(rowData.title.length > 28){
-                            rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
+            $('.items tbody').on('click', 'td', function () {
+                if(!$(this).hasClass("status")) {
+                    closeAlertBox();
+                    var id = $(this).parent().attr("item");
+                    var idInSelectedRows = selectedRows.indexOf(id);
+                    if (idInSelectedRows == -1){
+                        if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
+                            selectedRows.push(id);
+                            $(this).parent().addClass('selected');
+                            var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
+                            if(rowData.title.length > 28){
+                                rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
+                            }
+                            else {
+                                rowData.boxTitle = rowData.title;
+                            }
+                            var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
+                            $('#info-box-area').append(renderedInfoBox);
+                            var infoBoxInstance = $('#info-box-' + id);
+                            var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
+                            infoBoxInstance.css('right', rightPosition);
+                            $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
+                            $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
+                            $('#content').css('margin-bottom', '420px');
                         }
-                        else {
-                            rowData.boxTitle = rowData.title;
+                        else{
+                            //Flash div
+                            //miscMessage('No more than three textbooks can be compared at once.');
                         }
-                        var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
-                        $('#info-box-area').append(renderedInfoBox);
-                        var infoBoxInstance = $('#info-box-' + id);
-                        var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
-                        infoBoxInstance.css('right', rightPosition);
-                        $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
-                        $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
-                        $('#content').css('margin-bottom', '420px');
                     }
                     else{
-                        //Flash div
-                        //miscMessage('No more than three textbooks can be compared at once.');
+                        closeInfoBox(id);
                     }
                 }
-                else{
-                    closeInfoBox(id);
+            });
+            $(".status input").change(function() {
+                var $checkbox = $(this);
+                if ($checkbox.prop('checked')) {
+                    $checkbox.parent().parent().addClass("sold");
+                } else {
+                    $checkbox.parent().parent().removeClass("sold");
                 }
             });
         },
@@ -267,7 +277,7 @@ function closeInfoBox (id) {
         var rightPosition = (refreshedSelectedRows.length-1) * 320 + 10;
         infoBoxToModify.css('right', rightPosition);
     }
-    $('#'+id).removeClass('selected');
+    $("[item=" + id + "]").removeClass('selected');
     if(selectedRows.length == 0) {
         $('#content').css('margin-bottom', '20px');
     }
@@ -300,27 +310,27 @@ Date.prototype.timeSince = function (sinceDate) {
         sinceDate = new Date();
     }
     var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var seconds = Math.floor((sinceDate - this) / 1000);
-    var interval = Math.floor(seconds / 864000);
-    if (interval >= 1) {
-        if (this.getFullYear() != sinceDate.getFullYear()) {
+    var secondsSince = Math.floor((sinceDate - this) / 1000);//Remove milliseconds
+    var interval = Math.floor(secondsSince / 60*60*24*10);
+    if (interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
+        if (this.getFullYear() != sinceDate.getFullYear()) {//If during a different year include the year in the return date.
             return monthNames[this.getMonth()] + ' ' + this.getDate() + ', ' + this.getFullYear();
         }
         return monthNames[this.getMonth()] + ' ' + this.getDate();
     }
-    interval = Math.floor(seconds / 86400);
+    interval = Math.floor(secondsSince / 60*60*24);
     if (interval >= 1) {
         return (interval >= 2)?interval + " days ago":"1 day ago";
     }
-    interval = Math.floor(seconds / 3600);
+    interval = Math.floor(secondsSince / 60*60);
     if (interval >= 1) {
         return (interval >= 2)?interval + " hours ago":"1 hour ago";
     }
-    interval = Math.floor(seconds / 60);
+    interval = Math.floor(secondsSince / 60);
     if (interval >= 1) {
         return (interval >= 2)?interval + " minutes ago":"1 minute ago";
     }
-    return "Just now";
+    return "Just now";//Less than one minute ago.
 }
 
 function dateTimeToObject (dateTime) {
