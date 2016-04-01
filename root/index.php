@@ -1,4 +1,6 @@
 <?php
+$startTime = date("Y-m-d H:i:s");
+$startTimestamp = strtotime($startTime);
 require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
 $loggedIn = false;
@@ -45,7 +47,7 @@ else {
             $session = mysqli_query($con, "SELECT user, time, status FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
             if (mysqli_num_rows($session) != 0) {
                 $session = mysqli_fetch_array($session);
-                $diff = strtotime(date("Y-m-d H:i:s")) - strtotime($session['time']);
+                $diff = $startTimestamp - strtotime($session['time']);
                 if ($diff < 60 * 60 * 24 * 45) {
                     if($session['status'] == 1){
                         $loggedIn = true;
@@ -98,6 +100,7 @@ function logout ($status = 2) {
             if (mysqli_num_rows($session) != 0) {
                 $insert = "UPDATE `sessions` SET `status` = $status WHERE `hash` LIKE '".$_COOKIE['user-session']."'";
                 mysqli_query($con, $insert);
+                unset($_COOKIE['prefs']);
                 $loggedIn = false;
                 $result["misc"] = 'success';
                 printMessage("You are now logged out");
@@ -457,6 +460,7 @@ function checkHash($localCon, $complete, $user, $hash) {
     global $getAnotherLinkInstructions;
     global $theUser;
     global $loggedIn;
+    global $startTimestamp;
     $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
     $hashArray = mysqli_query($localCon, $hashSearch);
     if (mysqli_num_rows($hashArray) == 1) {
@@ -471,7 +475,7 @@ function checkHash($localCon, $complete, $user, $hash) {
             $theUser['loggedIn'] = true;
             $loggedIn = true;
             $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
-            setcookie("user-session", $theUser['session'], time() + (60*60*24*45), "/");
+            setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
             mysqli_query($localCon, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
         }
         else {
@@ -482,7 +486,7 @@ function checkHash($localCon, $complete, $user, $hash) {
                     printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ');
                 }
                 else {
-                    $diff = strtotime(date("Y-m-d H:i:s")) - strtotime($hashArray['time']);
+                    $diff = $startTimestamp - strtotime($hashArray['time']);
                     if ($diff < 60 * 60 * 24 * 30) {
                         $complete($localCon, $user, $textbookId, $textbook['title']);
                     }
@@ -518,6 +522,34 @@ function generateErrorText($localErrorCode, $makeDiv) {
     else{
         return false;
     }
+}
+
+function timeSince ($sinceDate) {
+    global $startTimestamp;
+    $sinceTimestamp = strtotime($sinceDate);
+    $secondsSince = $startTimestamp - $sinceTimestamp;
+    $interval = floor($secondsSince / 60*60*24*10);
+    if ($interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
+        if(date("Y") != date("Y", $sinceTimestamp)){//If during a different year include the year in the return date.
+            return date("F j, Y", $sinceTimestamp);
+        }
+        else {
+            return date("F j", $sinceTimestamp);
+        }
+    }
+    $interval = floor($secondsSince / 60*60*24);
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " days ago":"1 day ago";
+    }
+    $interval = floor($secondsSince / 60*60);
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " hours ago":"1 hour ago";
+    }
+    $interval = floor($secondsSince / 60);
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " minutes ago":"1 minute ago";
+    }
+    return "Just now";//Less than one minute ago.
 }
 
 ?>
@@ -636,7 +668,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
                 </div>
                 <div id="pages">
                     <div id='buy-text'>
-                        <table id="textbooks" class="display" cellspacing="0" width="100%">
+                        <table id="textbooks" class="display items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
                                     <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
@@ -655,7 +687,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
                                     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                 ?>
 
-                                <tr id="<?php echo $row['id']; ?>">
+                                <tr item="<?php echo $row['id']; ?>">
                                     <td class="title titleTextbooksColumn"><?php echo $row['title']; ?></td>
                                     <td class="author"><?php echo $row["author"]; ?></td>
                                     <td class="course"><?php echo $row["course"]; ?></td>
@@ -690,7 +722,7 @@ function generateErrorText($localErrorCode, $makeDiv) {
                                 </div>
                                 <div id="login-form-message" class="page-form-message"><div id="login-form-message-wrapper" class='form-message-wrapper'></div></div>
                                 <br>
-                                <input type="hidden" name="request" id="requestId" value="login1"/>
+                                <input type="hidden" name="request" id="requestId" value="login"/>
                                 <input id='login-submit' type="submit" value="VERIFY">
                             </div>
                         </form>
@@ -701,9 +733,10 @@ function generateErrorText($localErrorCode, $makeDiv) {
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
                             </script>
-                            <table id="owned-items" class="display" cellspacing="0" width="100%">
+                            <table id="owned-items" class="display items" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
+                                        <th class="statusHeader" title='Mark as sold'>Sold</th>
                                         <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
                                         <th class="authorHeader" title="Alphabetize by author">Author</th>
                                         <th class="courseHeader desktop" title="Sort by course">Course</th>
@@ -716,30 +749,28 @@ function generateErrorText($localErrorCode, $makeDiv) {
                                       $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
                                       if (mysqli_num_rows($result) > 0) {
                                           $numOfRows = mysqli_num_rows($result);
-                                          $i = 0;
+                                          $even = false;
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                     ?>
 
-                                    <tr id="<?php echo $row['id']; ?>">
+                                    <tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
+                                        <td class="status"><input type="checkbox" name="status-<?php echo $row['id']; ?>" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
                                         <td class="title titleTextbooksColumn"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>
-                                        <td class="price"><?php echo $row["price"]; ?></td>
-                                        <td class="time sorting_1"><?php echo $row["time"]; ?></td>
+                                        <td class="price">$<?php echo $row["price"]; ?></td>
+                                        <td class="time sorting_1" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                         <td class="comments"><?php echo $row["comments"]; ?></td>
                                     </tr><?php
+                                              $even = !$even;
                                           }
-                                          $i++;
                                       }
                                     ?>
-
                                 </tbody>
                             </table>
                             <div id="account-form-message" class="account-form-message"><div id="account-form-message-wrapper" class='form-message-wrapper'></div></div>
                             <br>
                             <input type="hidden" name="request" id="requestId" value="account"/>
-                            <input type="hidden" name="didcheck" id="didcheck" value="false"/>
-                            <input id='account-submit' type="submit" value="SUBMIT">
                         </form>
                         <?php } ?>
                     </div>
