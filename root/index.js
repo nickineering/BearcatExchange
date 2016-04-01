@@ -93,10 +93,30 @@ $(document).ready(function() {
     });
     $(".status input").change(function() {
         var $checkbox = $(this);
+        var status = '';
         if ($checkbox.prop('checked')) {
+            status = "sold";
             $checkbox.parent().parent().addClass("sold");
         } else {
+            status = "unsold";
             $checkbox.parent().parent().removeClass("sold");
+        }
+        var soldInputs = {//get the values submit
+            itemId : {
+                category : 'novalidate',
+                fieldValue : $(this).parent().parent().attr("item")
+            },
+            status : {
+                category : 'novalidate',
+                fieldValue : status
+            },
+            request : {
+                category : 'novalidate',
+                fieldValue : 'markedSold'
+            }
+        };
+        if(validateInputs(soldInputs, 'sold-form', receivedSoldFormResponse, miscMessage) == false) {
+            miscMessage('There was a problem updating the status of your item.', "error");
         }
     });
     $(function() {
@@ -666,7 +686,13 @@ function receivedLogoutResponse(data) {
         location.reload();
     }
     else{
-        miscMessage("There was an error logging you out");
+        miscMessage("There was an error logging you out. Refresh the page and try again.", "error");
+    }
+}
+
+function receivedSoldFormResponse (data) {
+    if(data.misc != "success"){
+        miscMessage("There was a problem updating the status of your item. Refresh the page and try again.", "error");
     }
 }
 

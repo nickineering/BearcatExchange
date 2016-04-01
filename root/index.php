@@ -78,6 +78,9 @@ else {
             case "contact-seller";
                 contactSeller();
                 break;
+            case "markedSold";
+                markedSold();
+                break;
             case "login";
                 login();
                 break;
@@ -264,6 +267,36 @@ function login () {
         mysqli_close($con);
         die(json_encode($userData));
     }
+}
+
+function markedSold () {
+    global $con;
+    global $loggedIn;
+    global $theUser;
+    if($loggedIn) {
+        $itemId = intval($_POST['itemId']);
+        $insert = "SELECT `user_id` FROM `textbooks` WHERE `id` = ".$itemId;
+        if (intval(mysqli_query($con, $insert)) == $theUser['id']){
+            if($_POST['status'] == "sold") {
+                $status = "sold";
+            }
+            if($_POST['status'] == "unsold") {
+                $status = "unsold";
+            }
+
+            $insert = "UPDATE `textbooks` SET `status` = '$status'".(($status == "sold")?", `sale_time` = CURRENT_TIMESTAMP":'')." WHERE `id` = ".$itemId;
+            mysqli_query($con, $insert);
+            $result["misc"] = "success";
+        }
+        else {
+            $result["misc"] = 'Wrong user';
+        }
+    }
+    else {
+        $result["misc"] = 'Not logged in';
+    }
+    mysqli_close($con);
+    die(json_encode($result));
 }
 
 function verifyLink() {
@@ -604,7 +637,7 @@ function timeSince ($sinceDate) {
 
                 <a href="#account">
                     <div class="navbar-link" id="accountLink">
-                        <h5><span class="mobile-hidden">EDIT </span> LISTINGS</h5>
+                        <h5>EDIT<span class="mobile-hidden"> YOUR LISTINGS</span></h5>
                     </div>
                 </a>
 
