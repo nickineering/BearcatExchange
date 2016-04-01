@@ -55,144 +55,47 @@ $(document).ready(function() {
     var infoBox = $('#info-box').html();
     Handlebars.parse(infoBox);   // optional, speeds up future uses
     var handlebarsInfoBoxCompilation = Handlebars.compile(infoBox);
-    //textbooks = $('#textbooks').dataTable();
-    $('#textbooks').dataTable({
-        responsive: true,
-        responsive: {
-            details: {
-                type: false
-            },
-            breakpoints: [
-                { name: 'desktop',  width: Infinity },
-                { name: 'tablet', width: 740 },
-                { name: 'small-tablet', width: 615 },
-                { name: 'phone', width: 520 }
-            ]
+    pageChangeHandler();
+    if(currentPage != 'sell' && !$(".alert-message").length){
+        miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
+    }
+    $('.items tbody').on('click', 'td', function () {
+        if(!$(this).hasClass("status")) {
+            closeAlertBox();
+            var id = $(this).parent().attr("item");
+            var idInSelectedRows = selectedRows.indexOf(id);
+            if (idInSelectedRows == -1){
+                if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
+                    selectedRows.push(id);
+                    $(this).parent().addClass('selected');
+                    var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
+                    if(rowData.title.length > 28){
+                        rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
+                    }
+                    else {
+                        rowData.boxTitle = rowData.title;
+                    }
+                    var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
+                    $('#info-box-area').append(renderedInfoBox);
+                    var infoBoxInstance = $('#info-box-' + id);
+                    var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
+                    infoBoxInstance.css('right', rightPosition);
+                    $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
+                    $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
+                    $('#content').css('margin-bottom', '420px');
+                }
+            }
+            else{
+                closeInfoBox(id);
+            }
         }
-        ,
-        "deferRender": true,
-        "order": [4, 'desc'],
-        "pagingType": "simple",
-        "tabIndex": 1,
-        "paging": false,
-        "info": false,
-        "search": {
-            "regex": false
-        },
-        "language": {
-            "loadingRecords": "Finding textbooks...",
-            "search": "",
-            "zeroRecords": 'No one listed that textbook yet. <a href="#sell" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>',
-            "emptyTable": "There are currently no textbooks to display. Please come back later."
-        },
-        "initComplete": function(settings, json) {
-            textbooks = $('#textbooks').DataTable(); //Wierd, but needed for some reason for the infobox.
-            textbooks.on( 'search.dt', function () { eventFired( 'DT Search' ); } );
-            pageChangeHandler();
-            if(currentPage != 'sell' && !$(".alert-message").length){
-                miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
-            }
-            //            if (hasReceivedFirstTextbooks) {
-            //                receivedTextbooks(firstTextbooksData);
-            //            }
-            //            else {
-            //                poolImmediately = true;
-            //            }
-            $('.items tbody').on('click', 'td', function () {
-                if(!$(this).hasClass("status")) {
-                    closeAlertBox();
-                    var id = $(this).parent().attr("item");
-                    var idInSelectedRows = selectedRows.indexOf(id);
-                    if (idInSelectedRows == -1){
-                        if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
-                            selectedRows.push(id);
-                            $(this).parent().addClass('selected');
-                            var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
-                            if(rowData.title.length > 28){
-                                rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
-                            }
-                            else {
-                                rowData.boxTitle = rowData.title;
-                            }
-                            var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
-                            $('#info-box-area').append(renderedInfoBox);
-                            var infoBoxInstance = $('#info-box-' + id);
-                            var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
-                            infoBoxInstance.css('right', rightPosition);
-                            $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
-                            $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
-                            $('#content').css('margin-bottom', '420px');
-                        }
-                        else{
-                            //Flash div
-                            //miscMessage('No more than three textbooks can be compared at once.');
-                        }
-                    }
-                    else{
-                        closeInfoBox(id);
-                    }
-                }
-            });
-            $(".status input").change(function() {
-                var $checkbox = $(this);
-                if ($checkbox.prop('checked')) {
-                    $checkbox.parent().parent().addClass("sold");
-                } else {
-                    $checkbox.parent().parent().removeClass("sold");
-                }
-            });
-        },
-        "columns": [{
-            "orderSequence": [ "asc" ],
-            "className": "all"
-        }, {
-            "orderSequence": [ "asc" ],
-            "className": "desktop"
-        }, {
-            "orderSequence": [ "asc" ],
-            "className": "desktop tablet small-tablet"
-        }, {
-            "orderSequence": [ "asc" ],
-            "className": "all"
-        }, {
-            "orderSequence": [ "desc" ],
-            "className": "desktop tablet"
-        }, {
-            "orderSequence": [ "asc" ],
-            "className": "never"
-        }],
-        "columnDefs": [{
-            "targets": 'textbookHeader',
-            type: 'anti-the',
-        }, {
-            "targets": 'priceHeader',
-            render: function(data, type, row) {
-                return '$' + data;
-            }
-        }, {
-            "targets": 'timePostedHeader',
-            render: function(data, type, row) {
-                // If display or filter data is requested, format the date
-                if (type === 'display' || type === 'filter') {
-                    return dateTimeToObject(data).timeSince(loadDate);
-                }
-                return data;
-            }
-        }]
     });
-//    new FixedHeader(textbooks, {
-//        "offsetTop": 80
-//    } );
-    //DataTables Anti-The Plugin
-    jQuery.extend(jQuery.fn.dataTableExt.oSort, { // Good, just disabling for temp
-        "anti-the-pre": function(a) {
-            return a.replace(/^the /i, "");
-        },
-        "anti-the-asc": function(a, b) {
-            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-        },
-        "anti-the-desc": function(a, b) {
-            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    $(".status input").change(function() {
+        var $checkbox = $(this);
+        if ($checkbox.prop('checked')) {
+            $checkbox.parent().parent().addClass("sold");
+        } else {
+            $checkbox.parent().parent().removeClass("sold");
         }
     });
     var eventFired = function ( type ) {
@@ -201,7 +104,7 @@ $(document).ready(function() {
             window.location.hash ='#';
             loadNonAjax("buy");
         }
-    }
+    };
     $(function() {
         $(".course").autocomplete({
             source: subjectCodes
@@ -209,13 +112,6 @@ $(document).ready(function() {
     });
     $('.yourname-container input').val($.cookie('prefs').yourname);
     $('.email-container input').val($.cookie('prefs').email);
-//    if($.cookie('prefs') != undefined){
-//        var prefs = jQuery.parseJSON($.cookie('prefs'));
-//        if(prefs.yourname && prefs.email) {
-//            $('.contact-info-area').html('<div class="input-text">Contact Information</div> <span class="editButton" onclick="editableContactInfo();">Edit</span><br> <p class="name-email">'+prefs.yourname+' ('+prefs.email+')<br><br></p>');
-//            $('.yourname-container, .email-container').css('display', 'none');
-//        }
-//    }
 //    $('#course').keydown(function(event) {
 //        var field = $(this);
 //        var newValue = field.val() + String.fromCharCode(event.keyCode);
@@ -236,12 +132,6 @@ $(document).ready(function() {
         return false;
     });
 });
-
-//function editableContactInfo () {
-//    $('.yourname-container, .email-container').css('display', 'inline');
-//    $('.contact-info-area').css('display', 'none');
-//    $('.yourname-container input').select();//allow overriding infoboxes.
-//}
 
 $(document).on( "change", "input[cookie]", function() {
     if($( this ).val().length <= 6 && $( this ).val().length != 0) {
@@ -444,18 +334,18 @@ function clearSearchBar () {
     $('#search-bar').focus();
 }
 
-$( "#search-bar" ).keyup(function(event) {
-    if(event.keyCode == 13 && !shouldAutoselect){
-        document.getElementById("search-bar").blur();
-    }
-    textbooks.search($(this).val()).draw();
-    if($('#search-bar').val() == '') {
-        $('#clear').css('display', 'none');
-    }
-    else {
-        $('#clear').css('display', 'inline');
-    }
-});
+//$( "#search-bar" ).keyup(function(event) {
+//    if(event.keyCode == 13 && !shouldAutoselect){
+//        document.getElementById("search-bar").blur();
+//    }
+//    textbooks.search($(this).val()).draw();
+//    if($('#search-bar').val() == '') {
+//        $('#clear').css('display', 'none');
+//    }
+//    else {
+//        $('#clear').css('display', 'inline');
+//    }
+//});
 
 function miscMessage(message, priority) {
     document.getElementById("alert-box-area").innerHTML = '<div class="alert-message '+priority+'"> <div class="box-icon"></div> <p>'+message+'</p><span onclick="closeAlertBox();" class="close">&times;</span></div>';
@@ -464,11 +354,6 @@ function miscMessage(message, priority) {
 function closeAlertBox(){
     document.getElementById("alert-box-area").innerHTML = '';
 }
-
-//function formReset(name){
-//    $('#' + name + ' .form-error label').html('');
-//    $('#' + name + ' input[cookie]').trigger('change');
-//}
 
 function submitSellForm(){
     var submitButton = $('#sell-submit');
@@ -701,13 +586,6 @@ function message(formName, error, shouldSelect) {
 
 function badContactInfoCookie(fieldName){
     $.updateCookie('prefs', fieldName, '', { expires: 90 });//might be bug. Should delete entire value.
-//    var prefs = {};
-//    prefs = jQuery.parseJSON($.cookie('prefs'));
-//    if(fieldName == ('yourname' || 'email') && prefs[fieldName]){
-//        delete prefs[fieldName];
-//        $.cookie('prefs', JSON.stringify(prefs), { expires: 90 });//$.param(prefs)
-////        editableContactInfo();
-//    }
 }
 
 function sellFormMiscMessage(message) {
@@ -869,15 +747,5 @@ function naturalSort (a, b) {
     }
     return 0;
 }
-
-//jQuery.extend( jQuery.fn.dataTableExt.oSort, {
-//    "natural-asc": function ( a, b ) {
-//        return naturalSort(a,b);
-//    },
-//
-//    "natural-desc": function ( a, b ) {
-//        return naturalSort(a,b) * -1;
-//    }
-//} );
 
 }());

@@ -58,31 +58,31 @@ h2 {
     font-size: 1.4em;
     line-height: normal;
 }
-#textbooks,
 button,
 label,
 input[type="submit"] {
     cursor: pointer;
 }
-#owned-items {
+.items {
     cursor: pointer;
     text-align: center;
     vertical-align: middle;
+    border-bottom: 2px solid lightgray;
 }
-#owned-items .comments {
+.comments {
     display:none;
 }
-#owned-items td {
+.course, .price, .time {
+    white-space: nowrap;
+}
+.items td {
     padding-top: 12px;
     padding-bottom: 12px;
     padding-left: 15px;
     padding-right: 15px;
     border-top: 1px solid #dddddd;
 }
-#owned-items {
-    border-bottom: 2px solid lightgray;
-}
-#owned-items thead th {
+.items thead th {
     padding-top:20px;
     padding-bottom: 20px;
 /*
@@ -92,10 +92,10 @@ input[type="submit"] {
     border-bottom: 1px solid lightgray;
     font-weight: bold;
 }
-#owned-items .odd {
+.odd {
     background-color: #f9f9f9;
 }
-#owned-items tbody tr:hover {
+.items tbody tr:hover {
     background-color: whitesmoke;
 }
 .sold {
@@ -666,7 +666,7 @@ div.alert-box span.close:focus {
     .selected {
         background-color: #ffd97a!important;
     }
-    .titleTextbooksColumn {
+    .title {
         font-weight: 600;
     }
     footer a {
