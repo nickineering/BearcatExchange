@@ -55,6 +55,9 @@ $(document).ready(function() {
     var infoBox = $('#info-box').html();
     Handlebars.parse(infoBox);   // optional, speeds up future uses
     var handlebarsInfoBoxCompilation = Handlebars.compile(infoBox);
+    var infoBoxEdit = $('#info-box-edit').html();
+    Handlebars.parse(infoBoxEdit);
+    var handlebarsInfoBoxEditCompilation = Handlebars.compile(infoBoxEdit);
     pageChangeHandler();
     if(currentPage != 'sell' && !$(".alert-message").length){
         miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
@@ -76,13 +79,31 @@ $(document).ready(function() {
                     else {
                         rowData.boxTitle = rowData.title;
                     }
-                    var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
+                    var parentTable = '';
+                    $( this ).parents().map(function() {
+                        if ($(this).attr("id") == "textbooks"){
+                            parentTable = "textbooks";
+                        }
+                        else if ($(this).attr("id") == "owned-items"){
+                            parentTable = "owned-items";
+                        }
+                    });
+                    if(parentTable == "owned-items") {
+                        var checked = $(this).parent().find(".status input").prop('checked');
+                        rowData.checkedForSold = (checked)?"checked":"";
+                        var renderedInfoBox = handlebarsInfoBoxEditCompilation(rowData);
+                    }
+                    else{
+                        var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
+                    }
                     $('#info-box-area').append(renderedInfoBox);
                     var infoBoxInstance = $('#info-box-' + id);
                     var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
                     infoBoxInstance.css('right', rightPosition);
-                    $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
-                    $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
+                    if(parentTable != "owned-items"){
+                        $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
+                        $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
+                    }
                     $('#content').css('margin-bottom', '420px');
                 }
             }
