@@ -675,7 +675,8 @@ function timeSince ($sinceDate) {
                                     <th class="commentsHeader"></th>
                                 </tr>
                             </thead>
-                            <tbody><?php
+                            <tbody>
+                                <?php
                                 $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments` FROM `textbooks` WHERE status = 'unsold' ORDER BY `id` DESC");
                                 if (mysqli_num_rows($result) > 0) {
                                     $numOfRows = mysqli_num_rows($result);
@@ -690,13 +691,14 @@ function timeSince ($sinceDate) {
                                     <td class="price">$<?php echo $row["price"]; ?></td>
                                     <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                     <td class="comments"><?php echo $row["comments"]; ?></td>
-                                </tr><?php
+                                </tr>
+                            <?php
                                         $even = !$even;
                                     }
                                 }
-                                ?>
-                            </tbody>
+                                ?></tbody>
                         </table>
+                        <div class="odd" id="search-message">There are currently no textbooks to display. Please come back later.</div>
                     </div>
                     <div id='extra-page'></div>
                     <div id='sell-text'><?php include 'sell-text.html'; ?></div>
@@ -740,15 +742,14 @@ function timeSince ($sinceDate) {
                                         <th class="commentsHeader never"></th>
                                     </tr>
                                 </thead>
-                                <tbody><?php
+                                <tbody>
+                                    <?php
                                       $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
                                       if (mysqli_num_rows($result) > 0) {
                                           $numOfRows = mysqli_num_rows($result);
                                           $even = false;
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                                    ?>
-
-                                    <tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
+                                    ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
                                         <td class="status"><input type="checkbox" name="status-<?php echo $row['id']; ?>" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
                                         <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>

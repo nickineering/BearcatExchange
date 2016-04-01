@@ -59,6 +59,7 @@ $(document).ready(function() {
     if(currentPage != 'sell' && !$(".alert-message").length){
         miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
+    areThereTextbooks();
     $('.items tbody').on('click', 'td', function () {
         if(!$(this).hasClass("status")) {
             closeAlertBox();
@@ -98,13 +99,6 @@ $(document).ready(function() {
             $checkbox.parent().parent().removeClass("sold");
         }
     });
-    var eventFired = function ( type ) {
-        var searchVal = $('#search-bar').val();
-        if (type == 'DT Search' && searchVal != ''){
-            window.location.hash ='#';
-            loadNonAjax("buy");
-        }
-    };
     $(function() {
         $(".course").autocomplete({
             source: subjectCodes
@@ -131,6 +125,35 @@ $(document).ready(function() {
         $('#' + $(this).closest("form").attr('id') + ' input[cookie]').trigger('change');
         return false;
     });
+    var $rows = $('#textbooks tbody tr');
+    $("#search-bar").keyup(function(event) {
+        if(event.keyCode == 13 && !shouldAutoselect){
+            document.getElementById("search-bar").blur();
+        }
+        if($('#search-bar').val() == '') {
+            $('#clear').css('display', 'none');
+        }
+        else {
+            $('#clear').css('display', 'inline');
+        }
+        $("#search-message").css("display", "none");
+        $("#textbooks thead th").css("border-bottom-width", "1px");
+        var $searchVal = $(this).val();
+        if($searchVal != ''){
+            window.location.hash ='#';
+            var val = $.trim($searchVal).replace(/ +/g, ' ').toLowerCase();
+            $rows.show().filter(function() {
+                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                return !~text.indexOf(val);
+            }).hide();
+            if(!areThereTextbooks()){
+                $("#search-message").html('No one listed that textbook yet. <a href="#sell" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
+            }
+        }
+        else {
+            clearSearchBar();
+        }
+    });
 });
 
 $(document).on( "change", "input[cookie]", function() {
@@ -140,6 +163,15 @@ $(document).on( "change", "input[cookie]", function() {
     $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
     $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
 });
+
+function areThereTextbooks() {
+    if(!$("#textbooks tbody tr:visible").exists()) {
+        $("#search-message").css("display", "block");
+        $("#textbooks thead th").css("border-bottom-width", "0");
+        return false;
+    }
+    return true;
+}
 
 function setJavaScriptData (localErrorCode, userData){
     errorCode = localErrorCode;
@@ -194,6 +226,8 @@ function expandInfoBox (id) {
 //    localInfoBoxMinimize.html('–');
     $('#info-box-' + id + ' .info-box-minimize').css('margin-top', '6px');
 }
+
+jQuery.fn.exists = function(){return this.length>0;}
 
 Date.prototype.timeSince = function (sinceDate) {
     if(!(sinceDate instanceof Date)){
@@ -329,23 +363,12 @@ function sellItYourself() {
 
 function clearSearchBar () {
     $('#search-bar').val('');
-    textbooks.search( '' ).columns().search( '' ).draw();
     $('#clear').css('display', 'none');
+    $("#search-message").css("display", "none");
+    $("#textbooks thead th").css("border-bottom-width", "1px");
     $('#search-bar').focus();
+    $('#textbooks tbody tr').show();
 }
-
-//$( "#search-bar" ).keyup(function(event) {
-//    if(event.keyCode == 13 && !shouldAutoselect){
-//        document.getElementById("search-bar").blur();
-//    }
-//    textbooks.search($(this).val()).draw();
-//    if($('#search-bar').val() == '') {
-//        $('#clear').css('display', 'none');
-//    }
-//    else {
-//        $('#clear').css('display', 'inline');
-//    }
-//});
 
 function miscMessage(message, priority) {
     document.getElementById("alert-box-area").innerHTML = '<div class="alert-message '+priority+'"> <div class="box-icon"></div> <p>'+message+'</p><span onclick="closeAlertBox();" class="close">&times;</span></div>';
