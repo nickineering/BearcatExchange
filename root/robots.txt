@@ -1,7 +1,7 @@
 User-agent: *
 disallow: *
+allow: /
 allow: images/
-allow: index.php
 allow: favicon.ico
 disallow: /#legal
 disallow: /?e=*
