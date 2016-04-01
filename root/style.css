@@ -64,9 +64,7 @@ input[type="submit"] {
     cursor: pointer;
 }
 .items {
-    cursor: pointer;
     text-align: center;
-    vertical-align: middle;
     border-bottom: 2px solid lightgray;
 }
 .comments {
@@ -95,12 +93,20 @@ input[type="submit"] {
 .odd {
     background-color: #f9f9f9;
 }
+.items tbody {
+    cursor: pointer;
+}
 .items tbody tr:hover {
     background-color: whitesmoke;
 }
 .sold {
     font-style: italic;
     background-color: #dddddd !important;
+}
+#search-message {
+    display:none;
+    padding:12px;
+    border-bottom: 2px solid lightgray;
 }
 #welcome-text p {
     margin-top: 5px;
