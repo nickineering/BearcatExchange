@@ -7,62 +7,64 @@ var errorMessageViews = 0;
 var subjectCodes = ["AAAS", "ACCT", "AFST", "ANTH", "ARAB", "ARTH", "ARTS", "ASTR", "BCHM", "BE", "BIOL", "BLS", "BME", "CCPA", "CDCI", "CHEM", "CHIN", "CINE", "CLAS", "COLI", "CQS", "CS", "CW", "DDPR", "DDP", "ECON", "EDUC", "EECE", "EGYN", "ELED", "ENG", "ENT", "ENVI", "ERED", "ESL", "EVOS", "FIN", "FREN", "GEOG", "GEOL", "GERM", "GLST", "GRD", "GRK", "HARP", "HDEV", "HEBR", "HIST", "HWS", "IBUS", "ISE", "ITAL", "JPN", "JUST", "KOR", "LACS", "LAT", "LEAD", "LING", "LTRC", "LXC", "MASS", "MATH", "MDVL", "ME", "MGMT", "MIS", "MKTG", "MSE", "MSL", "MUS", "MUSP", "NURS", "OPM", "OUT", "PAFF", "PERS", "PHIL", "PHYS", "PIC", "PLSC", "PPL", "PSYC", "RHET", "RLIT", "ROML", "RPHL", "RUSS", "SAA", "SCHL", "SCM", "SEC", "SOC", "SPAN", "SPED", "SSIE", "SW", "THEA", "THEP", "TRIP", "TURK", "UNIV", "VIET", "WGSS", "WRIT", "WTSN", "YIDD"];
 var loadDate= new Date();
 var submittingInfoBoxId = 0;
-var currentPage
+var currentPage;
 var pageViews = 0;
 var useAnalytics = true;//Google Analytics stuff
 var consentedToNewsletter = false;
+var userData;
 var errorCode = 0;
+var developmentServer = false;
 var shouldAutoselect = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) > 1200 || !$( "#open-html" ).hasClass( "touch" );
 
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-
-try { //Turn off analytics if 'analytics=off' is included as a request parameter.
-    if (getUrlVars()["analytics"] == 'off') {
-        $.cookie('analytics', 'off', { expires: 180 });
+function startJavascript (localErrorCode, data, devServer){
+    developmentServer = devServer;
+    userData = data;
+    errorCode = localErrorCode;
+    if(errorCode >= 500){
+        $('.form-noscript-warning').css('display', 'block');
     }
-    else if (getUrlVars()["analytics"] == 'on') {
-        $.removeCookie('analytics');
+    if(userData.name) {
+        $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
+        $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
+        $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
     }
-    if($.cookie('analytics') == 'off') {
-        useAnalytics = false;
+    if (userData.justLoggedIn) {
+        window.location.hash = "account";
     }
-} catch(e) {
-    //Just in case something goes wrong...
-    useAnalytics = true;
-}
-
-if(useAnalytics) {
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    ga('create', 'UA-58620297-1', 'auto');
-    ga('require', 'linkid', 'linkid.js');
-    ga('require', 'displayfeatures');
-    ga('send', 'pageview');
-}
-
-$(document).ready(function() {
-    if(!useAnalytics){
-        $('#legal-link').append('<br>Analytics is off');
+    //Start Google Analytics code
+    try { //Turn off analytics if 'analytics=off' is included as a request parameter.
+        if (getUrlVars()["analytics"] == 'off' || developmentServer == true) {
+            $.cookie('analytics', 'off', { expires: 180 });
+        }
+        else if (getUrlVars()["analytics"] == 'on') {
+            $.removeCookie('analytics');
+        }
+        if($.cookie('analytics') == 'off') {
+            useAnalytics = false;
+            $('#legal-link').append('<br><a href="/phpmyadmin" target="_blank">PHPMyAdmin</a><br><a href="/?analytics=on">Analytics is off</a>');
+        }
+    } catch(e) {
+        //Just in case something goes wrong...
+        useAnalytics = true;
     }
+    if(useAnalytics) {
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-58620297-1', 'auto');
+        ga('require', 'linkid', 'linkid.js');
+        ga('require', 'displayfeatures');
+        ga('send', 'pageview');
+    }
+    //End Google Analytics code
+    areThereTextbooks();
     var infoBox = $('#info-box').html();
     Handlebars.parse(infoBox);   // optional, speeds up future uses
     var handlebarsInfoBoxCompilation = Handlebars.compile(infoBox);
     var infoBoxEdit = $('#info-box-edit').html();
     Handlebars.parse(infoBoxEdit);
     var handlebarsInfoBoxEditCompilation = Handlebars.compile(infoBoxEdit);
-    pageChangeHandler();
-    if(currentPage != 'sell' && !$(".alert-message").length){
-        miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
-    }
-    areThereTextbooks();
     $('.items tbody').on('click', 'td', function () {
         if(!$(this).hasClass("status")) {
             closeAlertBox();
@@ -105,6 +107,7 @@ $(document).ready(function() {
                         $('#info-box-' + id + ' input[cookie="name"]').val($.cookie('prefs').name);
                     }
                     $('#content').css('margin-bottom', '420px');
+                    $('#info-box-' + id + '-name').focus();
                 }
             }
             else{
@@ -147,18 +150,18 @@ $(document).ready(function() {
     });
     $('.name-container input').val($.cookie('prefs').name);
     $('.email-container input').val($.cookie('prefs').email);
-//    $('#course').keydown(function(event) {
-//        var field = $(this);
-//        var newValue = field.val() + String.fromCharCode(event.keyCode);
-//        newValue = newValue.replace(/[^A-Z0-9]+/ig, '');
-//        if(!newValue.match(/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i)){
-//            message("course", "Please format the course like the example.");
-//            return false;
-//        }
-//        else {
-//            message("course", "");
-//        }
-//    });
+    //    $('#course').keydown(function(event) {
+    //        var field = $(this);
+    //        var newValue = field.val() + String.fromCharCode(event.keyCode);
+    //        newValue = newValue.replace(/[^A-Z0-9]+/ig, '');
+    //        if(!newValue.match(/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i)){
+    //            message("course", "Please format the course like the example.");
+    //            return false;
+    //        }
+    //        else {
+    //            message("course", "");
+    //        }
+    //    });
     $("button:reset").click(function() {
         this.form.reset();
         $('#' + $(this).closest("form").attr('id') + ' .form-error label').html('');
@@ -195,18 +198,29 @@ $(document).ready(function() {
             clearSearchBar();
         }
     });
-});
-
-$(document).on( "change", "input[cookie]", function() {
-    if($( this ).val().length <= 6 && $( this ).val().length != 0) {
-        return;
+    $(document).on( "change", "input[cookie]", function() {
+        if($( this ).val().length <= 6 && $( this ).val().length != 0) {
+            return;
+        }
+        $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
+        $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
+    });
+    pageChangeHandler();
+    if(currentPage != 'sell' && !$(".alert-message").length){
+        miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
-    $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
-    $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
-});
+}
+
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
 
 function areThereTextbooks() {
-    if(!$("#textbooks tbody tr:visible").exists()) {
+    if(!$("#textbooks tbody tr").exists()) {
         $("#search-message").css("display", "block");
         $("#textbooks thead th").css("border-bottom-width", "0");
         return false;
@@ -214,19 +228,8 @@ function areThereTextbooks() {
     return true;
 }
 
-function setJavaScriptData (localErrorCode, userData){
-    errorCode = localErrorCode;
-    if(errorCode >= 500){
-        $('.form-noscript-warning').css('display', 'block');
-    }
-    if(userData.name) {
-        $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
-        $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
-        $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
-    }
-    if (userData.loggedIn) {
-        window.location.hash = "account";
-    }
+function loggedIn () {
+    $('#toggleLogout p').html("Logout");
 }
 
 function closeInfoBox (id) {
@@ -336,6 +339,9 @@ function pageChangeHandler (){
         if (currentPage == 'sell'){
             $('#name').focus();
             window.scroll(0,0);
+        }
+        else if (currentPage == 'account' && !userData['loggedIn']){
+            $('#login-email').focus();
         }
         else {
             $('#search-bar').focus();
@@ -524,6 +530,15 @@ function submitLoginForm(){
     return false;
 }
 
+function toggleLogout (){
+    if(userData.loggedIn){
+        logout();
+    }
+    else {
+        window.location.hash = "account";
+    }
+}
+
 function logout(){
     var logoutInputs = {//get the values submit
         request : {
@@ -690,6 +705,9 @@ function receivedSellFormResponse(data) {
     var submitButton = $('#sell-submit');
     submitButton.removeAttr('disabled');
     submitButton.val('LIST TEXTBOOK');
+    if(data.loggedIn == true){
+        loggedIn();
+    }
     if(data.misc == 'success'){
         document.location.href = '';
     }
@@ -802,6 +820,9 @@ function receivedInfoBoxResponse(data) {
         if(data.didCheck == true) {
             document.getElementById('info-box-'+id+'-didcheck').value = true;
         }
+    }
+    if(data.loggedIn == true){
+        loggedIn();
     }
 }
 
