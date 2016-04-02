@@ -3,8 +3,8 @@ $startTime = date("Y-m-d H:i:s");
 $startTimestamp = strtotime($startTime);
 require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
-$loggedIn = false;
 $serverError = false;
+$developmentServer = false;
 $errorCode = (isset($_GET['e'])) ? $_GET["e"] : 0;
 $errorCodes = array(
     400 => array("Error 400 Bad Request", $programingErrorMessage),
@@ -27,6 +27,7 @@ session_start();
 $serverList = array('localhost', '127.0.0.1');
 if(in_array($_SERVER['HTTP_HOST'], $serverList)) {
     $con = mysqli_connect("localhost", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange");
+    $developmentServer = true;
 }
 else {
     $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange", 3306);
@@ -42,6 +43,7 @@ if($_REQUEST['isjson'] == true && $errorCode != 0){
     die(json_encode($errors));
 }
 else {
+    $loggedIn = false;
     if(isset($_COOKIE['user-session'])){
         if(ctype_alnum($_COOKIE['user-session'])) {
             $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
@@ -50,12 +52,16 @@ else {
                 $diff = $startTimestamp - strtotime($session['time']);
                 if ($diff < 60 * 60 * 24 * 45) {
                     if($session['status'] == 1){
-                        $loggedIn = true;
                         $theUser = findUser($con, $session['user']);
+                        $theUser['loggedIn'] = true;
+                        $loggedIn = true;
                     }
                 }
             }
         }
+    }
+    if (!$loggedIn) {
+        $theUser['loggedIn'] = false;
     }
     if (isset($_REQUEST['request']) || (isset($_GET['email']) && isset($_GET['h']))) {
         $errors['misc'] = '';
@@ -104,7 +110,7 @@ function logout ($status = 2) {
                 $insert = "UPDATE `sessions` SET `status` = $status WHERE `hash` LIKE '".$_COOKIE['user-session']."'";
                 mysqli_query($con, $insert);
                 unset($_COOKIE['prefs']);
-                $loggedIn = false;
+                $theUser['loggedIn'] = false;
                 $result["misc"] = 'success';
                 printMessage("You are now logged out");
             }
@@ -117,6 +123,7 @@ function logout ($status = 2) {
 function submitTextbook() {
     global $con;
     global $errors;
+    global $theUser;
     $name = ucwords(check_input($_POST['name'], "Enter your name.", "misc"));
     if (strlen($name) > 50) {
         $errors['misc'] .= "Abbreviate your name to 50 characters or less";
@@ -144,6 +151,7 @@ function submitTextbook() {
     $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `course`, `comments`) VALUES ('".$item['title']."', '".getUser($con, $email, $name, $newsletter). "', '".$item['author']."', '".$item['price']."', '".$item['course']."', '".$item['comments']."');";
     mysqli_query($con, $insert);
     mysqli_close($con);
+    $result['loggedIn'] = $theUser['loggedIn'];
     $result["misc"] = 'success';
     printMessage($item['title']." was listed successfully!", "success");
     die(json_encode($result));
@@ -195,6 +203,7 @@ function contactSeller() {
     global $con;
     global $errors;
     global $mail;
+    global $theUser;
     $name = ucwords(check_input($_POST['name']));
     if (strlen($name) > 50) {
         $errors['misc'].= "Abbreviate your name to 50 characters or less";
@@ -242,6 +251,7 @@ function contactSeller() {
         $result["misc"] = 'success';
     }
     mysqli_close($con);
+    $result['loggedIn'] = $theUser['loggedIn'];
     $result["misc"] = 'success';
     die(json_encode($result));
 }
@@ -278,11 +288,10 @@ function login () {
 
 function updateItem () {
     global $con;
-    global $loggedIn;
     global $session;
     global $theUser;
     global $errors;
-    if($loggedIn) {
+    if($theUser['loggedIn']) {
         $itemId = intval($_POST['itemId']);
         $insert = "SELECT `user_id` FROM `textbooks` WHERE `id` = ".$itemId;
         if (intval(mysqli_query($con, $insert)) == $theUser['id']){
@@ -520,7 +529,7 @@ function createHash($userid, $textbook) {
 function checkHash($localCon, $complete, $user, $hash) {
     global $con;
     global $getAnotherLinkInstructions;
-    global $loggedIn;
+    global $theUser;
     global $startTimestamp;
     $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
     $hashArray = mysqli_query($localCon, $hashSearch);
@@ -528,7 +537,7 @@ function checkHash($localCon, $complete, $user, $hash) {
         $hashArray = mysqli_fetch_array($hashArray);
         $textbookId = intval($hashArray['textbook']);
         if ($textbookId == -1) {
-            if ($loggedIn == true){
+            if ($theUser['loggedIn'] == true){
                 logout(3);
             }
             printMessage("You are now logged in");
@@ -569,11 +578,10 @@ function printMessage($status, $priority = "info") {
 function createSession ($userId){
     global $con;
     global $theUser;
-    global $loggedIn;
     global $startTimestamp;
     $theUser = findUser($con, $userId);
+    $theUser['justLoggedIn'] = true;
     $theUser['loggedIn'] = true;
-    $loggedIn = true;
     $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
     setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
     mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
@@ -643,7 +651,7 @@ function timeSince ($sinceDate) {
                 echo "miscMessage(".'"'. $_SESSION['status'].'"'. ", ".'"'.$_SESSION['priority'].'"'.");";
                 unset($_SESSION['status']);
             }
-            echo "setJavaScriptData($errorCode, " . json_encode($theUser) . ");";
+            echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).");";
         ?>'>
         <script src="send-form.js" defer></script>
         <script src="scripts/modernizr.min.js" defer></script>
@@ -704,7 +712,7 @@ function timeSince ($sinceDate) {
             <span id="clear" onclick='clearSearchBar();' ><img src="images/clear.svg"></span>
             <a class="top-right-button" id='facebook-link' href="https://facebook.com/bearcatexchange" target='_blank'><p>f</p></a>
             <a class="top-right-button" id='google-plus-link' href="https://plus.google.com/104887107850990243147" rel="publisher" target='_blank'><p>g+</p></a>
-            <a class="top-right-button" id='logout' onclick="logout();" target='_blank'><p>Logout</p></a>
+            <a class="top-right-button" id='toggleLogout' onclick="toggleLogout();" target='_blank'><p><?php echo ($theUser['loggedIn'] == true)?'Logout':'Login'; ?></p></a>
             <!--Begin page content area-->
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
             <div id="content" class="content">
@@ -775,7 +783,7 @@ function timeSince ($sinceDate) {
                     <div id='extra-page'></div>
                     <div id='sell-text'><?php include 'sell-text.html'; ?></div>
                     <div id='account-text'>
-                        <?php if(!$loggedIn) { ?>
+                        <?php if(!$theUser['loggedIn']) { ?>
                         <form id="login-form" class="page-form" name="login" method="POST" action="index.php" onsubmit="return submitLoginForm()">
                             <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
                             <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
@@ -797,7 +805,7 @@ function timeSince ($sinceDate) {
                         </form>
                         <?php } else { ?>
                         <form id="account-form" name="account" method="POST" action="index.php" onsubmit="return submitAccountForm()">
-                            <h1>Edit Your Listings</h1><h2>These are all of the items you listed with <?php echo $theUser['email'] . ", " .  $theUser['name'] . ". "; ?></h2>
+                            <h1>Edit Your Listings</h1><h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
