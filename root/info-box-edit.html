@@ -7,7 +7,7 @@
     <div class='info-box-body'>
         <div class="info-box-contact">
             <h3>Edit Your Listing</h3>
-            <form id="info-box-form-{{id}}" name="info-box" method="POST" onsubmit='return infoBoxSubmit({{id}});' action="index.php">
+            <form id="info-box-form-{{id}}" name="info-box" method="POST" onsubmit='return submitUpdateForm({{id}});' action="index.php">
                 <div class='textbooktitle-container'>
                     <p class="input-text"><label for="info-box-{{id}}-title">Title (include edition) <span class="required">*</span></label></p>
                     <p class="form-error"><label for="info-box-{{id}}-title" id='info-box-{{id}}-title-message'></label></p>
@@ -21,7 +21,7 @@
                 <div class="course-container">
                     <p class="input-text"><label for="info-box-{{id}}-course">Course <span class="required">*</span></label></p>
                     <p class="form-error"><label for="info-box-{{id}}-course" id='info-box-{{id}}-course-message'></label></p>
-                    <input type="text" class="course" id="info-box-{{id}}-course" maxlength='15' value="{{course}}">
+                    <input type="text" name='course' class="course" id="info-box-{{id}}-course" maxlength='15' value="{{course}}">
                 </div>
                 <div class='price-container'>
                     <p class="input-text"><label for="info-box-{{id}}-price">Price <span class="required">*</span></label></p>
@@ -35,14 +35,14 @@
                 </div>
                 <div class="newsletter-form">
                     <label>
-                        <input type="checkbox" name="status" value='sold' {{checkedForSold}}><div></div>
-                        <div>Mark as sold</div>
+                        <input type="checkbox" id="info-box-status-{{id}}" name="status" value='sold' {{checkedForSold}}><div></div>
+                        <div>This item was sold</div>
                     </label>
                 </div>
                 <div id="info-box-{{id}}-message-wrapper" class='form-message-wrapper'></div>
                 <input type="hidden" id="info-box-{{id}}-request-id" name="request" value="update-item"/>
-                <input type="hidden" name="textbookid" id="info-box-{{id}}-id" value="{{id}}"/>
-                <input type="submit" value="SAVE CHANGES" id='info-box-{{id}}-submit'>
+                <input type="hidden" name="itemId" id="info-box-id-{{id}}" value="{{id}}"/>
+                <input type="submit" value="SAVE CHANGES" id='info-box-submit-{{id}}'>
             </form>
         </div>
     </div>

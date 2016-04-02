@@ -269,18 +269,6 @@ input[type="submit"] {
 .newsletter-form {
     color: #007a5e;
 }
-.contact-info-area .input-text {
-    float: left;
-}
-.contact-info-area .name-email {
-    margin-top: 10px;
-}
-.contact-info-area .editButton {
-    text-align: right;
-    font-size: 15px;
-    float: right;
-    padding-right: 10px;
-}
 .page-form input[type="text"],
 .page-form input[type="email"] {
     height: 30px;
@@ -301,9 +289,6 @@ input[type="submit"] {
     background-size: 17px 17px;
     background-repeat: no-repeat;
     padding-left: 15px;
-}
-#textbooks_filter {
-    display: none;
 }
 #search-bar {
     -moz-box-sizing: border-box;

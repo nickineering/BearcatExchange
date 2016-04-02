@@ -72,7 +72,7 @@ $(document).ready(function() {
                 if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
                     selectedRows.push(id);
                     $(this).parent().addClass('selected');
-                    var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
+                    var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price .val").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
                     if(rowData.title.length > 28){
                         rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
                     }
@@ -102,7 +102,7 @@ $(document).ready(function() {
                     infoBoxInstance.css('right', rightPosition);
                     if(parentTable != "owned-items"){
                         $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
-                        $('#info-box-' + id + ' input[cookie="yourname"]').val($.cookie('prefs').yourname);
+                        $('#info-box-' + id + ' input[cookie="name"]').val($.cookie('prefs').name);
                     }
                     $('#content').css('margin-bottom', '420px');
                 }
@@ -133,7 +133,7 @@ $(document).ready(function() {
             },
             request : {
                 category : 'novalidate',
-                fieldValue : 'markedSold'
+                fieldValue : 'update-item'
             }
         };
         if(validateInputs(soldInputs, 'sold-form', receivedSoldFormResponse, miscMessage) == false) {
@@ -145,7 +145,7 @@ $(document).ready(function() {
             source: subjectCodes
         });
     });
-    $('.yourname-container input').val($.cookie('prefs').yourname);
+    $('.name-container input').val($.cookie('prefs').name);
     $('.email-container input').val($.cookie('prefs').email);
 //    $('#course').keydown(function(event) {
 //        var field = $(this);
@@ -276,18 +276,18 @@ Date.prototype.timeSince = function (sinceDate) {
     }
     var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var secondsSince = Math.floor((sinceDate - this) / 1000);//Remove milliseconds
-    var interval = Math.floor(secondsSince / 60*60*24*10);
+    var interval = Math.floor(secondsSince / (60*60*24*10));
     if (interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
         if (this.getFullYear() != sinceDate.getFullYear()) {//If during a different year include the year in the return date.
             return monthNames[this.getMonth()] + ' ' + this.getDate() + ', ' + this.getFullYear();
         }
         return monthNames[this.getMonth()] + ' ' + this.getDate();
     }
-    interval = Math.floor(secondsSince / 60*60*24);
+    interval = Math.floor(secondsSince / (60*60*24));
     if (interval >= 1) {
         return (interval >= 2)?interval + " days ago":"1 day ago";
     }
-    interval = Math.floor(secondsSince / 60*60);
+    interval = Math.floor(secondsSince / (60*60));
     if (interval >= 1) {
         return (interval >= 2)?interval + " hours ago":"1 hour ago";
     }
@@ -302,36 +302,6 @@ function dateTimeToObject (dateTime) {
     var t = dateTime.split(/[- :]/);
     var d = new Date(t[0], t[1] - 1, t[2], t[3], t[4], t[5]);
     return d;
-}
-
-function getTextbooks() {
-    var dataToSend = 'request=textbooks&first=' + textbooks.column(0).data().length;
-    sendForm(receivedTextbooks, miscMessage, 'index.php', dataToSend);
-}
-
-function receivedTextbooks(data) {
-    if (data.none != 1) {
-        for (var i = 0, len = data.length; i < len; i++) {
-            textbooks.row.add({
-                "title": data[i].title,
-                "author": data[i].author,
-                "course": data[i].course,
-                "price": data[i].price,
-                "time": data[i].time,
-                "comments": data[i].comments
-            }).draw();
-        }
-    }
-    getTextbooks();
-}
-
-function receivedFirstTextbooks(data) {
-    if (poolImmediately) {
-        receivedTextbooks(data);
-    } else {
-        firstTextbooksData = data;
-        hasReceivedFirstTextbooks = true;
-    }
 }
 
 function pageChangeHandler (){
@@ -364,7 +334,7 @@ function pageChangeHandler (){
     $('title').text(pageTitles[currentPage] + ' - Bearcat Exchange');
     if(shouldAutoselect){
         if (currentPage == 'sell'){
-            $('#your-name').focus();
+            $('#name').focus();
             window.scroll(0,0);
         }
         else {
@@ -399,7 +369,7 @@ function sellItYourself() {
     var searchTerm = $('#search-bar').val();
     clearSearchBar();
     loadNonAjax('sell');
-    $('#textbook-title').val(searchTerm);
+    $('#title').val(searchTerm);
 }
 
 function clearSearchBar () {
@@ -444,9 +414,9 @@ function submitSellForm(){
             fieldValue : $('#author').val(),
             required : true
         },
-        textbooktitle : {
+        title : {
             category : 'text',
-            fieldValue : $('#textbook-title').val(),
+            fieldValue : $('#title').val(),
             required : true
         },
         email : {
@@ -455,9 +425,9 @@ function submitSellForm(){
             required : true,
             makeCookie : true
         },
-        yourname : {
+        name : {
             category : 'name',
-            fieldValue : $('#your-name').val(),
+            fieldValue : $('#name').val(),
             required : true,
             makeCookie : true
         },
@@ -499,7 +469,7 @@ function infoBoxSubmit(id){
             required : true,
             makeCookie :true
         },
-        yourname : {
+        name : {
             category : 'name',
             fieldValue : $('#info-box-'+id+'-name').val(),
             required : true,
@@ -567,6 +537,65 @@ function logout(){
     return false;
 }
 
+function submitUpdateForm(id){
+    var submitButton = $('#info-box-submit-' + id);
+    submitButton.val('SAVING');
+    submitButton.attr('disabled','disabled');
+    submittingInfoBoxId = id;
+    var $checkbox = $("#info-box-status-" + id);
+    var status = '';
+    if ($checkbox.prop('checked')) {
+        status = "sold";
+    } else {
+        status = "unsold";
+    }
+    var updateFormInputs = {//get the values submit
+        status : {
+            category : 'novalidate',
+            fieldValue : status
+        },
+        comments : {
+            category : 'text',
+            fieldValue : $('#info-box-' + id + '-comments').val(),
+            required : false
+        },
+        course : {
+            category : 'course',
+            fieldValue : $('#info-box-' + id + '-course').val(),
+            required : true
+        },
+        price : {
+            category : 'price',
+            fieldValue : $('#info-box-' + id + '-price').val() + "",
+            required : true
+        },
+        author : {
+            category : 'text',
+            fieldValue : $('#info-box-' + id + '-author').val(),
+            required : true
+        },
+        title : {
+            category : 'text',
+            fieldValue : $('#info-box-' + id + '-title').val(),
+            required : true
+        },
+        itemId : {
+            category : 'novalidate',
+            fieldValue : id + ''
+        },
+        request : {
+            category : 'novalidate',
+            fieldValue : 'update-item'
+        }
+    };
+    if(validateInputs(updateFormInputs, 'info-box-form-' + id, receivedUpdateFormResponse, infoBoxMiscMessage) == false) {
+        submitButton.removeAttr('disabled');
+        submitButton.val('SAVE CHANGES');
+        infoBoxMiscMessage('Fix the errors shown and then submit again.');
+    }
+    return false;
+}
+
 function validateInputs(inputs, formName, responseFunction, miscMessageFunction){//Accepts an object of objects and the id of the form being submited with no hashtag. All objects in the object must have a string property named fieldValue which will be sent to the server along with the name of the object in lowercase.
     var errors = new Array();//If something is added, the form will not submit.
     for(var input in inputs) {//Apply validation to each field before sending.
@@ -626,7 +655,7 @@ function validateInputs(inputs, formName, responseFunction, miscMessageFunction)
         message(formName, errors[error], true);
     }
     if(hasErrors){//Check if inputs are valid...
-        return false;//...Return false if they are not.
+        return false;//...and return false if they are not.
     }
     var dataToSend = '';//Will become the parameters of the submission.
     for(input in inputs) {
@@ -695,7 +724,8 @@ function receivedLoginFormResponse(data) {
         $.updateCookie('prefs', 'name', data.name, { expires: 90 });
         $.updateCookie('prefs', 'email', data.email, { expires: 90 });
         $.updateCookie('prefs', 'userid', data.id, { expires: 90 });
-        loginFormMiscMessage('We sent you an email with a link. Click that link to continue. ');
+        window.location.hash ='#';
+        miscMessage('We sent you an email with a link. Click it to continue. ', 'success');
     }
     if(data.misc){
         sellFormMiscMessage(data.misc);
@@ -715,6 +745,32 @@ function receivedSoldFormResponse (data) {
     if(data.misc != "success"){
         miscMessage("There was a problem updating the status of your item. Refresh the page and try again.", "error");
     }
+    else {
+        miscMessage("<i>" + data.item.title + "</i> was successfully marked as " + data.item.status + ".", "success");
+    }
+}
+
+function receivedUpdateFormResponse(data) {
+    if(data.misc == 'success'){
+        closeInfoBox(submittingInfoBoxId);
+        $('[item='+data.item.id+'] .title').html(data.item.title);
+        $('[item='+data.item.id+'] .author').html(data.item.author);
+        $('[item='+data.item.id+'] .course').html(data.item.course);
+        $('[item='+data.item.id+'] .price .val').html(data.item.price);
+        $('[item='+data.item.id+'] .comments').html(data.item.comments);
+        if(data.item.status == 'sold'){
+            $('[item='+data.item.id+']').addClass("sold");
+            $('[item='+data.item.id+'] .status input').attr("checked", "checked");
+        }
+        else {
+            $('[item='+data.item.id+']').removeClass("sold");
+            $('[item='+data.item.id+'] .status input').removeAttr("checked");
+        }
+        miscMessage("Your changes were saved successfully.", 'success');
+    }
+    else{
+        infoBoxMiscMessage(data.misc);
+    }
 }
 
 function infoBoxMiscMessage(message) {
@@ -722,7 +778,7 @@ function infoBoxMiscMessage(message) {
     $('#info-box-'+submittingInfoBoxId+'-message-wrapper').html(message);
 }
 
-function receivedInfoBoxResponse(data) {;
+function receivedInfoBoxResponse(data) {
     if(data.misc == 'success'){
         closeInfoBox(submittingInfoBoxId);
 //        var subscribed = $('#info-box-'+submittingInfoBoxId+'-newsletter').prop('checked');
