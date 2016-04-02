@@ -44,7 +44,7 @@ if($_REQUEST['isjson'] == true && $errorCode != 0){
 else {
     if(isset($_COOKIE['user-session'])){
         if(ctype_alnum($_COOKIE['user-session'])) {
-            $session = mysqli_query($con, "SELECT user, time, status FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
+            $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
             if (mysqli_num_rows($session) != 0) {
                 $session = mysqli_fetch_array($session);
                 $diff = $startTimestamp - strtotime($session['time']);
@@ -78,8 +78,8 @@ else {
             case "contact-seller";
                 contactSeller();
                 break;
-            case "markedSold";
-                markedSold();
+            case "update-item";
+                updateItem();
                 break;
             case "login";
                 login();
@@ -117,7 +117,7 @@ function logout ($status = 2) {
 function submitTextbook() {
     global $con;
     global $errors;
-    $name = ucwords(check_input($_POST['yourname'], "Enter your name.", "misc"));
+    $name = ucwords(check_input($_POST['name'], "Enter your name.", "misc"));
     if (strlen($name) > 50) {
         $errors['misc'] .= "Abbreviate your name to 50 characters or less";
     }
@@ -126,42 +126,7 @@ function submitTextbook() {
     }
     $email = strtolower($_POST['email']);
     validateEmail($email);
-    $title = ucfirst(check_input($_POST['textbooktitle'], "Enter the textbook's title.", "misc"));
-    if (strlen($title) > 75) {
-        $errors['misc'] .= "Abbreviate the textbook's title to 75 characters or less. ";
-    }
-    else if (strlen($title) < 3) {
-        $errors['misc'] .= "What is the textbook's title? ";
-    }
-    $author = ucwords(check_input($_POST['author'], "Enter the author's name.", "misc"));
-    if (strlen($author) > 50) {
-        $errors['misc'] .= "Abbreviate the author's name to 50 characters or less";
-    }
-    else if (strlen($author) < 3) {
-        $errors['misc'] .= "Who is the textbook's author? ";
-    }
-    $price = preg_replace('/[^0-9]+/i', '', $_POST['price']);
-    if ($price === NULL || $price == false || intval($price) < 1 || intval($price) > 400) {
-        $errors['misc'] .= 'Enter a price between $1 and $400. ';
-    }
-    $course = $_POST['course'];
-    $course = preg_replace('/[^A-Z0-9]+/i', '', $course);
-    if ($course != '') {
-        if (preg_match("/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i", $course)) {
-            $course = strtoupper($course);
-            $course = preg_replace('/(?=[0-9]{3})/', ' ', $course);
-        }
-        else {
-            $errors['misc'] = 'Format the course like the examples. ';
-        }
-    }
-    else {
-        $errors['misc'] .= 'Please enter the course the textbook is used in. ';
-    }
-    $comments = ucfirst(check_input($_POST['comments']));
-    if (strlen($comments) > 1000) {
-        $errors['misc'] .= 'Limit your comments to 1000 characters. ';
-    }
+    $item = getItemData();
     $newsletter = 'unsubscribed';
     if ($_POST['newsletter'] == 'subscribed') {
         $newsletter = 'subscribed';
@@ -176,19 +141,61 @@ function submitTextbook() {
         echo json_encode($errors);
         die();
     }
-    $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `course`, `comments`) VALUES ('$title', '".getUser($con, $email, $name, $newsletter). "', '$author', '$price', '$course', '$comments');";
+    $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `course`, `comments`) VALUES ('".$item['title']."', '".getUser($con, $email, $name, $newsletter). "', '".$item['author']."', '".$item['price']."', '".$item['course']."', '".$item['comments']."');";
     mysqli_query($con, $insert);
     mysqli_close($con);
     $result["misc"] = 'success';
-    printMessage("$title was listed successfully!");
+    printMessage($item['title']." was listed successfully!", "success");
     die(json_encode($result));
+}
+
+function getItemData () {
+    global $errors;
+    $return = array();
+    $return['title'] = ucfirst(check_input($_POST['title'], "Enter the textbook's title.", "misc"));
+    if (strlen($return['title']) > 75) {
+        $errors['misc'] .= "Abbreviate the textbook's title to 75 characters or less. ";
+    }
+    else if (strlen($return['title']) < 3) {
+        $errors['misc'] .= "What is the textbook's title? ";
+    }
+    $return['author'] = ucwords(check_input($_POST['author'], "Enter the author's name.", "misc"));
+    if (strlen( $return['author']) > 50) {
+        $errors['misc'] .= "Abbreviate the author's name to 50 characters or less";
+    }
+    else if (strlen( $return['author']) < 3) {
+        $errors['misc'] .= "Who is the textbook's author? ";
+    }
+    $return['price'] = preg_replace('/[^0-9]+/i', '', $_POST['price']);
+    if ($return['price'] === NULL || $return['price'] == false || intval($return['price']) < 1 || intval($return['price']) > 400) {
+        $errors['misc'] .= 'Enter a price between $1 and $400. ';
+    }
+    $return['course'] = $_POST['course'];
+    $return['course'] = preg_replace('/[^A-Z0-9]+/i', '', $return['course']);
+    if ($return['course'] != '') {
+        if (preg_match("/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i", $return['course'])) {
+            $return['course'] = strtoupper($return['course']);
+            $return['course'] = preg_replace('/(?=[0-9]{3})/', ' ', $return['course']);
+        }
+        else {
+            $errors['misc'] = 'Format the course like the examples. ';
+        }
+    }
+    else {
+        $errors['misc'] .= 'Please enter the course the textbook is used in. ';
+    }
+    $return['comments'] = ucfirst(check_input($_POST['comments']));
+    if (strlen($return['comments']) > 1000) {
+        $errors['misc'] .= 'Limit your comments to 1000 characters. ';
+    }
+    return $return;
 }
 
 function contactSeller() {
     global $con;
     global $errors;
     global $mail;
-    $name = ucwords(check_input($_POST['yourname']));
+    $name = ucwords(check_input($_POST['name']));
     if (strlen($name) > 50) {
         $errors['misc'].= "Abbreviate your name to 50 characters or less";
     }
@@ -228,7 +235,7 @@ function contactSeller() {
     $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
     $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
     if(!$mail->send()) {
-        printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.");
+        printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.", "error");
         //echo 'Mailer Error: ' . $mail->ErrorInfo;
     }
     else {
@@ -259,7 +266,7 @@ function login () {
         $mail->Subject = 'Edit your textbook listings';
         $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
         if(!$mail->send()) {
-            printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.");
+            printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.", "error");
         }
         else {
             $result["misc"] = 'success';
@@ -269,24 +276,44 @@ function login () {
     }
 }
 
-function markedSold () {
+function updateItem () {
     global $con;
     global $loggedIn;
+    global $session;
     global $theUser;
+    global $errors;
     if($loggedIn) {
         $itemId = intval($_POST['itemId']);
         $insert = "SELECT `user_id` FROM `textbooks` WHERE `id` = ".$itemId;
         if (intval(mysqli_query($con, $insert)) == $theUser['id']){
+            $item = getItemData();
             if($_POST['status'] == "sold") {
-                $status = "sold";
+                $item['status'] = "sold";
             }
             if($_POST['status'] == "unsold") {
-                $status = "unsold";
+                $item['status'] = "unsold";
             }
-
-            $insert = "UPDATE `textbooks` SET `status` = '$status'".(($status == "sold")?", `sale_time` = CURRENT_TIMESTAMP":'')." WHERE `id` = ".$itemId;
-            mysqli_query($con, $insert);
+            $overviewQuery = "SELECT `id`, `user_id`, `title`, `author`, `price`, `time`, `course`, `comments`, `status` FROM textbooks WHERE `id` = $itemId";
+            $beginningState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
+            $textbooksUpdate = "UPDATE `textbooks` SET";
+            $updates = "INSERT INTO `updates` (`textbook_id`, `update_time`, `update_session`";
+            $updatesValues = "VALUES ($itemId, CURRENT_TIMESTAMP, '" . $session['hash'] . "'";
+            $previousInTextbooks = false;
+            foreach ($item as $key => $value) {
+                if(isset($_POST[$key]) && $item[$key] != $beginningState[$key]){
+                    $textbooksUpdate .= (($previousInTextbooks)?",":"")." `$key` = '".$item[$key]."'";
+                    $previousInTextbooks = true;
+                    $updates .= ", `$key`";
+                    $updatesValues .= ", '".$item[$key]."'";
+                }
+            }
+            $textbooksUpdate .= " WHERE `id` = ".$itemId;
+            $updates .= ") " . $updatesValues . ");";
+            mysqli_query($con, $textbooksUpdate);
+            mysqli_query($con, $updates);
+            $endingState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
             $result["misc"] = "success";
+            $result['item'] = $endingState;
         }
         else {
             $result["misc"] = 'Wrong user';
@@ -306,7 +333,7 @@ function verifyLink() {
     $hash = check_input($_GET['h']);
     $user = mysqli_query($con, "SELECT id FROM users WHERE email = '$email'");
     if (mysqli_num_rows($user) == 0) {
-        printMessage('Hmmmm... That is funny. The email in your link is not registered with any textbooks. M'.$getAnotherLinkInstructions, 'warning');
+        printMessage('Hmmmm... That is funny. The email in your link is not registered with any textbooks. M'.$getAnotherLinkInstructions, 'error');
     }
     $user = mysqli_fetch_array($user);
     checkHash($con, onValidate, $user['id'], $hash);
@@ -314,7 +341,7 @@ function verifyLink() {
 
 function onValidate($localCon, $user, $textbookId, $textbookTitle) {
     mysqli_query($localCon, 'UPDATE textbooks SET status = "sold" WHERE `user_id` = '.$user.' AND `id` = '.$textbookId);
-    printMessage('Your textbook <i>'.$textbookTitle.'</i> was marked as sold. Congratulations!');
+    printMessage('Your textbook <i>'.$textbookTitle.'</i> was marked as sold. Congratulations!', "success");
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter) {
@@ -323,10 +350,12 @@ function getUser($localCon, $localEmail, $localName, $localNewsletter) {
         $userInsert = "INSERT INTO `users` (`email`, `name`, `joined`, `newsletter`) VALUES ('$localEmail', '$localName', CURRENT_TIMESTAMP, '$localNewsletter');";
         mysqli_query($localCon, $userInsert);
         $userId = mysqli_insert_id($localCon);
+        createSession($userId);
     }
     else {
-        return $findUserResult['id'];
+        $userId = $findUserResult['id'];
     }
+    return $userId;
 }
 
 function findUser($localCon, $identifier, $localNewsletter) {
@@ -491,7 +520,6 @@ function createHash($userid, $textbook) {
 function checkHash($localCon, $complete, $user, $hash) {
     global $con;
     global $getAnotherLinkInstructions;
-    global $theUser;
     global $loggedIn;
     global $startTimestamp;
     $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
@@ -504,19 +532,14 @@ function checkHash($localCon, $complete, $user, $hash) {
                 logout(3);
             }
             printMessage("You are now logged in");
-            $theUser = findUser($con, $hashArray['user']);
-            $theUser['loggedIn'] = true;
-            $loggedIn = true;
-            $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
-            setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
-            mysqli_query($localCon, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
+            createSession($hashArray['user']);
         }
         else {
             $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
             if (mysqli_num_rows($textbook) == 1) {
                 $textbook = mysqli_fetch_array($textbook);
                 if ($textbook['status'] == 'sold') {
-                    printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ');
+                    printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ', "warning");
                 }
                 else {
                     $diff = $startTimestamp - strtotime($hashArray['time']);
@@ -524,23 +547,36 @@ function checkHash($localCon, $complete, $user, $hash) {
                         $complete($localCon, $user, $textbookId, $textbook['title']);
                     }
                     else {
-                        printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'warning');
+                        printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'error');
                     }
                 }
             }
             else {
-                printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'warning');
+                printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'error');
             }
         }
     }
     else {
-        printMessage('Your link did not work. Are you sure you copied it correctly from your email? If not, m'.$getAnotherLinkInstructions, 'warning');
+        printMessage('Your link did not work. Are you sure you copied it correctly from your email? If not, m'.$getAnotherLinkInstructions, 'error');
     }
 }
 
 function printMessage($status, $priority = "info") {
     $_SESSION['status'] = $status;
     $_SESSION['priority'] = $priority;
+}
+
+function createSession ($userId){
+    global $con;
+    global $theUser;
+    global $loggedIn;
+    global $startTimestamp;
+    $theUser = findUser($con, $userId);
+    $theUser['loggedIn'] = true;
+    $loggedIn = true;
+    $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
+    setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
+    mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
 }
 
 function generateErrorText($localErrorCode, $makeDiv) {
@@ -561,7 +597,7 @@ function timeSince ($sinceDate) {
     global $startTimestamp;
     $sinceTimestamp = strtotime($sinceDate);
     $secondsSince = $startTimestamp - $sinceTimestamp;
-    $interval = floor($secondsSince / 60*60*24*10);
+    $interval = floor($secondsSince / (60*60*24*10));
     if ($interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
         if(date("Y") != date("Y", $sinceTimestamp)){//If during a different year include the year in the return date.
             return date("F j, Y", $sinceTimestamp);
@@ -570,11 +606,11 @@ function timeSince ($sinceDate) {
             return date("F j", $sinceTimestamp);
         }
     }
-    $interval = floor($secondsSince / 60*60*24);
+    $interval = floor($secondsSince / (60*60*24));
     if ($interval >= 1) {
         return ($interval >= 2)?$interval . " days ago":"1 day ago";
     }
-    $interval = floor($secondsSince / 60*60);
+    $interval = floor($secondsSince / (60*60));
     if ($interval >= 1) {
         return ($interval >= 2)?$interval . " hours ago":"1 hour ago";
     }
@@ -616,7 +652,7 @@ function timeSince ($sinceDate) {
         <script src="scripts/jquery.cookie.js" defer></script>
 <!--        <script src="scripts/mustache.min.js" defer></script>-->
         <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
-        <script src="index.js" defer></script>
+        <script src="main.js" defer></script>
         <div id='wrapper'>
             <!--Begin Nav Bar-->
             <div id="top-bar-background"></div>
@@ -724,7 +760,7 @@ function timeSince ($sinceDate) {
                                     <td class="title"><?php echo $row['title']; ?></td>
                                     <td class="author"><?php echo $row["author"]; ?></td>
                                     <td class="course"><?php echo $row["course"]; ?></td>
-                                    <td class="price">$<?php echo $row["price"]; ?></td>
+                                    <td class="price">$<span class='val'><?php echo $row["price"]; ?></span></td>
                                     <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                     <td class="comments"><?php echo $row["comments"]; ?></td>
                                 </tr>
@@ -790,7 +826,7 @@ function timeSince ($sinceDate) {
                                         <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>
-                                        <td class="price">$<?php echo $row["price"]; ?></td>
+                                        <td class="price">$<span class='val'><?php echo $row["price"]; ?></span></td>
                                         <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                         <td class="comments"><?php echo $row["comments"]; ?></td>
                                     </tr><?php

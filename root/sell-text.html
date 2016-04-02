@@ -7,10 +7,10 @@
     </script>
     <div class="sell-form-input">
     <div class="left-form">
-        <div class='yourname-container'>
-            <p class="input-text"><label for="your-name">Your Name <span class="required">*</span></label></p>
-            <p class="form-error"><label for="name" id='yourname-message'></label></p>
-            <input type="text" name="name" id='your-name' maxlength="50" cookie='yourname'>
+        <div class='name-container'>
+            <p class="input-text"><label for="name">Your Name <span class="required">*</span></label></p>
+            <p class="form-error"><label for="name" id='name-message'></label></p>
+            <input type="text" name="name" id='name' maxlength="50" cookie='name'>
             <br><br>
         </div>
         <div class='email-container'>
@@ -19,10 +19,10 @@
             <input type="email" name="email" id='email' maxlength="254" cookie='email'>
             <br><br>
         </div>
-        <div class='textbooktitle-container'>
-            <p class="input-text"><label for="textbook-title">Title (include edition) <span class="required">*</span></label></p>
-            <p class="form-error"><label for="title" id='textbooktitle-message'></label></p>
-            <input type="text" name="title" id='textbook-title' maxlength="75" spellcheck="true">
+        <div class='title-container'>
+            <p class="input-text"><label for="title">Title (include edition) <span class="required">*</span></label></p>
+            <p class="form-error"><label for="title" id='title-message'></label></p>
+            <input type="text" name="title" id='title' maxlength="75" spellcheck="true">
             <br><br>
         </div>
         <div class='author-container'>
@@ -36,7 +36,7 @@
         <div class="course-container">
             <p class="input-text"><label for="course">Course (ex: BIOL 380A) <span class="required">*</span></label></p>
             <p class="form-error"><label for="course" id='course-message'></label></p>
-            <input type="text" class="course" id="course" maxlength='15'>
+            <input type="text" name ='course' class="course" id="course" maxlength='15'>
             <br><br>
         </div>
         <div class='price-container'>
@@ -60,7 +60,7 @@
     </div>
     <div id="sell-form-message"><div id="sell-form-message-wrapper" class='form-message-wrapper'></div></div>
     <br>
-    <input type="hidden" name="request" id="requestId" value="submit"/>
+    <input type="hidden" name="request" id="requestId" value="submit-sell-form"/>
     <input type="hidden" name="didcheck" id="didcheck" value="false"/>
     <input id='sell-submit' type="submit" value="LIST TEXTBOOK">
     </div>
