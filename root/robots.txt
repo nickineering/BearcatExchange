@@ -1,6 +1,5 @@
 User-agent: *
 disallow: *
 allow: /$
-disallow: /?e=*
-allow: images/
-allow: favicon.ico
+allow: /images/
+allow: /favicon.ico
