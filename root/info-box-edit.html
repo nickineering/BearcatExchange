@@ -1,4 +1,4 @@
-<div class='info-box' id='info-box-{{id}}'>
+<div class='info-box info-box-edit' id='info-box-{{id}}'>
     <div class="info-box-heading">
         <h3>{{boxTitle}}</h3>
         <div class="info-box-minimize" onclick="minimizeInfoBox({{id}});" title='Minimize'>&ndash;</div>
@@ -19,7 +19,7 @@
                     <input type="text" name="author" id='info-box-{{id}}-author' maxlength='50' value="{{author}}">
                 </div>
                 <div class="course-container">
-                    <p class="input-text"><label for="info-box-{{id}}-course">Course <span class="required">*</span></label></p>
+                    <p class="input-text"><label for="info-box-{{id}}-course">Course  (ex: BIOL 380A)<span class="required">*</span></label></p>
                     <p class="form-error"><label for="info-box-{{id}}-course" id='info-box-{{id}}-course-message'></label></p>
                     <input type="text" name='course' class="course" id="info-box-{{id}}-course" maxlength='15' value="{{course}}">
                 </div>
@@ -35,11 +35,11 @@
                 </div>
                 <div class="newsletter-form">
                     <label>
-                        <input type="checkbox" id="info-box-status-{{id}}" name="status" value='sold' {{checkedForSold}}><div></div>
+                        <input type="checkbox" id="info-box-status-{{id}}" name="status" value='sold' {{checkedForSold}}>
                         <div>This item was sold</div>
                     </label>
                 </div>
-                <div id="info-box-{{id}}-message-wrapper" class='form-message-wrapper'></div>
+                <div id="info-box-{{id}}-message-wrapper" class='form-message-wrapper hidden'></div>
                 <input type="hidden" id="info-box-{{id}}-request-id" name="request" value="update-item"/>
                 <input type="hidden" name="itemId" id="info-box-id-{{id}}" value="{{id}}"/>
                 <input type="submit" value="SAVE CHANGES" id='info-box-submit-{{id}}'>

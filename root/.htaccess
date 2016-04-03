@@ -74,16 +74,16 @@ Order Allow,Deny
 Deny from all
 </filesMatch>
 
-ErrorDocument 400 http://bearcatexchange.com/?e=400
-ErrorDocument 401 http://bearcatexchange.com/?e=401
-ErrorDocument 403 http://bearcatexchange.com/?e=403
-ErrorDocument 404 http://bearcatexchange.com/?e=404
-ErrorDocument 405 http://bearcatexchange.com/?e=405
-ErrorDocument 408 http://bearcatexchange.com/?e=408
-ErrorDocument 414 http://bearcatexchange.com/?e=414
-ErrorDocument 500 http://bearcatexchange.com/?e=500
-ErrorDocument 502 http://bearcatexchange.com/?e=502
-ErrorDocument 504 http://bearcatexchange.com/?e=504
-ErrorDocument 508 http://bearcatexchange.com/?e=508
+ErrorDocument 400 /?e=400
+ErrorDocument 401 /?e=401
+ErrorDocument 403 /?e=403
+ErrorDocument 404 /?e=404
+ErrorDocument 405 /?e=405
+ErrorDocument 408 /?e=408
+ErrorDocument 414 /?e=414
+ErrorDocument 500 /?e=500
+ErrorDocument 502 /?e=502
+ErrorDocument 504 /?e=504
+ErrorDocument 508 /?e=508
 
 Redirect 301 /textbooks-data.php /

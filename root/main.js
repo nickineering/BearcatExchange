@@ -12,24 +12,28 @@ var pageViews = 0;
 var useAnalytics = true;//Google Analytics stuff
 var consentedToNewsletter = false;
 var userData;
+var $rows;
 var errorCode = 0;
 var developmentServer = false;
+var buyScroll = 0;
 var shouldAutoselect = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) > 1200 || !$( "#open-html" ).hasClass( "touch" );
 
-function startJavascript (localErrorCode, data, devServer){
+function startJavascript (localErrorCode, data, devServer, pageToLoad){
+    window.scrollTo(0,0);
+    $rows = $('#textbooks tbody tr:not(.soldUserItem)');
     developmentServer = devServer;
     userData = data;
     errorCode = localErrorCode;
     if(errorCode >= 500){
-        $('.form-noscript-warning').css('display', 'block');
+        $('.form-noscript-warning').removeClass("hidden");
     }
     if(userData.name) {
         $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
         $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
         $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
     }
-    if (userData.justLoggedIn) {
-        window.location.hash = "account";
+    if (pageToLoad != '.') {
+        window.location.hash = pageToLoad;
     }
     //Start Google Analytics code
     try { //Turn off analytics if 'analytics=off' is included as a request parameter.
@@ -58,7 +62,10 @@ function startJavascript (localErrorCode, data, devServer){
         ga('send', 'pageview');
     }
     //End Google Analytics code
-    areThereTextbooks();
+    if(!$rows.exists()) {
+        $("#search-message").removeClass("hidden");
+        $("#textbooks thead th").css("border-bottom-width", "0");
+    }
     var infoBox = $('#info-box').html();
     Handlebars.parse(infoBox);   // optional, speeds up future uses
     var handlebarsInfoBoxCompilation = Handlebars.compile(infoBox);
@@ -74,24 +81,25 @@ function startJavascript (localErrorCode, data, devServer){
                 if(selectedRows.length < Math.max(Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 320 -1, 1)){
                     selectedRows.push(id);
                     $(this).parent().addClass('selected');
-                    var rowData = {id: id, title: $("[item=" + id + "] .title").html(), author: $("[item=" + id + "] .author").html(), course: $("[item=" + id + "] .course").html(), price: $("[item=" + id + "] .price .val").html(), time: $("[item=" + id + "] .time").html(), comments: $("[item=" + id + "] .comments").html()};
+                    var rowData = {
+                        id: id,
+                        title: $("[item=" + id + "] .title").html(),
+                        author: $("[item=" + id + "] .author").html(),
+                        course: $("[item=" + id + "] .course").html(),
+                        price: $("[item=" + id + "] .price .val").html(),
+                        time: $("[item=" + id + "] .time").html(),
+                        comments: $("[item=" + id + "] .comments").html()
+                    };
                     if(rowData.title.length > 28){
                         rowData.boxTitle = rowData.title.slice(0,25) + '...';//replace with regex
                     }
                     else {
                         rowData.boxTitle = rowData.title;
                     }
-                    var parentTable = '';
-                    $( this ).parents().map(function() {
-                        if ($(this).attr("id") == "textbooks"){
-                            parentTable = "textbooks";
-                        }
-                        else if ($(this).attr("id") == "owned-items"){
-                            parentTable = "owned-items";
-                        }
-                    });
-                    if(parentTable == "owned-items") {
-                        var checked = $(this).parent().find(".status input").prop('checked');
+                    var infoBoxEdit = false;
+                    if($("[item=" + id + "]").hasClass("userItem")){
+                        infoBoxEdit = true;
+                        var checked = $("#owned-items [item=" + id + "] .status input").prop('checked');
                         rowData.checkedForSold = (checked)?"checked":"";
                         var renderedInfoBox = handlebarsInfoBoxEditCompilation(rowData);
                     }
@@ -102,11 +110,11 @@ function startJavascript (localErrorCode, data, devServer){
                     var infoBoxInstance = $('#info-box-' + id);
                     var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
                     infoBoxInstance.css('right', rightPosition);
-                    if(parentTable != "owned-items"){
+                    if(!infoBoxEdit){
                         $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
                         $('#info-box-' + id + ' input[cookie="name"]').val($.cookie('prefs').name);
                     }
-                    $('#content').css('margin-bottom', '420px');
+                    $('#content').addClass("infoBoxOpen");
                     $('#info-box-' + id + '-name').focus();
                 }
             }
@@ -117,18 +125,22 @@ function startJavascript (localErrorCode, data, devServer){
     });
     $(".status input").change(function() {
         var $checkbox = $(this);
+        var itemId = $checkbox.parent().parent().attr("item");
         var status = '';
         if ($checkbox.prop('checked')) {
             status = "sold";
             $checkbox.parent().parent().addClass("sold");
+            $('[item='+itemId+'].userItem').addClass("soldUserItem");
         } else {
             status = "unsold";
             $checkbox.parent().parent().removeClass("sold");
+            $('[item='+itemId+'].userItem').removeClass("soldUserItem");
         }
+        colorizeTextbooks();
         var soldInputs = {//get the values submit
             itemId : {
                 category : 'novalidate',
-                fieldValue : $(this).parent().parent().attr("item")
+                fieldValue : itemId
             },
             status : {
                 category : 'novalidate',
@@ -165,38 +177,35 @@ function startJavascript (localErrorCode, data, devServer){
     $("button:reset").click(function() {
         this.form.reset();
         $('#' + $(this).closest("form").attr('id') + ' .form-error label').html('');
-        $('#' + $(this).closest("form").attr('id') + ' .form-message-wrapper').css('display', 'none');
+        $('#' + $(this).closest("form").attr('id') + ' .form-message-wrapper').addClass('hidden');
         $('#' + $(this).closest("form").attr('id') + ' input[cookie]').trigger('change');
         return false;
     });
-    var $rows = $('#textbooks tbody tr');
     $("#search-bar").keyup(function(event) {
         if(event.keyCode == 13 && !shouldAutoselect){
             document.getElementById("search-bar").blur();
         }
-        if($('#search-bar').val() == '') {
-            $('#clear').css('display', 'none');
-        }
-        else {
-            $('#clear').css('display', 'inline');
-        }
-        $("#search-message").css("display", "none");
-        $("#textbooks thead th").css("border-bottom-width", "1px");
         var $searchVal = $(this).val();
         if($searchVal != ''){
             window.location.hash ='#';
+            $('#clear').removeClass('hidden');
             var val = $.trim($searchVal).replace(/ +/g, ' ').toLowerCase();
-            $rows.show().filter(function() {
+            $rows.removeClass("hiddenRow").filter(function() {
                 var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
                 return !~text.indexOf(val);
-            }).hide();
-            if(!areThereTextbooks()){
-                $("#search-message").html('No one listed that textbook yet. <a href="#sell" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
+            }).addClass("hiddenRow");
+            $visibleRows = $('#textbooks tbody tr:not(.hiddenRow):not(.soldUserItem)');
+            if(!$visibleRows.exists()){
+                searchMessage('No one listed that textbook yet. <a href="#sell" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
+            }
+            else {
+                searchMessage(false);
             }
         }
         else {
             clearSearchBar();
         }
+        colorizeTextbooks();
     });
     $(document).on( "change", "input[cookie]", function() {
         if($( this ).val().length <= 6 && $( this ).val().length != 0) {
@@ -211,21 +220,30 @@ function startJavascript (localErrorCode, data, devServer){
     }
 }
 
+function searchMessage (message) {
+    if (message == false) {
+        $("#textbooks thead th").css("border-bottom-width", "1px");
+        $("#search-message").addClass('hidden');
+    }
+    else {
+        $("#search-message").html(message);
+        $("#search-message").removeClass("hidden");
+        $("#textbooks thead th").css("border-bottom-width", "0");
+    }
+}
+
+function colorizeTextbooks () {
+    $("#textbooks tr").removeClass("even odd");
+    $("#textbooks tr:not(.hiddenRow):not(.soldUserItem)").filter(':even').addClass("even");
+    $("#textbooks tr:not(.hiddenRow):not(.soldUserItem)").filter(':odd').addClass("odd");
+}
+
 function getUrlVars() {
     var vars = {};
     var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
         vars[key] = value;
     });
     return vars;
-}
-
-function areThereTextbooks() {
-    if(!$("#textbooks tbody tr").exists()) {
-        $("#search-message").css("display", "block");
-        $("#textbooks thead th").css("border-bottom-width", "0");
-        return false;
-    }
-    return true;
 }
 
 function loggedIn () {
@@ -245,7 +263,7 @@ function closeInfoBox (id) {
     }
     $("[item=" + id + "]").removeClass('selected');
     if(selectedRows.length == 0) {
-        $('#content').css('margin-bottom', '20px');
+        $('#content').removeClass("infoBoxOpen");
     }
 }
 
@@ -256,7 +274,6 @@ function minimizeInfoBox (id) {
     localInfoBoxMinimize.removeAttr('onclick');
     localInfoBoxMinimize.attr('onclick', 'expandInfoBox('+id+');');
     localInfoBoxMinimize.attr('title', 'Expand');
-//    localInfoBoxMinimize.html('&#9744;');
     $('#info-box-' + id + ' .info-box-minimize').css('margin-top', '-4px');
 }
 
@@ -267,7 +284,6 @@ function expandInfoBox (id) {
     localInfoBoxMinimize.removeAttr('onclick');
     localInfoBoxMinimize.attr('onclick', 'minimizeInfoBox('+id+');');
     localInfoBoxMinimize.attr('title', 'Minimize');
-//    localInfoBoxMinimize.html('–');
     $('#info-box-' + id + ' .info-box-minimize').css('margin-top', '6px');
 }
 
@@ -308,28 +324,35 @@ function dateTimeToObject (dateTime) {
 }
 
 function pageChangeHandler (){
+    if($('#textbooks').is(":visible")){
+        buyScroll = window.pageYOffset;
+    }
     currentPage = window.location.hash.replace(/\#/, '');
     if($('#server-messages').length && pageViews > 0 && errorCode < 500){
         $('#server-messages').remove();
-        $('#houston').css('display', 'none');
-        $('#welcome-text').css('display', 'inline');
+        $('#houston').addClass('hidden');
+        $('#welcome-text').removeClass('hidden');
     }
     disappear();
     if (currentPage == '') {
         currentPage = 'buy';
-        $('#buy-page-text').css('display', 'inline');
+        $('#buy-page-text').removeClass("hidden");
         history.replaceState("", "", "/");
         loadNonAjax("buy");
-    }
-    else if(currentPage == 'legal'){
-        loadAjax('legal');
-    }
-    else if (currentPage == 'feedback'){
-        $('#' + currentPage + 'Link').addClass('navBarCurrent');
-        loadAjax('feedback');
+        window.scrollTo(0, buyScroll);
     }
     else {
-        loadNonAjax(currentPage);
+        if(currentPage == 'legal'){
+            loadAjax('legal');
+        }
+        else if (currentPage == 'feedback'){
+            $('#' + currentPage + 'Link').addClass('navBarCurrent');
+            loadAjax('feedback');
+        }
+        else {
+            loadNonAjax(currentPage);
+        }
+        window.scrollTo(0, 0);
     }
     if(currentPage == 'sell') {
         closeAlertBox();
@@ -338,7 +361,6 @@ function pageChangeHandler (){
     if(shouldAutoselect){
         if (currentPage == 'sell'){
             $('#name').focus();
-            window.scroll(0,0);
         }
         else if (currentPage == 'account' && !userData['loggedIn']){
             $('#login-email').focus();
@@ -354,45 +376,52 @@ function loadAjax(name) {
     $.ajax({
         url: name + '.html',
         success: function(result) {
-            $('#extra-page').css('display', 'inline');
+            $('#extra-page').removeClass("hidden");
             $("#extra-page").html(result);
         }
     });
 }
 
 function loadNonAjax(name) {
-    $('#' + name + '-text').css('display', 'inline');
+    $('#' + name + '-text').removeClass("hidden");
     $('#' + name + 'Link').addClass('navBarCurrent');
 }
 
 function disappear() {
-    $('#buy-page-text').css('display', 'none');
-    $("#pages > div").css('display', 'none');
+    $('#buy-page-text').addClass("hidden");
+    $("#pages > div").addClass("hidden");
     $('.navBarCurrent').removeClass('navBarCurrent');
 }
 
 function sellItYourself() {
     var searchTerm = $('#search-bar').val();
     clearSearchBar();
-    loadNonAjax('sell');
+    window.location.hash = "sell";
     $('#title').val(searchTerm);
 }
 
 function clearSearchBar () {
     $('#search-bar').val('');
-    $('#clear').css('display', 'none');
-    $("#search-message").css("display", "none");
-    $("#textbooks thead th").css("border-bottom-width", "1px");
+    $('#clear').addClass("hidden");
+    if($rows.exists()){
+        searchMessage(false);
+    }
+    else {
+        searchMessage("There are currently no textbooks to display. Please come back later. ");
+    }
     $('#search-bar').focus();
-    $('#textbooks tbody tr').show();
+    $rows.removeClass("hiddenRow");
+    colorizeTextbooks();
 }
 
 function miscMessage(message, priority) {
     document.getElementById("alert-box-area").innerHTML = '<div class="alert-message '+priority+'"> <div class="box-icon"></div> <p>'+message+'</p><span onclick="closeAlertBox();" class="close">&times;</span></div>';
+    $('#content').addClass("alertBoxOpen");
 }
 
 function closeAlertBox(){
     document.getElementById("alert-box-area").innerHTML = '';
+    $('#content').removeClass("alertBoxOpen");
 }
 
 function submitSellForm(){
@@ -447,7 +476,7 @@ function submitSellForm(){
         },
         didCheck : {
             category : 'novalidate',
-            fieldValue : document.getElementById("didcheck").value
+            fieldValue : $('#didcheck').val()
         }
     };
     if(validateInputs(inputs, 'sell-form', receivedSellFormResponse, sellFormMiscMessage) == false) {
@@ -651,7 +680,7 @@ function validateInputs(inputs, formName, responseFunction, miscMessageFunction)
                     errors.push({inputName : input, message : "Required"});
                 }
                 else if(!fieldValue.match(/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i)){
-                    errors.push({inputName : input, message : "Please format the course like the examples."});
+                    errors.push({inputName : input, message : "Please format the course like the example."});
                 }
                 else {
                     var subjectCode = fieldValue.match(/^[A-Z]{2,4}/i);
@@ -697,7 +726,7 @@ function badContactInfoCookie(fieldName){
 }
 
 function sellFormMiscMessage(message) {
-    $('#sell-form-message-wrapper').css('display', 'inline-block');
+    $('#sell-form-message-wrapper').removeClass("hidden");
     $('#sell-form-message-wrapper').html(message);
 }
 
@@ -729,7 +758,7 @@ function receivedSellFormResponse(data) {
 }
 
 function loginFormMiscMessage(message) {
-    $('#login-form-message-wrapper').css('display', 'inline-block');
+    $('#login-form-message-wrapper').removeClass("hidden");
     $('#login-form-message-wrapper').html(message);
 }
 
@@ -764,7 +793,7 @@ function receivedSoldFormResponse (data) {
         miscMessage("There was a problem updating the status of your item. Refresh the page and try again.", "error");
     }
     else {
-        miscMessage("<i>" + data.item.title + "</i> was successfully marked as " + data.item.status + ".", "success");
+        miscMessage("<i>" + data.item.title + "</i> was marked as " + data.item.status + ".", "success");
     }
 }
 
@@ -777,14 +806,15 @@ function receivedUpdateFormResponse(data) {
         $('[item='+data.item.id+'] .price .val').html(data.item.price);
         $('[item='+data.item.id+'] .comments').html(data.item.comments);
         if(data.item.status == 'sold'){
-            $('[item='+data.item.id+']').addClass("sold");
+            $('#owned-items [item='+data.item.id+']').addClass("sold");
+            $('#textbooks [item='+data.item.id+']').addClass("soldUserItem");
             $('[item='+data.item.id+'] .status input').attr("checked", "checked");
         }
         else {
-            $('[item='+data.item.id+']').removeClass("sold");
+            $('[item='+data.item.id+']').removeClass("sold soldUserItem");
             $('[item='+data.item.id+'] .status input').removeAttr("checked");
         }
-        miscMessage("Your changes were saved successfully.", 'success');
+        miscMessage("Your changes were saved.", 'success');
     }
     else{
         infoBoxMiscMessage(data.misc);
@@ -792,7 +822,7 @@ function receivedUpdateFormResponse(data) {
 }
 
 function infoBoxMiscMessage(message) {
-    $('#info-box-'+submittingInfoBoxId+'-message-wrapper').css('display', 'inline-block');
+    $('#info-box-'+submittingInfoBoxId+'-message-wrapper').removeClass("hidden");
     $('#info-box-'+submittingInfoBoxId+'-message-wrapper').html(message);
 }
 
@@ -830,10 +860,10 @@ window.onscroll = scroll;
 
 function scroll () {
     if(window.pageYOffset > 44){
-        $('#top-bar-background').css('border-bottom', '2px solid rgb(211, 211, 211)');
+        $('#top-bar-background').addClass('bottomGrayBorder');
     }
     else {
-        $('#top-bar-background').css('border-bottom', 'none');
+        $('#top-bar-background').removeClass('bottomGrayBorder');
     }
 }
 
