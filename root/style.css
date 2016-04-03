@@ -1,5 +1,5 @@
-.hidden, #clear, .commentsHeader {
-    display: none
+.hidden, .commentsHeader {
+    display: none !important;
 }
 /*
 .faq {
@@ -63,12 +63,15 @@ label,
 input[type="submit"] {
     cursor: pointer;
 }
+.bottomGrayBorder {
+    border-bottom: 2px solid lightgray;
+}
 .items {
     text-align: center;
     border-bottom: 2px solid lightgray;
 }
 .comments {
-    display:none;
+    display: none;
 }
 .course, .price, .time {
     white-space: nowrap;
@@ -93,7 +96,7 @@ input[type="submit"] {
 .odd {
     background-color: #f9f9f9;
 }
-.items tbody {
+.items tbody td:not(.status) {
     cursor: pointer;
 }
 .items tbody tr:hover {
@@ -103,10 +106,16 @@ input[type="submit"] {
     font-style: italic;
     background-color: #dddddd !important;
 }
+.soldUserItem, .hiddenRow {
+    display: none;
+}
 #search-message {
-    display:none;
+    display:block;
     padding:12px;
     border-bottom: 2px solid lightgray;
+}
+#welcome-text {
+    display: none;
 }
 #welcome-text p {
     margin-top: 5px;
@@ -129,7 +138,10 @@ input[type="submit"] {
 }
 #noscript-warning {
     padding-right: 20px;
-    text-align: left
+    text-align: left;
+}
+.form-noscript-warning {
+    display: block;
 }
 label {
     font-weight: 600;
@@ -190,21 +202,19 @@ textarea:focus {
     border: 1px solid #007a5e;
     box-shadow: 0 0 7px rgba(0, 122, 94, 1);
 }
-/*
-input[type="checkbox"] {
+form input[type="checkbox"] {
     display: none;
 }
-input[type="checkbox"] + div {
+form input[type="checkbox"] + div {
     background-position: left 2px center;
     background-size: 18px 18px;
     background-repeat: no-repeat;
     padding-left: 25px;
     background-image: url(images/unchecked.png) !important;
 }
-input[type="checkbox"]:checked + div {
+form input[type="checkbox"]:checked + div {
     background-image: url(images/checked.png) !important;
 }
-*/
 input[type="submit"],
 #sell-reset {
     border: none;
@@ -238,7 +248,7 @@ input[type="submit"] {
     font-size: 13px;
 }
 .form-message-wrapper {
-    display: none;
+    display: inline-block;
     margin-top: 6px;
     margin-right: auto;
     margin-left: auto;
@@ -265,6 +275,9 @@ input[type="submit"] {
 }
 .form-message-wrapper {
     border-radius: 6px;
+}
+.info-box .form-message-wrapper {
+    border-radius: 0;
 }
 .newsletter-form {
     color: #007a5e;
@@ -399,6 +412,9 @@ nav a,
     display: inline-block;
     width: 100px;
 }
+.info-box-edit .info-box-contact{
+    margin-top:0;
+}
 .alert-message {
     position: fixed;
     bottom: 10px;
@@ -477,6 +493,15 @@ nav a,
 div.alert-box span.close:focus {
     opacity: 1.0;
 }
+#content {
+    margin-bottom: 25px;
+}
+.infoBoxOpen {
+    margin-bottom: 420px !important;
+}
+.alertBoxOpen {
+    margin-bottom: 80px !important;
+}
 /*Desktop Only*/
 
 @media screen and (min-width: 961px) {
@@ -512,7 +537,6 @@ div.alert-box span.close:focus {
     #content {
         float: right;
         margin-top: 80px;
-        margin-bottom: 40px;
         width: calc(100% - 263px);
     }
     nav a {
@@ -630,16 +654,10 @@ div.alert-box span.close:focus {
 @media screen and (min-width: 616px) {
     /*removes second line under thead from firefox*/
 
-    table.dataTable.no-footer {
-        border-bottom: none;
-    }
     hr {
         border-right: none;
         border-bottom: none;
         border-left: none;
-    }
-    #pages > div {
-        display: none;
     }
     a img,
     #logo {
@@ -662,9 +680,6 @@ div.alert-box span.close:focus {
     }
     footer a {
         border-bottom: none;
-    }
-    .dataTables_wrapper {
-        border-bottom: 2px solid rgb(211, 211, 211);
     }
     #clear img {
         position: fixed;
@@ -779,9 +794,9 @@ div.alert-box span.close:focus {
         .info-box-body {
             overflow-y: auto;
             padding: 10px;
-            padding-top: 35px;
+            padding-top: 40px;
             width: 300px;
-            height: 360px;
+            height: 350px;
         }
         .info-box-heading {
             position: inherit;

@@ -5,6 +5,7 @@ require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
 $serverError = false;
 $developmentServer = false;
+$pageToLoad = '.';
 $errorCode = (isset($_GET['e'])) ? $_GET["e"] : 0;
 $errorCodes = array(
     400 => array("Error 400 Bad Request", $programingErrorMessage),
@@ -186,7 +187,7 @@ function getItemData () {
             $return['course'] = preg_replace('/(?=[0-9]{3})/', ' ', $return['course']);
         }
         else {
-            $errors['misc'] = 'Format the course like the examples. ';
+            $errors['misc'] = 'Format the course like the example. ';
         }
     }
     else {
@@ -244,7 +245,7 @@ function contactSeller() {
     $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
     $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
     if(!$mail->send()) {
-        printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.", "error");
+        printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
         //echo 'Mailer Error: ' . $mail->ErrorInfo;
     }
     else {
@@ -276,7 +277,7 @@ function login () {
         $mail->Subject = 'Edit your textbook listings';
         $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
         if(!$mail->send()) {
-            printMessage("Sorry, we had an internal error. Please try again. Email us at support@bearcatexchange.com if this message appears again.", "error");
+            printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
         }
         else {
             $result["misc"] = 'success';
@@ -294,7 +295,7 @@ function updateItem () {
     if($theUser['loggedIn']) {
         $itemId = intval($_POST['itemId']);
         $insert = "SELECT `user_id` FROM `textbooks` WHERE `id` = ".$itemId;
-        if (intval(mysqli_query($con, $insert)) == $theUser['id']){
+        if (intval(mysqli_fetch_array(mysqli_query($con, $insert))['user_id']) == $theUser['id']){
             $item = getItemData();
             if($_POST['status'] == "sold") {
                 $item['status'] = "sold";
@@ -312,8 +313,8 @@ function updateItem () {
                 if(isset($_POST[$key]) && $item[$key] != $beginningState[$key]){
                     $textbooksUpdate .= (($previousInTextbooks)?",":"")." `$key` = '".$item[$key]."'";
                     $previousInTextbooks = true;
-                    $updates .= ", `$key`";
-                    $updatesValues .= ", '".$item[$key]."'";
+                    $updates .= ", `$key`, `previous_$key`";
+                    $updatesValues .= ", '".$item[$key]."', '".$beginningState[$key]."'";
                 }
             }
             $textbooksUpdate .= " WHERE `id` = ".$itemId;
@@ -349,8 +350,11 @@ function verifyLink() {
 }
 
 function onValidate($localCon, $user, $textbookId, $textbookTitle) {
+    global $pageToLoad;
     mysqli_query($localCon, 'UPDATE textbooks SET status = "sold" WHERE `user_id` = '.$user.' AND `id` = '.$textbookId);
-    printMessage('Your textbook <i>'.$textbookTitle.'</i> was marked as sold. Congratulations!', "success");
+    createSession($user);
+    printMessage('<i>'.$textbookTitle.'</i> was marked as sold.', "success");
+    $pageToLoad = "account";
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter) {
@@ -537,11 +541,7 @@ function checkHash($localCon, $complete, $user, $hash) {
         $hashArray = mysqli_fetch_array($hashArray);
         $textbookId = intval($hashArray['textbook']);
         if ($textbookId == -1) {
-            if ($theUser['loggedIn'] == true){
-                logout(3);
-            }
-            printMessage("You are now logged in");
-            createSession($hashArray['user']);
+            createSession($hashArray['user'], true);
         }
         else {
             $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
@@ -575,16 +575,22 @@ function printMessage($status, $priority = "info") {
     $_SESSION['priority'] = $priority;
 }
 
-function createSession ($userId){
+function createSession ($userId, $print){
     global $con;
     global $theUser;
     global $startTimestamp;
     $theUser = findUser($con, $userId);
+    if ($theUser['loggedIn'] == true){
+        logout(3);
+    }
     $theUser['justLoggedIn'] = true;
     $theUser['loggedIn'] = true;
     $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
     setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
     mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
+    if($print == true) {
+        printMessage("You are now logged in");
+    }
 }
 
 function generateErrorText($localErrorCode, $makeDiv) {
@@ -630,7 +636,6 @@ function timeSince ($sinceDate) {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en" id='open-html'>
     <head>
@@ -651,7 +656,7 @@ function timeSince ($sinceDate) {
                 echo "miscMessage(".'"'. $_SESSION['status'].'"'. ", ".'"'.$_SESSION['priority'].'"'.");";
                 unset($_SESSION['status']);
             }
-            echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).");";
+                  echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).", ".json_encode($pageToLoad).");";
         ?>'>
         <script src="send-form.js" defer></script>
         <script src="scripts/modernizr.min.js" defer></script>
@@ -709,7 +714,7 @@ function timeSince ($sinceDate) {
             </script>
             <!--End Popup Information Window-->
             <!--Login Button-->
-            <span id="clear" onclick='clearSearchBar();' ><img src="images/clear.svg"></span>
+            <span id="clear" onclick='clearSearchBar();' class='hidden'><img src="images/clear.svg"></span>
             <a class="top-right-button" id='facebook-link' href="https://facebook.com/bearcatexchange" target='_blank'><p>f</p></a>
             <a class="top-right-button" id='google-plus-link' href="https://plus.google.com/104887107850990243147" rel="publisher" target='_blank'><p>g+</p></a>
             <a class="top-right-button" id='toggleLogout' onclick="toggleLogout();" target='_blank'><p><?php echo ($theUser['loggedIn'] == true)?'Logout':'Login'; ?></p></a>
@@ -717,7 +722,7 @@ function timeSince ($sinceDate) {
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
             <div id="content" class="content">
                 <div id='buy-page-text'>
-                    <div id='welcome-text' style='display : none'>
+                    <div id='welcome-text'>
                         <h1>Savings Ahoy!</h1>
                         <h2>Welcome to the new best place to buy and sell textbooks at Binghamton.</h2>
                         <p>It's completely free, made by and for Binghamton students. You can buy and sell textbooks online with people in Binghamton, not Seattle, without giving the bookstore a cut. Click a textbook and start saving now.</p>
@@ -743,7 +748,7 @@ function timeSince ($sinceDate) {
                     </script>
                 </div>
                 <div id="pages">
-                    <div id='buy-text'>
+                    <div id='buy-text' class="hidden">
                         <table id="textbooks" class="items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
@@ -757,14 +762,20 @@ function timeSince ($sinceDate) {
                             </thead>
                             <tbody>
                                 <?php
-                                $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments` FROM `textbooks` WHERE status = 'unsold' ORDER BY `id` DESC");
+                                $result = mysqli_query($con, "SELECT `id`, `user_id`, `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`, `status` FROM `textbooks` WHERE `status` = 'unsold'".(($theUser['loggedIn'] == true)?' OR `user_id` = ' . $theUser['id']:'')." ORDER BY `id` DESC");
                                 if (mysqli_num_rows($result) > 0) {
                                     $numOfRows = mysqli_num_rows($result);
                                     $even = false;
                                     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                 ?>
-
-                                <tr item="<?php echo $row['id']; ?>" class="<?php echo ($even)?'even':'odd'; ?>">
+                                <tr item="<?php echo $row['id'] .'" class="'. (($even)?'even':'odd');
+                                    if($row['status'] != 'unsold') {
+                                        echo ' soldUserItem';
+                                    }
+                                    if($row['user_id'] == $theUser['id']) {
+                                            echo ' userItem';
+                                    }
+                                    ?>">
                                     <td class="title"><?php echo $row['title']; ?></td>
                                     <td class="author"><?php echo $row["author"]; ?></td>
                                     <td class="course"><?php echo $row["course"]; ?></td>
@@ -773,20 +784,22 @@ function timeSince ($sinceDate) {
                                     <td class="comments"><?php echo $row["comments"]; ?></td>
                                 </tr>
                             <?php
-                                        $even = !$even;
+                                        if($row['status'] == 'unsold') {
+                                            $even = !$even;
+                                        }
                                     }
                                 }
                                 ?></tbody>
                         </table>
-                        <div class="odd" id="search-message">There are currently no textbooks to display. Please come back later.</div>
+                        <div class="odd hidden" id="search-message">There are currently no textbooks to display. Please come back later.</div>
                     </div>
-                    <div id='extra-page'></div>
-                    <div id='sell-text'><?php include 'sell-text.html'; ?></div>
-                    <div id='account-text'>
+                    <div id='extra-page' class="hidden"></div>
+                    <div id='sell-text' class="hidden"><?php include 'sell-text.html'; ?></div>
+                    <div id='account-text' class="hidden">
                         <?php if(!$theUser['loggedIn']) { ?>
                         <form id="login-form" class="page-form" name="login" method="POST" action="index.php" onsubmit="return submitLoginForm()">
                             <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
-                            <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+                            <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('login-noscript-warning').style.display = 'none';
                             </script>
@@ -797,16 +810,16 @@ function timeSince ($sinceDate) {
                                     <input type="email" name="email" id='login-email' maxlength="254" cookie='email'>
                                     <br><br>
                                 </div>
-                                <div id="login-form-message" class="page-form-message"><div id="login-form-message-wrapper" class='form-message-wrapper'></div></div>
+                                <div id="login-form-message" class="page-form-message"><div id="login-form-message-wrapper" class='form-message-wrapper hidden'></div></div>
                                 <br>
                                 <input type="hidden" name="request" id="requestId" value="login"/>
                                 <input id='login-submit' type="submit" value="VERIFY">
                             </div>
                         </form>
                         <?php } else { ?>
-                        <form id="account-form" name="account" method="POST" action="index.php" onsubmit="return submitAccountForm()">
+                        <div id="account-form">
                             <h1>Edit Your Listings</h1><h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
-                            <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning' style='display:block;'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+                            <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
                             </script>
@@ -844,12 +857,10 @@ function timeSince ($sinceDate) {
                                     ?>
                                 </tbody>
                             </table>
-                            <br>
-                            <input type="hidden" name="request" id="requestId" value="account"/>
-                        </form>
+                        </div>
                         <?php } ?>
                     </div>
-                    <div id='faq-text'><?php include 'faq-text.html'; ?></div>
+                    <div id='faq-text' class="hidden"><?php include 'faq-text.html'; ?></div>
                 </div>
             </div>
             <!--End page content area-->
