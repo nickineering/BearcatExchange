@@ -156,13 +156,13 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         }
     });
     $(function() {
-        $(".course").autocomplete({
+        $(".courseEdit").autocomplete({
             source: subjectCodes
         });
     });
     $('.name-container input').val($.cookie('prefs').name);
     $('.email-container input').val($.cookie('prefs').email);
-    //    $('#course').keydown(function(event) {
+    //    $('#courseEdit').keydown(function(event) {
     //        var field = $(this);
     //        var newValue = field.val() + String.fromCharCode(event.keyCode);
     //        newValue = newValue.replace(/[^A-Z0-9]+/ig, '');
