@@ -265,8 +265,6 @@ input[type="submit"] {
     border: 2px solid gray;
     border-radius: 10px;
     background-color: #f9f9f9;
-    padding-left: 20px;
-    padding-right: 20px;
     color: #007a5e;
 }
 .page-form-message {
@@ -496,12 +494,6 @@ div.alert-box span.close:focus {
 #content {
     margin-bottom: 25px;
 }
-.infoBoxOpen {
-    margin-bottom: 420px !important;
-}
-.alertBoxOpen {
-    margin-bottom: 80px !important;
-}
 /*Desktop Only*/
 
 @media screen and (min-width: 961px) {
@@ -529,7 +521,6 @@ div.alert-box span.close:focus {
     footer {
         position: fixed;
         left: 5px;
-        ;
         bottom: 0;
         display: inline-block;
         width: 250px;
@@ -648,6 +639,19 @@ div.alert-box span.close:focus {
         left: 272px;
         width: calc(100% - 307px);
     }
+    .infoBoxOpen {
+        margin-bottom: 420px !important;
+    }
+    .alertBoxOpen {
+        margin-bottom: 80px !important;
+    }
+    .name-container, .email-container, .title-container, .author-container, .price-container, .course-container, .comments-container {
+        margin-bottom: 14px;
+    }
+    .page-form {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
 }
 /*Desktop and Tablet*/
 
@@ -735,7 +739,7 @@ div.alert-box span.close:focus {
     .right-form textarea {
         width: 100%;
     }
-    #course .course {
+    #course .courseEdit {
         display: inline-block;
         margin-top: 0;
         margin-right: 1%;
@@ -770,7 +774,7 @@ div.alert-box span.close:focus {
         padding: 40px;
     }
     @media screen and (max-height: 700px) {
-        ..page-form {
+        .page-form {
             height: 570px;
         }
     }
@@ -855,10 +859,6 @@ div.alert-box span.close:focus {
         width: 100%;
         height: 155px;
     }
-    #content {
-        margin-top: 165px;
-        padding-bottom: 20px;
-    }
     #nav {
         position: fixed;
         top: 100px;
@@ -876,10 +876,16 @@ div.alert-box span.close:focus {
         right: 20px;
         left: calc(100% - 55px);
     }
+    #content {
+        margin-top: 125px;
+    }
 }
 /*Tablet and Phone*/
 
 @media screen and (max-width: 960px) {
+    .mobile-hidden {
+        display: none;
+    }
     #nav {
         width: 100%;
         text-align: center;
@@ -934,23 +940,21 @@ div.alert-box span.close:focus {
         position: relative;
         left: calc(100% - 160px);
     }
+    .time, .timePostedHeader {
+        display: none;
+    }
 }
 /*Phone Only*/
 
 @media screen and (max-width: 615px) {
-    footer {
-        padding-top: 20px;
-    }
     #content {
-        margin-top: 65px;
+        margin-top: 30px;
     }
     #logo {
         margin-right: calc(50% - 125px);
         margin-left: calc(50% - 125px);
     }
-    .mobile-hidden {
-        display: none;
-    }
+/*    This below needs to go. Just not sure how.*/
     #clear img {
         display: none;
     }
@@ -1057,6 +1061,12 @@ div.alert-box span.close:focus {
     }
     .info-box-data {
         width: 100%;
+    }
+    .course,
+    .courseHeader,
+    .author,
+    .authorHeader {
+        display: none;
     }
 }
 /* Tablet with Small Height and Phone */
