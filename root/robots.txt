@@ -1,5 +1,7 @@
 User-agent: *
 disallow: *
 allow: /$
+allow: /index
+allow: /index.php
 allow: /images/
 allow: /favicon.ico
