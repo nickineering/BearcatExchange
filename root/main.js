@@ -210,7 +210,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
     }
 }
 
-function printPrefs (){
+function printPrefs () {
     if($.cookie("prefs")){
         for (pref in $.cookie('prefs')) {
             $('[cookie='+pref).val($.cookie('prefs')[pref]);
