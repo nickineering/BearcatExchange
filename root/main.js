@@ -32,6 +32,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
         $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
     }
+    printPrefs();
     if (pageToLoad != '.') {
         window.location.hash = pageToLoad;
     }
@@ -110,10 +111,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
                     var infoBoxInstance = $('#info-box-' + id);
                     var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
                     infoBoxInstance.css('right', rightPosition);
-                    if(!infoBoxEdit){
-                        $('#info-box-' + id + ' input[cookie="email"]').val($.cookie('prefs').email);
-                        $('#info-box-' + id + ' input[cookie="name"]').val($.cookie('prefs').name);
-                    }
+                    printPrefs();
                     $('#content').addClass("infoBoxOpen");
                     $('#info-box-' + id + '-name').focus();
                 }
@@ -160,8 +158,6 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
             source: subjectCodes
         });
     });
-    $('.name-container input').val($.cookie('prefs').name);
-    $('.email-container input').val($.cookie('prefs').email);
     //    $('#courseEdit').keydown(function(event) {
     //        var field = $(this);
     //        var newValue = field.val() + String.fromCharCode(event.keyCode);
@@ -207,17 +203,27 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         }
         colorizeTextbooks();
     });
-    $(document).on( "change", "input[cookie]", function() {
-        if($( this ).val().length <= 6 && $( this ).val().length != 0) {
-            return;
-        }
-        $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
-        $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
-    });
+    $(document).on( "change", "input[cookie]", storePrefs);
     pageChangeHandler();
     if(currentPage != 'sell' && !$(".alert-message").length){
         miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
+}
+
+function printPrefs (){
+    if($.cookie("prefs")){
+        for (pref in $.cookie('prefs')) {
+            $('[cookie='+pref).val($.cookie('prefs')[pref]);
+        }
+    }
+}
+
+function storePrefs () {
+    if($( this ).val().length <= 6 && $( this ).val().length != 0) {
+        return;
+    }
+    $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
+    $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
 }
 
 function searchMessage (message) {
