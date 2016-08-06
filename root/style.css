@@ -497,6 +497,9 @@ div.alert-box span.close:focus {
 /*Desktop Only*/
 
 @media screen and (min-width: 961px) {
+    .desktop-hidden {
+        display:none;
+    }
     nav {
         position: fixed;
         top: 90px;
@@ -719,7 +722,7 @@ div.alert-box span.close:focus {
         display: inline;
         margin-top: 20px;
         margin-bottom: 0;
-        width: 47%;
+        width: 48%;
     }
     .left-form,
     .newsletter-form {
@@ -877,7 +880,11 @@ div.alert-box span.close:focus {
         left: calc(100% - 55px);
     }
     #content {
-        margin-top: 125px;
+        margin-top: 166px;
+    }
+    .sell-form-input {
+        padding-right:15px;
+        padding-left:15px;
     }
 }
 /*Tablet and Phone*/
@@ -943,12 +950,15 @@ div.alert-box span.close:focus {
     .time, .timePostedHeader {
         display: none;
     }
+    .top-right-button {
+        display:none;
+    }
 }
 /*Phone Only*/
 
 @media screen and (max-width: 615px) {
     #content {
-        margin-top: 30px;
+        margin-top: 76px;
     }
     #logo {
         margin-right: calc(50% - 125px);
