@@ -677,30 +677,33 @@ function timeSince ($sinceDate) {
                         <h5>BUY<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
-
                 <a  href="#sell">
                     <div class="navbar-link" id="sellLink">
                         <h5>SELL<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
-
                 <a href="#account">
                     <div class="navbar-link" id="accountLink">
                         <h5>EDIT<span class="mobile-hidden"> YOUR LISTINGS</span></h5>
                     </div>
                 </a>
-
                 <a href="#faq">
                     <div class="navbar-link" id="faqLink">
                         <h5><span class="mobile-hidden">COMMON </span> QUESTIONS</h5>
                     </div>
                 </a>
-
                 <a href="#feedback">
                     <div class="navbar-link" id="feedbackLink">
                         <h5><span class="mobile-hidden">SEND US </span>FEEDBACK</h5>
                     </div>
                 </a>
+                <?php if($theUser['loggedIn'] == true) { ?>
+                <a id='toggleLogout' class="desktop-hidden" onclick="toggleLogout();" target='_blank'>
+                    <div class="navbar-link" id="logoutLink">
+                        <h5>LOGOUT</h5>
+                    </div>
+                </a>
+                <?php } ?>
                 </div>
             </nav>
             <!--End Nav Bar-->
