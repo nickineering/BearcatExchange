@@ -55,6 +55,7 @@ else {
                     if($session['status'] == 1){
                         $theUser = findUser($con, $session['user']);
                         $theUser['loggedIn'] = true;
+                        $theUser['accountEmail'] = $theUser['email'];
                         $loggedIn = true;
                     }
                 }
@@ -62,6 +63,10 @@ else {
         }
     }
     if (!$loggedIn) {
+        if(isset($_COOKIE['prefs'])){
+            $prefs = json_decode($_COOKIE['prefs'], true);
+            $theUser = findUser($con, check_input($prefs['email']));
+        }
         $theUser['loggedIn'] = false;
     }
     if (isset($_REQUEST['request']) || (isset($_GET['email']) && isset($_GET['h']))) {
@@ -101,8 +106,9 @@ else {
     }
 }
 
-function logout ($status = 2) {
+function logout ($status = 2, $terminate = true) {
     global $con;
+    global $theUser;
     $result["misc"] = 'failed';
     if(isset($_COOKIE['user-session'])){
         if(ctype_alnum($_COOKIE['user-session'])) {
@@ -113,12 +119,16 @@ function logout ($status = 2) {
                 unset($_COOKIE['prefs']);
                 $theUser['loggedIn'] = false;
                 $result["misc"] = 'success';
-                printMessage("You are now logged out");
+                if($terminate){
+                    printMessage("You are now logged out");
+                }
             }
         }
     }
-    mysqli_close($con);
-    die(json_encode($result));
+    if($terminate){
+        mysqli_close($con);
+        die(json_encode($result));
+    }
 }
 
 function submitTextbook() {
@@ -151,6 +161,10 @@ function submitTextbook() {
     }
     $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `course`, `comments`) VALUES ('".$item['title']."', '".getUser($con, $email, $name, $newsletter). "', '".$item['author']."', '".$item['price']."', '".$item['course']."', '".$item['comments']."');";
     mysqli_query($con, $insert);
+    if ($theUser['loggedIn'] && $theUser['email'] != $email){
+        logout(4, false);
+        $result['reload'] = 'reload';
+    }
     mysqli_close($con);
     $result['loggedIn'] = $theUser['loggedIn'];
     $result["misc"] = 'success';
@@ -233,7 +247,7 @@ function contactSeller() {
         echo json_encode($errors);
         die();
     }
-    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `time` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter). "', '$textbookId', '$message', CURRENT_TIMESTAMP , '".get_ip()."' );";
+    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `time` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter, 4). "', '$textbookId', '$message', CURRENT_TIMESTAMP , '".get_ip()."' );";
     mysqli_query($con, $insert);
     $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, price FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
@@ -251,8 +265,15 @@ function contactSeller() {
     else {
         $result["misc"] = 'success';
     }
+    if ($theUser['loggedIn'] && $theUser['email'] != $email){
+        logout(4, false);
+        $result['reload'] = 'reload';
+    }
     mysqli_close($con);
     $result['loggedIn'] = $theUser['loggedIn'];
+    $result['name'] = $theUser['name'];
+    $result['email'] = $theUser['email'];
+    $result['newsletter'] = $theUser['newsletter'];
     $result["misc"] = 'success';
     die(json_encode($result));
 }
@@ -339,6 +360,7 @@ function updateItem () {
 function verifyLink() {
     global $getAnotherLinkInstructions;
     global $con;
+    logout(5, false);
     $email = check_input($_GET['email']);
     $hash = check_input($_GET['h']);
     $user = mysqli_query($con, "SELECT id FROM users WHERE email = '$email'");
@@ -357,13 +379,13 @@ function onValidate($localCon, $user, $textbookId, $textbookTitle) {
     $pageToLoad = "account";
 }
 
-function getUser($localCon, $localEmail, $localName, $localNewsletter) {
+function getUser($localCon, $localEmail, $localName, $localNewsletter, $code = 1) {
     $findUserResult = findUser($localCon, $localEmail, $localNewsletter);
     if($findUserResult == false) {
         $userInsert = "INSERT INTO `users` (`email`, `name`, `joined`, `newsletter`) VALUES ('$localEmail', '$localName', CURRENT_TIMESTAMP, '$localNewsletter');";
         mysqli_query($localCon, $userInsert);
         $userId = mysqli_insert_id($localCon);
-        createSession($userId);
+        createSession($userId, false, $code);
     }
     else {
         $userId = $findUserResult['id'];
@@ -575,7 +597,7 @@ function printMessage($status, $priority = "info") {
     $_SESSION['priority'] = $priority;
 }
 
-function createSession ($userId, $print){
+function createSession ($userId, $print, $code = 1){
     global $con;
     global $theUser;
     global $startTimestamp;
@@ -587,7 +609,7 @@ function createSession ($userId, $print){
     $theUser['loggedIn'] = true;
     $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
     setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
-    mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", 1, '".$theUser['session']."', '".get_ip()."')");
+    mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", $code, '".$theUser['session']."', '".get_ip()."')");
     if($print == true) {
         printMessage("You are now logged in");
     }
@@ -726,7 +748,7 @@ function timeSince ($sinceDate) {
             <div id="content" class="content">
                 <div id='buy-page-text'>
                     <div id='welcome-text'>
-                        <h1>Savings Ahoy!</h1>
+                        <h1>Savings Ahoy<?php if($theUser['loggedIn'] == true) echo ", " . $theUser['name']; ?>!</h1>
                         <h2>Welcome to the new best place to buy and sell textbooks at Binghamton.</h2>
                         <p>It's completely free, made by and for Binghamton students. You can buy and sell textbooks online with people in Binghamton, not Seattle, without giving the bookstore a cut. Click a textbook and start saving now.</p>
                     </div>
@@ -772,10 +794,10 @@ function timeSince ($sinceDate) {
                                     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                 ?>
                                 <tr item="<?php echo $row['id'] .'" class="'. (($even)?'even':'odd');
-                                    if($row['status'] != 'unsold') {
+                                    if($row['status'] != 'unsold' && $theUser['loggedIn'] == true) {
                                         echo ' soldUserItem';
                                     }
-                                    if($row['user_id'] == $theUser['id']) {
+                                    if($row['user_id'] == $theUser['id'] && $theUser['loggedIn'] == true) {
                                             echo ' userItem';
                                     }
                                     ?>">
@@ -821,7 +843,9 @@ function timeSince ($sinceDate) {
                         </form>
                         <?php } else { ?>
                         <div id="account-form">
-                            <h1>Edit Your Listings</h1><h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
+                            <h1>Edit Your Listings</h1>
+                            <h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
+                            <p>Click a listing to edit it. To hide listings from shoppers click the sold checkbox. To sell another item vist the <a href='#sell'>selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';

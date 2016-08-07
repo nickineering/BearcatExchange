@@ -27,12 +27,12 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
     if(errorCode >= 500){
         $('.form-noscript-warning').removeClass("hidden");
     }
-    if(userData.name) {
+    if(userData.email) {
         $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
         $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
-        $.updateCookie('prefs', 'id', userData.id, { expires: 90 });
     }
     printPrefs();
+    hideNewsletters();
     if (pageToLoad != '.') {
         window.location.hash = pageToLoad;
     }
@@ -108,11 +108,12 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
                         var renderedInfoBox = handlebarsInfoBoxCompilation(rowData);
                     }
                     $('#info-box-area').append(renderedInfoBox);
+                    hideNewsletters();
                     var infoBoxInstance = $('#info-box-' + id);
                     var rightPosition = parseInt(infoBoxInstance.css('right')) + (selectedRows.length-1) * 320;
                     infoBoxInstance.css('right', rightPosition);
                     printPrefs();
-                    $('#content').addClass("infoBoxOpen");
+                    $('body').addClass("infoBoxOpen");
                     $('#info-box-' + id + '-name').focus();
                 }
             }
@@ -158,18 +159,6 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
             source: subjectCodes
         });
     });
-    //    $('#courseEdit').keydown(function(event) {
-    //        var field = $(this);
-    //        var newValue = field.val() + String.fromCharCode(event.keyCode);
-    //        newValue = newValue.replace(/[^A-Z0-9]+/ig, '');
-    //        if(!newValue.match(/^[A-Z]{2,4}[0-9]{3}[A-Z]?$/i)){
-    //            message("course", "Please format the course like the example.");
-    //            return false;
-    //        }
-    //        else {
-    //            message("course", "");
-    //        }
-    //    });
     $("button:reset").click(function() {
         this.form.reset();
         $('#' + $(this).closest("form").attr('id') + ' .form-error label').html('');
@@ -210,10 +199,16 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
     }
 }
 
+function hideNewsletters () {
+    if(userData.newsletter == "subscribed" && $.cookie("prefs").email == userData.email) {
+        $(".newsletter-form").addClass("hidden");
+    }
+}
+
 function printPrefs () {
     if($.cookie("prefs")){
         for (pref in $.cookie('prefs')) {
-            $('[cookie='+pref).val($.cookie('prefs')[pref]);
+            $('[cookie='+pref+"]").val($.cookie('prefs')[pref]);
         }
     }
 }
@@ -224,6 +219,12 @@ function storePrefs () {
     }
     $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
     $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
+    if($.cookie("prefs").email != userData.email) {
+        $(".newsletter-form").removeClass("hidden");
+    }
+    if($.cookie("prefs").email == userData.email) {
+        $(".newsletter-form").addClass("hidden");
+    }
 }
 
 function searchMessage (message) {
@@ -269,7 +270,7 @@ function closeInfoBox (id) {
     }
     $("[item=" + id + "]").removeClass('selected');
     if(selectedRows.length == 0) {
-        $('#content').removeClass("infoBoxOpen");
+        $('body').removeClass("infoBoxOpen");
     }
 }
 
@@ -575,7 +576,7 @@ function toggleLogout (){
 }
 
 function logout(){
-    var logoutInputs = {//get the values submit
+    var logoutInputs = {
         request : {
             category : 'novalidate',
             fieldValue : 'logout'
@@ -677,7 +678,7 @@ function validateInputs(inputs, formName, responseFunction, miscMessageFunction)
                     errors.push({inputName : input, message : "Numbers only"});
                 }
                 else if (fieldValue < 1 || fieldValue > 400){
-                    errors.push({inputName : input, message : "Stay between $1 and $400."});
+                    errors.push({inputName : input, message : "Stay between $1 and $400"});
                 }
                 break;
             case 'course':
@@ -701,7 +702,6 @@ function validateInputs(inputs, formName, responseFunction, miscMessageFunction)
     var hasErrors = false;
     for(var error in errors) {//if there are errors display the errors and set hasErrors true so the form will not submit.
         hasErrors = true;
-        badContactInfoCookie(errors[error].inputName);
         message(formName, errors[error], true);
     }
     if(hasErrors){//Check if inputs are valid...
@@ -729,6 +729,7 @@ function message(formName, error, shouldSelect) {
 
 function badContactInfoCookie(fieldName){
     $.updateCookie('prefs', fieldName, '', { expires: 90 });//might be bug. Should delete entire value.
+    printPrefs();
 }
 
 function sellFormMiscMessage(message) {
@@ -760,6 +761,9 @@ function receivedSellFormResponse(data) {
         else{
             sellFormMiscMessage('Fix the errors shown and then submit again.');
         }
+        if(data.reload){
+            document.location.href = '';
+        }
     }
 }
 
@@ -773,10 +777,10 @@ function receivedLoginFormResponse(data) {
     submitButton.removeAttr('disabled');
     submitButton.val('VERIFY');
 //    console.log(JSON.stringify(data, null, 2));
-    if(data.name){
+    if(data.email){
         $.updateCookie('prefs', 'name', data.name, { expires: 90 });
         $.updateCookie('prefs', 'email', data.email, { expires: 90 });
-        $.updateCookie('prefs', 'userid', data.id, { expires: 90 });
+        printPrefs();
         window.location.hash ='#';
         miscMessage('We sent you an email with a link. Click it to continue. ', 'success');
     }
@@ -833,13 +837,15 @@ function infoBoxMiscMessage(message) {
 }
 
 function receivedInfoBoxResponse(data) {
+    if(data.newsletter == "subscribed") {
+        userData.email = data.email;
+        userData.newsletter = "subscribed";
+        $.updateCookie('prefs', 'email', data.email, { expires: 90 });
+        printPrefs();
+        $("newsletter-form").addClass("hidden");
+    }
     if(data.misc == 'success'){
         closeInfoBox(submittingInfoBoxId);
-//        var subscribed = $('#info-box-'+submittingInfoBoxId+'-newsletter').prop('checked');
-//        if(subscribed) {//make all true
-//            $('.newsletter-form input').prop('checked', true);
-//            $('.newsletter-form').css('display', 'none'); should renable once I can control it better.
-//        }
         miscMessage("Message sent. Check your email spam folder if the seller doesn't contact you within a day.", 'success');
     }
     else{
@@ -857,8 +863,8 @@ function receivedInfoBoxResponse(data) {
             document.getElementById('info-box-'+id+'-didcheck').value = true;
         }
     }
-    if(data.loggedIn == true){
-        loggedIn();
+    if(data.reload){
+        document.location.href = '';
     }
 }
 

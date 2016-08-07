@@ -1,68 +1,73 @@
 <form id="sell-form" class="page-form" name="submit-textbooks" method="POST" action="index.php" onsubmit="return submitSellForm()">
     <button type="reset" value="Reset" id="sell-reset">Clear Form</button>
-    <h1>Sell a Textbook</h1><h2>Live life on the wild side and ditch <a href="https://en.wikipedia.org/wiki/The_Elements_of_Style" class="hide-link" target="_blank">Strunk and White</a>.</h2>
-    <div><div id="sell-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
+    <h1>Sell a Textbook</h1>
+    <h2>Live life on the wild side and ditch <a href="https://en.wikipedia.org/wiki/The_Elements_of_Style" class="hide-link" target="_blank">Strunk and White</a>.</h2>
+    <div>
+        <div id="sell-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div>
+    </div>
     <script>
         document.getElementById('sell-noscript-warning').style.display = 'none';
     </script>
     <div class="sell-form-input">
-    <div class="left-form">
-        <div class='name-container'>
-            <p class="input-text"><label for="name">Your Name <span class="required">*</span></label></p>
-            <p class="form-error"><label for="name" id='name-message'></label></p>
-            <input type="text" name="name" id='name' maxlength="50" cookie='name'>
+        <div class="left-form">
+            <div class='name-container'>
+                <p class="input-text"><label for="name">Your Name <span class="required">*</span></label></p>
+                <p class="form-error"><label for="name" id='name-message'></label></p>
+                <input type="text" name="name" id='name' maxlength="50" cookie='name'>
+                <br>
+            </div>
+            <div class='email-container'>
+                <p class="input-text"><label for="email">Email <span class="required">*</span></label></p>
+                <p class="form-error"><label for="email"  id='email-message'></label></p>
+                <input type="email" name="email" id='email' maxlength="254" cookie='email'>
+                <br>
+            </div>
+            <div class='title-container'>
+                <p class="input-text"><label for="title">Title (include edition) <span class="required">*</span></label></p>
+                <p class="form-error"><label for="title" id='title-message'></label></p>
+                <input type="text" name="title" id='title' maxlength="75" spellcheck="true">
+                <br>
+            </div>
+            <div class='author-container'>
+                <p class="input-text"><label for="author">Author <span class="required">*</span></label></p>
+                <p class="form-error"><label for="author" id='author-message'></label></p>
+                <input type="text" name="author" id='author' maxlength='50'>
+                <br>
+            </div>
+        </div>
+        <div class="right-form">
+            <div class="course-container">
+                <p class="input-text"><label for="course">Course (ex: BIOL 380A) <span class="required">*</span></label></p>
+                <p class="form-error"><label for="course" id='course-message'></label></p>
+                <input type="text" name ='course' class="courseEdit" id="course" maxlength='15'>
+                <br>
+            </div>
+            <div class='price-container'>
+                <p class="input-text"><label for="price">Price <span class="required">*</span></label></p>
+                <p class="form-error"><label for="price" id='price-message'></label></p>
+                <input type="text" name="price" id='price' autocomplete="off">
+                <br>
+            </div>
+            <div class='comments-container'>
+                <p class="input-text"><label for="comments">Comments</label></p>
+                <p class="form-error"><label for="comments"  id='comments-message'></label></p>
+                <textarea rows="6" name="comments" id="comments" maxlength='1000' spellcheck="true"></textarea>
+                <br>
+            </div>
+        </div>
+        <div class="newsletter-form">
+            <label>
+                <input type="checkbox" name="newsletter" id='newsletter' value='subscribed' checked>
+                <div>This is cool. Keep me informed. You can always unsubscribe, but you won't want to!</div>
+            </label>
             <br>
         </div>
-        <div class='email-container'>
-            <p class="input-text"><label for="email">Email <span class="required">*</span></label></p>
-            <p class="form-error"><label for="email"  id='email-message'></label></p>
-            <input type="email" name="email" id='email' maxlength="254" cookie='email'>
-            <br>
+        <div id="sell-form-message">
+            <div id="sell-form-message-wrapper" class='form-message-wrapper hidden'></div>
         </div>
-        <div class='title-container'>
-            <p class="input-text"><label for="title">Title (include edition) <span class="required">*</span></label></p>
-            <p class="form-error"><label for="title" id='title-message'></label></p>
-            <input type="text" name="title" id='title' maxlength="75" spellcheck="true">
-            <br>
-        </div>
-        <div class='author-container'>
-            <p class="input-text"><label for="author">Author <span class="required">*</span></label></p>
-            <p class="form-error"><label for="author" id='author-message'></label></p>
-            <input type="text" name="author" id='author' maxlength='50'>
-            <br>
-        </div>
-    </div>
-    <div class="right-form">
-        <div class="course-container">
-            <p class="input-text"><label for="course">Course (ex: BIOL 380A) <span class="required">*</span></label></p>
-            <p class="form-error"><label for="course" id='course-message'></label></p>
-            <input type="text" name ='course' class="courseEdit" id="course" maxlength='15'>
-            <br>
-        </div>
-        <div class='price-container'>
-            <p class="input-text"><label for="price">Price <span class="required">*</span></label></p>
-            <p class="form-error"><label for="price" id='price-message'></label></p>
-            <input type="text" name="price" id='price' autocomplete="off">
-            <br>
-        </div>
-        <div class='comments-container'>
-            <p class="input-text"><label for="comments">Comments</label></p>
-            <p class="form-error"><label for="comments"  id='comments-message'></label></p>
-            <textarea rows="6" name="comments" id="comments" maxlength='1000' spellcheck="true"></textarea>
-            <br>
-        </div>
-    </div>
-    <div class="newsletter-form">
-        <label>
-            <input type="checkbox" name="newsletter" id='newsletter' value='subscribed' cookie='newsletter' checked>
-            <div>This is cool. Keep me informed. You can always unsubscribe, but you won't want to!</div>
-        </label>
         <br>
-    </div>
-    <div id="sell-form-message"><div id="sell-form-message-wrapper" class='form-message-wrapper hidden'></div></div>
-    <br>
-    <input type="hidden" name="request" id="requestId" value="submit-sell-form"/>
-    <input type="hidden" name="didcheck" id="didcheck" value="false"/>
-    <input id='sell-submit' type="submit" value="LIST TEXTBOOK">
+        <input type="hidden" name="request" id="requestId" value="submit-sell-form"/>
+        <input type="hidden" name="didcheck" id="didcheck" value="false"/>
+        <input id='sell-submit' type="submit" value="LIST TEXTBOOK">
     </div>
 </form>
