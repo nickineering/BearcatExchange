@@ -1,20 +1,6 @@
 .hidden, .commentsHeader {
     display: none !important;
 }
-/*
-.faq {
-text-align: center;
-}
-
-.faq h1 {
-padding-bottom: 30px;
-}
-
-.faq-question-box {
-margin-bottom: 25px;
-}
-*/
-
 body,
 input[type="search"] {
     font-family: 'Open Sans', sans-serif;
@@ -27,6 +13,7 @@ a:visited {
     border-bottom: 1px solid #007a5e;
     color: #007a5e;
     text-decoration: none;
+    cursor: pointer;
 }
 a:hover {
     border-bottom: 1px solid #004C3B;
@@ -117,7 +104,7 @@ input[type="submit"] {
 #welcome-text {
     display: none;
 }
-#welcome-text p {
+#welcome-text p, #account-form p {
     margin-top: 5px;
     margin-bottom: 5px;
 }
@@ -133,7 +120,7 @@ input[type="submit"] {
     color: #007A5E;
     /*    text-shadow: 0px 0px 5px #383838; Can not get it to work. Probably need to do it a different way.*/
 }
-#buy-page-text {
+#buy-page-text, #buy-text, #account-text {
     text-align: center
 }
 #noscript-warning {
@@ -172,9 +159,6 @@ textarea {
 select,
 button {
     font-family: inherit;
-}
-#buy-text {
-    text-align: center;
 }
 input[type=text]::-ms-clear {
     display: none;
@@ -238,6 +222,10 @@ input[type="submit"] {
     border-top-left-radius: 0;
     border-bottom-right-radius: 0;
 }
+#sell-form-message {
+    text-align: center;
+    clear: both;
+}
 .form-error,
 .contact-info-area .editButton {
     margin-top: 0;
@@ -288,7 +276,7 @@ input[type="submit"] {
 }
 .page-form textarea {
     margin-top: 0;
-    height: 108px;
+    height: 98px;
     border: 1px solid grey;
     border-radius: 5px;
     font-size: 15px;
@@ -352,6 +340,7 @@ nav a,
 }
 .info-box-contact p {
     padding-left: 10px;
+    padding-right: 10px;
     margin-top: 0;
     margin-bottom: 0;
 }
@@ -609,7 +598,6 @@ div.alert-box span.close:focus {
     #toggleLogout {
         right: 20px;
         width: 137px;
-        cursor: pointer;
     }
     #toggleLogout p {
         padding-top: 8px;
@@ -642,7 +630,7 @@ div.alert-box span.close:focus {
         left: 272px;
         width: calc(100% - 307px);
     }
-    .infoBoxOpen {
+    .infoBoxOpen #content {
         margin-bottom: 420px !important;
     }
     .alertBoxOpen {
@@ -957,6 +945,10 @@ div.alert-box span.close:focus {
 /*Phone Only*/
 
 @media screen and (max-width: 615px) {
+    .infoBoxOpen {
+        height:100%;
+        overflow: hidden;
+    }
     #content {
         margin-top: 76px;
     }
