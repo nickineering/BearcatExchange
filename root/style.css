@@ -194,10 +194,10 @@ form input[type="checkbox"] + div {
     background-size: 18px 18px;
     background-repeat: no-repeat;
     padding-left: 25px;
-    background-image: url(images/unchecked.png) !important;
+    background-image: url(/images/unchecked.png) !important;
 }
 form input[type="checkbox"]:checked + div {
-    background-image: url(images/checked.png) !important;
+    background-image: url(/images/checked.png) !important;
 }
 input[type="submit"],
 #sell-reset {
@@ -284,7 +284,7 @@ input[type="submit"] {
     -ms-box-sizing: border-box;
 }
 .price-container input {
-    background: url(images/dollar.svg) no-repeat scroll 0px 5px, white;
+    background: url(/images/dollar.svg) no-repeat scroll 0px 5px, white;
     background-size: 17px 17px;
     background-repeat: no-repeat;
     padding-left: 15px;
@@ -294,7 +294,7 @@ input[type="submit"] {
     box-sizing: border-box;
     border: 2px solid grey;
     border-radius: 5px;
-    background: url(images/search.svg) no-repeat scroll 4px 0px;
+    background: url(/images/search.svg) no-repeat scroll 4px 0px;
     -webkit-appearance: textfield;
 }
 footer a,
@@ -431,7 +431,7 @@ nav a,
     margin-top: 2px;
     width: 30px;
     height: 25px;
-    background-image: url('images/icon.png');
+    background-image: url('/images/icon.png');
     background-position: -8px -8px;
 }
 .alert-message p {
@@ -539,7 +539,7 @@ div.alert-box span.close:focus {
     .navBarCurrent,
     .navbar-link:hover {
         height: 50px;
-        background-image: url(images/navbar-arrow.svg);
+        background-image: url(/images/navbar-arrow.svg);
         background-size: contain;
         background-repeat: no-repeat;
     }

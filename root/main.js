@@ -172,7 +172,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         }
         var $searchVal = $(this).val();
         if($searchVal != ''){
-            window.location.hash ='#';
+            pageChangeHandler('buy');
             $('#clear').removeClass('hidden');
             var val = $.trim($searchVal).replace(/ +/g, ' ').toLowerCase();
             $rows.removeClass("hiddenRow").filter(function() {
@@ -330,11 +330,28 @@ function dateTimeToObject (dateTime) {
     return d;
 }
 
-function pageChangeHandler (){
+$(function() {
+    $('.spaLoad').click(function(e) {
+        href = $(this).attr("href");
+        pageChangeHandler(href);
+        e.preventDefault();
+    });
+
+    // THIS EVENT MAKES SURE THAT THE BACK/FORWARD BUTTONS WORK AS WELL
+    window.onpopstate = function(event) {
+        pageChangeHandler(location.pathname);
+    };
+
+});
+
+function pageChangeHandler (newPage){
     if($('#textbooks').is(":visible")){
         buyScroll = window.pageYOffset;
     }
-    currentPage = window.location.hash.replace(/\#/, '');
+    currentPage = window.location.pathname.replace(/\//g, '');
+    if(newPage){
+        currentPage = newPage.replace(/\//g, '');
+    }
     if($('#server-messages').length && pageViews > 0 && errorCode < 500){
         $('#server-messages').remove();
         $('#houston').addClass('hidden');
@@ -343,12 +360,16 @@ function pageChangeHandler (){
     disappear();
     if (currentPage == '') {
         currentPage = 'buy';
+    }
+    if(currentPage == 'buy') {
+        history.pushState('', '', '/');
         $('#buy-page-text').removeClass("hidden");
         history.replaceState("", "", "/");
         loadNonAjax("buy");
         window.scrollTo(0, buyScroll);
     }
     else {
+        history.pushState('', '', '/'+currentPage+'/');
         if(currentPage == 'legal'){
             loadAjax('legal');
         }
@@ -381,7 +402,7 @@ function pageChangeHandler (){
 
 function loadAjax(name) {
     $.ajax({
-        url: name + '.html',
+        url: '/' + name + '.html',
         success: function(result) {
             $('#extra-page').removeClass("hidden");
             $("#extra-page").html(result);
@@ -403,7 +424,7 @@ function disappear() {
 function sellItYourself() {
     var searchTerm = $('#search-bar').val();
     clearSearchBar();
-    window.location.hash = "sell";
+    pageChangeHandler('sell');
     $('#title').val(searchTerm);
 }
 
@@ -712,7 +733,7 @@ function validateInputs(inputs, formName, responseFunction, miscMessageFunction)
         dataToSend += input + '=' + inputs[input].fieldValue + '&';
     }
     dataToSend = dataToSend.substring(0, dataToSend.length - 1);
-    if(sendForm(responseFunction, miscMessageFunction, 'index.php', dataToSend)){
+    if(sendForm(responseFunction, miscMessageFunction, '/index.php', dataToSend)){
         return true;//inputs are valid and successfully sent.
     }
     else{

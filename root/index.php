@@ -669,8 +669,8 @@ function timeSince ($sinceDate) {
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
-        <link href="style.css" rel="stylesheet" type="text/css"/>
-        <link rel="icon" type="image/ico" href="favicon.ico"/>
+        <link href="/style.css" rel="stylesheet" type="text/css"/>
+        <link rel="icon" type="image/ico" href="/favicon.ico"/>
         <meta property="og:image" content="https://bearcatexchange.com/images/facebook-logo.jpg" />
     </head>
     <body onload='<?php
@@ -680,41 +680,41 @@ function timeSince ($sinceDate) {
             }
                   echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).", ".json_encode($pageToLoad).");";
         ?>'>
-        <script src="send-form.js" defer></script>
-        <script src="scripts/modernizr.min.js" defer></script>
+        <script src="/send-form.js" defer></script>
+        <script src="/scripts/modernizr.min.js" defer></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
-        <script src="scripts/jquery.cookie.js" defer></script>
+        <script src="/scripts/jquery.cookie.js" defer></script>
 <!--        <script src="scripts/mustache.min.js" defer></script>-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
-        <script src="main.js" defer></script>
+        <script src="/main.js" defer></script>
         <div id='wrapper'>
             <!--Begin Nav Bar-->
             <div id="top-bar-background"></div>
-            <a href='#'><img src="images/logo.svg" width="250" height="83" id="logo" alt="Bearcat Exchange"></a>
+            <a href='/' class="spaLoad"><img src="/images/logo.svg" width="250" height="83" id="logo" alt="Bearcat Exchange"></a>
             <nav id="nav">
                 <div id="nav-wrap">
-                <a href='#'>
+                <a href='/' class="spaLoad">
                     <div class="navbar-link" id="buyLink">
                         <h5>BUY<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
-                <a  href="#sell">
+                <a  href="/sell/" class="spaLoad">
                     <div class="navbar-link" id="sellLink">
                         <h5>SELL<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
-                <a href="#account">
+                <a href="/account/" class="spaLoad">
                     <div class="navbar-link" id="accountLink">
                         <h5>EDIT<span class="mobile-hidden"> YOUR LISTINGS</span></h5>
                     </div>
                 </a>
-                <a href="#faq">
+                <a href="/faq/" class="spaLoad">
                     <div class="navbar-link" id="faqLink">
                         <h5><span class="mobile-hidden">COMMON </span> QUESTIONS</h5>
                     </div>
                 </a>
-                <a href="#feedback">
+                <a href="/feedback/" class="spaLoad">
                     <div class="navbar-link" id="feedbackLink">
                         <h5><span class="mobile-hidden">SEND US </span>FEEDBACK</h5>
                     </div>
@@ -739,7 +739,7 @@ function timeSince ($sinceDate) {
             </script>
             <!--End Popup Information Window-->
             <!--Login Button-->
-            <span id="clear" onclick='clearSearchBar();' class='hidden'><img src="images/clear.svg"></span>
+            <span id="clear" onclick='clearSearchBar();' class='hidden'><img src="/images/clear.svg"></span>
             <a class="top-right-button" id='facebook-link' href="https://facebook.com/bearcatexchange" target='_blank'><p>f</p></a>
             <a class="top-right-button" id='google-plus-link' href="https://plus.google.com/104887107850990243147" rel="publisher" target='_blank'><p>g+</p></a>
             <a class="top-right-button" id='toggleLogout' onclick="toggleLogout();" target='_blank'><p><?php echo ($theUser['loggedIn'] == true)?'Logout':'Login'; ?></p></a>
@@ -822,7 +822,7 @@ function timeSince ($sinceDate) {
                     <div id='sell-text' class="hidden"><?php include 'sell-text.html'; ?></div>
                     <div id='account-text' class="hidden">
                         <?php if(!$theUser['loggedIn']) { ?>
-                        <form id="login-form" class="page-form" name="login" method="POST" action="index.php" onsubmit="return submitLoginForm()">
+                        <form id="login-form" class="page-form" name="login" method="POST" action="/index.php" onsubmit="return submitLoginForm()">
                             <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
                             <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
@@ -845,7 +845,7 @@ function timeSince ($sinceDate) {
                         <div id="account-form">
                             <h1>Edit Your Listings</h1>
                             <h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
-                            <p>Click a listing to edit it. To hide listings from shoppers click the sold checkbox. To sell another item vist the <a href='#sell'>selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
+                            <p>Click a listing to edit it. To hide listings from shoppers click the sold checkbox. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').style.display = 'none';
@@ -896,7 +896,7 @@ function timeSince ($sinceDate) {
                 <p id="copyright">&#169; 2016</p>
                 <p>Nicholas Ferrara &amp; Rohit Kapur</p><p>Independent Student Website</p>
                 <hr>
-                <p id='legal-link'><a href='#legal'>Terms and Privacy</a></p>
+                <p id='legal-link'><a href='/legal/' class="spaLoad">Terms and Privacy</a></p>
             </footer>
             <!-- End Copyright-->
             <div id='alert-box-area'>
