@@ -57,6 +57,12 @@ AddDefaultCharset utf-8
 
 RewriteEngine On
 
+RewriteRule    ^sell/?$         index.php?page=sell         [NC,L]
+RewriteRule    ^account/?$      index.php?page=account      [NC,L]
+RewriteRule    ^faq/?$          index.php?page=faq          [NC,L]
+RewriteRule    ^feedback/?$     index.php?page=feedback     [NC,L]
+RewriteRule    ^legal/?$        index.php?page=legal        [NC,L]
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php
