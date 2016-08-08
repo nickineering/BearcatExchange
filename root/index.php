@@ -252,12 +252,12 @@ function contactSeller() {
     $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, price FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
     $bodyTitle = "A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!";
-    $removalLink = "http://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
+    $removalLink = "https://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
     $bodyMessage = "<p>$message</p><p style='margin-bottom: 1em'>--$name</p><p>Don't forget, your asking price is <strong>$".$textbookListing['price']."</strong>. You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it.</p > ";
     $mail->addAddress($seller['email'], $seller['name']);
     $mail->addReplyTo($email, $name);
     $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
-    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
+    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
     if(!$mail->send()) {
         printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
         //echo 'Mailer Error: ' . $mail->ErrorInfo;
@@ -292,11 +292,11 @@ function login () {
     }
     else {
         $bodyTitle = "Click the link below to edit your textbook listings!";
-        $removalLink = "http://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
+        $removalLink = "https://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
         $bodyMessage = "<p><a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it. If you did not request this email simply ignore it.</p > ";
         $mail->addAddress($userData['email'], $userData['name']);
         $mail->Subject = 'Edit your textbook listings';
-        $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='http://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
+        $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
         if(!$mail->send()) {
             printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
         }
@@ -666,12 +666,12 @@ function timeSince ($sinceDate) {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="Avoid bookstore prices: Buy and sell textbooks faster and easier with our free website, created by and for Binghamton University students.">
         <meta name="viewport" content="initial-scale=1, width=device-width">
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
-        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
         <link href="style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="favicon.ico"/>
-        <meta property="og:image" content="http://bearcatexchange.com/images/facebook-logo.jpg" />
+        <meta property="og:image" content="https://bearcatexchange.com/images/facebook-logo.jpg" />
     </head>
     <body onload='<?php
             if(isset($_SESSION['status'])){
@@ -682,11 +682,11 @@ function timeSince ($sinceDate) {
         ?>'>
         <script src="send-form.js" defer></script>
         <script src="scripts/modernizr.min.js" defer></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
         <script src="scripts/jquery.cookie.js" defer></script>
 <!--        <script src="scripts/mustache.min.js" defer></script>-->
-        <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
         <script src="main.js" defer></script>
         <div id='wrapper'>
             <!--Begin Nav Bar-->

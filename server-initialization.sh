@@ -23,7 +23,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         echo "phpmyadmin phpmyadmin/mysql/admin-pass password codebook" | debconf-set-selections
         echo "phpmyadmin phpmyadmin/mysql/app-pass password codebook" |debconf-set-selections
         echo "phpmyadmin phpmyadmin/app-password-confirm password codebook" | debconf-set-selections
-        apt-get install postfix phpmyadmin mysql-server -y
+        apt-get install postfix phpmyadmin mysql-server python-letsencrypt-apache -y
         php5enmod mcrypt
         pear install mail
         curl https://getcomposer.org/installer -o /var/www/be/live/composer.phar | php
@@ -35,6 +35,11 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         service codedeploy-agent start
         service codedeploy-agent status
         mkdir /home/ubuntu/.aws
+        echo -ne '\n nferrara100@gmail.com \n \n ^[[1;5B \n \n' | letsencrypt --apache
+        touch /etc/cron.d/twicedaily
+        chmod 777 /etc/cron.d/twicedaily
+        echo "56 06,16 * * * letsencrypt renew --agree-tos -m nferrara100@gmail.com" >> /etc/cron.d/twicedaily
+        rm mycron
         cd /var/www/
         service apache2 restart
         mkdir /var/www/be/live/ -p
