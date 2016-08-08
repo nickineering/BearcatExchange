@@ -428,16 +428,16 @@ function generateErrorText($localErrorCode, $makeDiv) {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="Avoid bookstore prices: Buy and sell textbooks faster and easier with our free website, created by and for Binghamton University students.">
         <meta name="viewport" content="initial-scale=1, width=device-width">
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
-        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="data-tables.css">
 <!--        <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">-->
 <!--        <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/fixedheader/2.1.2/css/dataTables.fixedHeader.css">-->
-        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/responsive/1.0.3/css/dataTables.responsive.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/1.0.3/css/dataTables.responsive.css">
         <link href="style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="favicon.ico"/>
-        <meta property="og:image" content="http://bearcatexchange.com/images/facebook-logo.jpg" />
+        <meta property="og:image" content="https://bearcatexchange.com/images/facebook-logo.jpg" />
     </head>
     <body onload='<?php
             if(isset($_SESSION['status'])){
@@ -448,8 +448,8 @@ function generateErrorText($localErrorCode, $makeDiv) {
         ?>'>
         <script src="send-form.js" defer></script>
         <script src="scripts/modernizr.min.js" defer></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
         <script src="scripts/jquery.cookie.js" defer></script>
         <script src="scripts/mustache.min.js" defer></script>
         <script src="index.js" defer></script>
@@ -565,9 +565,9 @@ function generateErrorText($localErrorCode, $makeDiv) {
                     <div id='faq-text'><?php include 'faq-text.html'; ?></div>
                 </div>
             </div>
-            <script type="text/javascript" src="http://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" defer></script>
-            <script src="//cdn.datatables.net/responsive/2.0.0/js/dataTables.responsive.js" defer></script>
-<!--            <script type="text/javascript" src="http://cdn.datatables.net/fixedheader/2.1.2/js/dataTables.fixedHeader.min.js"></script>-->
+            <script type="text/javascript" src="https://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" defer></script>
+            <script src="https://cdn.datatables.net/responsive/2.0.0/js/dataTables.responsive.js" defer></script>
+<!--            <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/2.1.2/js/dataTables.fixedHeader.min.js"></script>-->
             <!--End page content area-->
             <!--Begin Copyright-->
             <footer id="other-nav">
