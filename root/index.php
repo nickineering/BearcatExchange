@@ -26,11 +26,13 @@ $errorCodes = array(
 session_start();
 $serverList = array('localhost', '127.0.0.1');
 if(in_array($_SERVER['HTTP_HOST'], $serverList)) {
-    $con = mysqli_connect("localhost", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange");
+    $sensitive = parse_ini_file("bearcatexchange-local.ini");
+    $con = mysqli_connect("localhost", "main", $sensitive['localDBPassword'], "bearcatexchange");
     $developmentServer = true;
 }
 else {
-    $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", "Gc4CXzCrz8RR8WCxxPuWjsCg", "bearcatexchange", 3306);
+    $sensitive = parse_ini_file("bearcatexchange.ini");
+    $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", $sensitive['remoteDBPassword'], "bearcatexchange", 3306);
 }
 if (!mysqli_set_charset($con, "utf8")) {
     $errorCode = 603;
@@ -70,8 +72,8 @@ else {
         $mail->isSMTP();
         $mail->Host = 'email-smtp.us-east-1.amazonaws.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'AKIAJV3FTVKKHHAHE4YQ';
-        $mail->Password = 'ArnoeqtqrnOBa/q6fDICu+vYlwYHr3/bmCv6XnSMSvrP';
+        $mail->Username = $sensitive['sesUsername'];
+        $mail->Password = $sensitive['sesPassword'];
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
         $mail->setFrom('support@bearcatexchange.com', 'Bearcat Exchange');

@@ -10,7 +10,7 @@ if [ ! -f /home/ubuntu/automated/custom-after-install.log ]
         a2enmod rewrite
         service apache2 restart
         chown -R ubuntu /home/ubuntu/automated/
-        crontab -l | { cat; echo "0 0 */15 * * /home/ubuntu/automated/backup_database.sh"; } |
+        crontab -l | { cat; echo "00 4 * * 0 /home/ubuntu/automated/backup_database.sh"; } |
         cd /var/www/be/live/
         php composer.phar install
 fi

@@ -112,7 +112,9 @@ function startJavascript (localErrorCode, data, devServer){
                     infoBoxInstance.css('right', rightPosition);
                     printPrefs();
                     $('body').addClass("infoBoxOpen");
-                    $('#info-box-' + id + '-name').focus();
+                    if(shouldAutoselect){
+                        $('#info-box-' + id + '-name').focus();
+                    }
                 }
             }
             else{
@@ -164,10 +166,12 @@ function startJavascript (localErrorCode, data, devServer){
         $('#' + $(this).closest("form").attr('id') + ' input[cookie]').trigger('change');
         return false;
     });
-    $("#search-bar").keyup(function(event) {
+    $("input, textarea").keyup(function(event) {
         if(event.keyCode == 13 && !shouldAutoselect){
-            document.getElementById("search-bar").blur();
+            $(this).blur();
         }
+    });
+    $("#search-bar").keyup(function(event) {
         var $searchVal = $(this).val();
         if($searchVal != ''){
             pageChangeHandler('buy');
@@ -433,7 +437,9 @@ function clearSearchBar () {
     else {
         searchMessage("There are currently no textbooks to display. Please come back later. ");
     }
-    $('#search-bar').focus();
+    if(shouldAutoselect){
+        $('#search-bar').focus();
+    }
     $rows.removeClass("hiddenRow");
     colorizeTextbooks();
 }
@@ -762,7 +768,12 @@ function receivedSellFormResponse(data) {
         loggedIn();
     }
     if(data.misc == 'success'){
-        document.location.href = '';
+        if(loggedIn){
+            document.location.href = '/account/';
+        }
+        else {
+            document.location.href = '/';
+        }
     }
     else{
         if(data.email){
@@ -779,7 +790,7 @@ function receivedSellFormResponse(data) {
             sellFormMiscMessage('Fix the errors shown and then submit again.');
         }
         if(data.reload){
-            document.location.href = '';
+            document.location.href = '/';
         }
     }
 }
@@ -881,7 +892,7 @@ function receivedInfoBoxResponse(data) {
         }
     }
     if(data.reload){
-        document.location.href = '';
+        document.location.href = '/';
     }
 }
 

@@ -8,5 +8,3 @@ files:
   destination: /etc/apache2/sites-available/
 - source: /backup_database.sh
   destination: /home/ubuntu/automated/
-- source: /config
-  destination: /home/ubuntu/.aws/
