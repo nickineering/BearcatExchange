@@ -91,5 +91,3 @@ ErrorDocument 500 /?e=500
 ErrorDocument 502 /?e=502
 ErrorDocument 504 /?e=504
 ErrorDocument 508 /?e=508
-
-Redirect 301 /textbooks-data.php /

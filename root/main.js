@@ -29,8 +29,8 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         $('.form-noscript-warning').removeClass("hidden");
     }
     if(userData.email) {
-        $.updateCookie('prefs', 'name', userData.name, { expires: 90 });
-        $.updateCookie('prefs', 'email', userData.email, { expires: 90 });
+        $.updateCookie('prefs', 'name', userData.name, { expires: 90, path: '/'});
+        $.updateCookie('prefs', 'email', userData.email, { expires: 90, path: '/' });
     }
     printPrefs();
     hideNewsletters();
@@ -40,7 +40,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
     //Start Google Analytics code
     try { //Turn off analytics if 'analytics=off' is included as a request parameter.
         if (getUrlVars()["analytics"] == 'off' || developmentServer == true) {
-            $.cookie('analytics', 'off', { expires: 180 });
+            $.cookie('analytics', 'off', { expires: 180, path: '/' });
         }
         else if (getUrlVars()["analytics"] == 'on') {
             $.removeCookie('analytics');
@@ -217,7 +217,7 @@ function storePrefs () {
     if($( this ).val().length <= 6 && $( this ).val().length != 0) {
         return;
     }
-    $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90 });
+    $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90, path: '/'});
     $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
     if($.cookie("prefs").email != userData.email) {
         $(".newsletter-form").removeClass("hidden");
@@ -744,7 +744,7 @@ function message(formName, error, shouldSelect) {
 }
 
 function badContactInfoCookie(fieldName){
-    $.updateCookie('prefs', fieldName, '', { expires: 90 });//might be bug. Should delete entire value.
+    $.updateCookie('prefs', fieldName, '', { expires: 90, path: '/' });//might be bug. Should delete entire value.
     printPrefs();
 }
 
@@ -794,8 +794,8 @@ function receivedLoginFormResponse(data) {
     submitButton.val('VERIFY');
 //    console.log(JSON.stringify(data, null, 2));
     if(data.email){
-        $.updateCookie('prefs', 'name', data.name, { expires: 90 });
-        $.updateCookie('prefs', 'email', data.email, { expires: 90 });
+        $.updateCookie('prefs', 'name', data.name, { expires: 90, path: '/' });
+        $.updateCookie('prefs', 'email', data.email, { expires: 90, path: '/' });
         printPrefs();
         window.location.hash ='#';
         miscMessage('We sent you an email with a link. Click it to continue. ', 'success');
@@ -856,7 +856,7 @@ function receivedInfoBoxResponse(data) {
     if(data.newsletter == "subscribed") {
         userData.email = data.email;
         userData.newsletter = "subscribed";
-        $.updateCookie('prefs', 'email', data.email, { expires: 90 });
+        $.updateCookie('prefs', 'email', data.email, { expires: 90, path: '/' });
         printPrefs();
         $("newsletter-form").addClass("hidden");
     }
