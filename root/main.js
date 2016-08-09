@@ -1,5 +1,5 @@
 var condition = ["New", "Like New", "Very Good", "Good", "Acceptable", "Ask"];
-var pageTitles = {buy : 'Buy Textbooks', sell : 'Sell Textbooks', account : 'Edit Listings', faq : 'Common Questions', legal : 'Terms and Privacy', feedback : 'Give Feedback'};
+var pageTitles = {buy : 'Bearcat Exchange - Buy and sell textbooks at Binghamton', sell : 'Sell Textbooks On Bearcat Exchange', account : 'Edit Your Listings On Bearcat Exchange', faq : 'Common Questions About Bearcat Exchange', legal : 'Terms and Privacy For Bearcat Exchange', feedback : 'Give Feedback About Bearcat Exchange'};
 var textbooks;
 var selectedRows = [];
 window.onhashchange = pageChangeHandler;
@@ -19,6 +19,7 @@ var buyScroll = 0;
 var shouldAutoselect = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) > 1200 || !$( "#open-html" ).hasClass( "touch" );
 
 function startJavascript (localErrorCode, data, devServer, pageToLoad){
+    currentPage = window.location.pathname.replace(/\//g, '');
     window.scrollTo(0,0);
     $rows = $('#textbooks tbody tr:not(.soldUserItem)');
     developmentServer = devServer;
@@ -46,7 +47,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         }
         if($.cookie('analytics') == 'off') {
             useAnalytics = false;
-            $('#legal-link').append('<br><a href="/phpmyadmin" target="_blank">PHPMyAdmin</a><br><a href="/?analytics=on">Analytics is off</a>');
+            $('#legal-link').append('<br><a href="/phpmyadmin/" target="_blank">PHPMyAdmin</a><br><a href="/?analytics=on">Analytics is off</a>');
         }
     } catch(e) {
         //Just in case something goes wrong...
@@ -193,7 +194,6 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
         colorizeTextbooks();
     });
     $(document).on( "change", "input[cookie]", storePrefs);
-    pageChangeHandler();
     if(currentPage != 'sell' && !$(".alert-message").length){
         miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
@@ -362,30 +362,25 @@ function pageChangeHandler (newPage){
         currentPage = 'buy';
     }
     if(currentPage == 'buy') {
-        history.pushState('', '', '/');
         $('#buy-page-text').removeClass("hidden");
-        history.replaceState("", "", "/");
-        loadNonAjax("buy");
+        $('#welcome-text').removeClass("hidden");
         window.scrollTo(0, buyScroll);
+        history.pushState('', '', '/');
     }
     else {
         history.pushState('', '', '/'+currentPage+'/');
-        if(currentPage == 'legal'){
-            loadAjax('legal');
-        }
-        else if (currentPage == 'feedback'){
-            $('#' + currentPage + 'Link').addClass('navBarCurrent');
-            loadAjax('feedback');
-        }
-        else {
-            loadNonAjax(currentPage);
-        }
         window.scrollTo(0, 0);
+    }
+    if(currentPage == 'legal'){
+        loadAjax('legal');
+    }
+    else {
+        loadNonAjax(currentPage);
     }
     if(currentPage == 'sell') {
         closeAlertBox();
     }
-    $('title').text(pageTitles[currentPage] + ' - Bearcat Exchange');
+    $('title').text(pageTitles[currentPage]);
     if(shouldAutoselect){
         if (currentPage == 'sell'){
             $('#name').focus();

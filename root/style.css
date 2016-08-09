@@ -101,9 +101,6 @@ input[type="submit"] {
     padding:12px;
     border-bottom: 2px solid lightgray;
 }
-#welcome-text {
-    display: none;
-}
 #welcome-text p, #account-form p {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -296,6 +293,9 @@ input[type="submit"] {
     border-radius: 5px;
     background: url(/images/search.svg) no-repeat scroll 4px 0px;
     -webkit-appearance: textfield;
+}
+#clear {
+    cursor:pointer;
 }
 footer a,
 footer p,
