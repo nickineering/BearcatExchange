@@ -6,13 +6,12 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         echo "Proccess began: " >> /home/ubuntu/automated/custom.log
         date >> /home/ubuntu/automated/custom.log
         exec >> /home/ubuntu/automated/custom.log 2>&1
-        add-apt-repository -y ppa:ondrej/php5-5.6
         apt-get update -y && apt-get dist-upgrade -y
         apt-get autoremove -y && apt-get autoclean -y
         apt-get install python-software-properties
         curl https://bootstrap.pypa.io/get-pip.py -o /home/ubuntu/automated/get-pip.py
         python3.4 /home/ubuntu/automated/get-pip.py
-        apt-get install ruby2.0 apache2 php5 libapache2-mod-php5 php5-mcrypt php5-cli php5-fpm php5-gd libssh2-php php5-mysqlnd git unzip zip php5-curl mailutils php5-json php-pear -y4
+        apt-get install ruby2.0 apache2 php7.0 libapache2-mod-php7.0 php7.0-mcrypt php7.0-cli php7.0-fpm php7.0-gd libssh2-php php7.0-mysqlnd git unzip zip php7.0-curl mailutils php7.0-json -y4
         debconf-set-selections <<< 'mysql-server mysql-server/root_password password codebook'
         debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password codebook'
         debconf-set-selections <<< "postfix postfix/mailname string 'bearcatexchange.com'"
@@ -24,7 +23,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         echo "phpmyadmin phpmyadmin/mysql/app-pass password codebook" |debconf-set-selections
         echo "phpmyadmin phpmyadmin/app-password-confirm password codebook" | debconf-set-selections
         apt-get install postfix phpmyadmin mysql-server python-letsencrypt-apache -y
-        php5enmod mcrypt
+        php7.0enmod mcrypt
         pear install mail
         curl https://getcomposer.org/installer -o /var/www/be/live/composer.phar | php
         pip3.4 install awscli django
@@ -40,6 +39,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         chmod 777 /etc/cron.d/twicedaily
         echo "56 06,16 * * * letsencrypt renew --agree-tos -m nferrara100@gmail.com" >> /etc/cron.d/twicedaily
         rm mycron
+        echo "set number" > ~/.vimrc
         cd /var/www/
         service apache2 restart
         mkdir /var/www/be/live/ -p
