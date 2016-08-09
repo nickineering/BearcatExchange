@@ -34,9 +34,10 @@ h2 {
 }
 h1 {
     margin-top: 5px;
-    margin-bottom: 15px;
+    margin-bottom: -6px;
     font-size: 32px;
     font-weight: bold;
+    line-height: 40px;
 }
 h2 {
     margin-top: 10px;

@@ -179,7 +179,7 @@ function startJavascript (localErrorCode, data, devServer){
             }).addClass("hiddenRow");
             $visibleRows = $('#textbooks tbody tr:not(.hiddenRow):not(.soldUserItem)');
             if(!$visibleRows.exists()){
-                searchMessage('No one listed that textbook yet. <a href="#sell" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
+                searchMessage('No one listed that textbook yet. <a href="/sell/" class="spaLink" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
             }
             else {
                 searchMessage(false);
@@ -192,7 +192,7 @@ function startJavascript (localErrorCode, data, devServer){
     });
     $(document).on( "change", "input[cookie]", storePrefs);
     if(currentPage != 'sell' && !$(".alert-message").length){
-        miscMessage("<a href='#sell'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
+        miscMessage("<a href='/sell/' class='spaLink'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
 }
 
@@ -421,7 +421,6 @@ function disappear() {
 function sellItYourself() {
     var searchTerm = $('#search-bar').val();
     clearSearchBar();
-    pageChangeHandler('sell');
     $('#title').val(searchTerm);
 }
 
