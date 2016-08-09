@@ -249,15 +249,29 @@ function contactSeller() {
     }
     $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `time` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter, 4). "', '$textbookId', '$message', CURRENT_TIMESTAMP , '".get_ip()."' );";
     mysqli_query($con, $insert);
-    $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, price FROM textbooks WHERE id LIKE $textbookId"));
+    $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, author, course, price, time, comments FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
-    $bodyTitle = "A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!";
     $removalLink = "https://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
-    $bodyMessage = "<p>$message</p><p style='margin-bottom: 1em'>--$name</p><p>Don't forget, your asking price is <strong>$".$textbookListing['price']."</strong>. You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it.</p > ";
     $mail->addAddress($seller['email'], $seller['name']);
     $mail->addReplyTo($email, $name);
     $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
-    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
+    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'>
+        <h2 style='color: #007a5e'>A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!</h2>
+        <div style='font-size: 1.2em;'>
+            <div style='color:#000'>
+                <p>$message</p>
+                <p style='margin-bottom: 1em'>--$name</p>
+                <p><strong>This is what you listed: </strong><br>
+                <strong>Title:</strong> ".$textbookListing['title']."<br>
+                <strong>Author:</strong> ".$textbookListing['author']."<br>
+                <strong>Course:</strong> ".$textbookListing['course']."<br>
+                <strong>Time Posted:</strong> ".timeSince($textbookListing['time'])."<br>
+                <strong>Comments:</strong> ".($textbookListing['comments']?$textbookListing['comments']:"None")."</p>
+                <p><strong>Instructions For You</strong><br>
+                You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
+            </div>
+        </div>
+    </div>";
     if(!$mail->send()) {
         printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
         //echo 'Mailer Error: ' . $mail->ErrorInfo;
@@ -666,6 +680,7 @@ function timeSince ($sinceDate) {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="Avoid bookstore prices: Buy and sell textbooks faster and easier with our free website, created by and for Binghamton University students.">
         <meta name="viewport" content="initial-scale=1, width=device-width">
+        <meta name="page" content="<?php echo $_GET['page']; ?>">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
@@ -695,27 +710,27 @@ function timeSince ($sinceDate) {
             <nav id="nav">
                 <div id="nav-wrap">
                 <a href='/' class="spaLoad">
-                    <div class="navbar-link" id="buyLink">
+                    <div class="navbar-link<?php if(!$_GET['page']) echo " navBarCurrent"; ?>" id="buyLink">
                         <h5>BUY<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
                 <a  href="/sell/" class="spaLoad">
-                    <div class="navbar-link" id="sellLink">
+                    <div class="navbar-link<?php if($_GET['page'] == "sell") echo " navBarCurrent"; ?>" id="sellLink">
                         <h5>SELL<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
                 <a href="/account/" class="spaLoad">
-                    <div class="navbar-link" id="accountLink">
+                    <div class="navbar-link<?php if($_GET['page'] == "account") echo " navBarCurrent"; ?>" id="accountLink">
                         <h5>EDIT<span class="mobile-hidden"> YOUR LISTINGS</span></h5>
                     </div>
                 </a>
                 <a href="/faq/" class="spaLoad">
-                    <div class="navbar-link" id="faqLink">
+                    <div class="navbar-link<?php if($_GET['page'] == "faq") echo " navBarCurrent"; ?>" id="faqLink">
                         <h5><span class="mobile-hidden">COMMON </span> QUESTIONS</h5>
                     </div>
                 </a>
                 <a href="/feedback/" class="spaLoad">
-                    <div class="navbar-link" id="feedbackLink">
+                    <div class="navbar-link<?php if($_GET['page'] == "feedback") echo " navBarCurrent"; ?>" id="feedbackLink">
                         <h5><span class="mobile-hidden">SEND US </span>FEEDBACK</h5>
                     </div>
                 </a>
@@ -747,7 +762,7 @@ function timeSince ($sinceDate) {
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
             <div id="content" class="content">
                 <div id='buy-page-text'>
-                    <div id='welcome-text'>
+                    <div id='welcome-text' class='hidden'>
                         <h1>Savings Ahoy<?php if($theUser['loggedIn'] == true) echo ", " . $theUser['name']; ?>!</h1>
                         <h2>Welcome to the new best place to buy and sell textbooks at Binghamton.</h2>
                         <p>It's completely free, made by and for Binghamton students. You can buy and sell textbooks online with people in Binghamton, not Seattle, without giving the bookstore a cut. Click a textbook and start saving now.</p>
@@ -765,15 +780,17 @@ function timeSince ($sinceDate) {
                         <p>Same as your social security number websites cannot get your email unless you provide it. While Bearcat Exchange does offer you the option to provide your email, you do not have to provide it and JavaScript alone can not steal it. If you do choose to provide us with it, we will never send you spam, only updates about your listings or other things you opt-in to.</p>
                     </div>
                     <script>
-                        document.getElementById('noscript-warning').style.display = 'none';
+                        document.getElementById('noscript-warning').className += ' hidden';
                         if(!document.getElementById('server-messages')){
-                            document.getElementById('welcome-text').style.display = 'inline';
-                            document.getElementById('houston').style.display = 'none';
+                            document.getElementById('houston').className += ' hidden';
+                            if(document.querySelector("meta[name='page']").getAttribute("content") == ''){
+                                document.getElementById('welcome-text').className = document.getElementById('welcome-text').className.replace('hidden', '');
+                            }
                         }
                     </script>
                 </div>
                 <div id="pages">
-                    <div id='buy-text' class="hidden">
+                    <div id='buy-text'<?php if($_GET['page']) echo " class='hidden'"; ?>>
                         <table id="textbooks" class="items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
@@ -818,15 +835,15 @@ function timeSince ($sinceDate) {
                         </table>
                         <div class="odd hidden" id="search-message">There are currently no textbooks to display. Please come back later.</div>
                     </div>
-                    <div id='extra-page' class="hidden"></div>
-                    <div id='sell-text' class="hidden"><?php include 'sell-text.html'; ?></div>
-                    <div id='account-text' class="hidden">
+                    <div id='extra-page'<?php if($_GET['page'] != "legal") echo " class='hidden'"; ?>><?php if($_GET['page'] == "legal") include 'legal.html'; ?></div>
+                    <div id='sell-text'<?php if($_GET['page'] != "sell") echo " class='hidden'"; ?>><?php include 'sell-text.html'; ?></div>
+                    <div id='account-text'<?php if($_GET['page'] != "account") echo " class='hidden'"; ?>>
                         <?php if(!$theUser['loggedIn']) { ?>
                         <form id="login-form" class="page-form" name="login" method="POST" action="/index.php" onsubmit="return submitLoginForm()">
                             <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
                             <div><div id="login-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
-                                document.getElementById('login-noscript-warning').style.display = 'none';
+                                document.getElementById('login-noscript-warning').className += " hidden";
                             </script>
                             <div class="login-form-input">
                                 <div class='email-container'>
@@ -848,7 +865,7 @@ function timeSince ($sinceDate) {
                             <p>Click a listing to edit it. To hide listings from shoppers click the sold checkbox. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
-                                document.getElementById('account-noscript-warning').style.display = 'none';
+                                document.getElementById('account-noscript-warning').className += " hidden";
                             </script>
                             <table id="owned-items" class="items" cellspacing="0" width="100%">
                                 <thead>
@@ -887,7 +904,8 @@ function timeSince ($sinceDate) {
                         </div>
                         <?php } ?>
                     </div>
-                    <div id='faq-text' class="hidden"><?php include 'faq-text.html'; ?></div>
+                    <div id='faq-text' <?php if($_GET['page'] != "faq") echo " class='hidden'"; ?>><?php include 'faq-text.html'; ?></div>
+                    <div id='feedback-text'<?php if($_GET['page'] != "feedback") echo " class='hidden'"; ?>><?php include 'feedback-text.html'; ?></div>
                 </div>
             </div>
             <!--End page content area-->
