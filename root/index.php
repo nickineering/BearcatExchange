@@ -5,7 +5,6 @@ require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
 $serverError = false;
 $developmentServer = false;
-$pageToLoad = '.';
 $errorCode = (isset($_GET['e'])) ? $_GET["e"] : 0;
 $errorCodes = array(
     400 => array("Error 400 Bad Request", $programingErrorMessage),
@@ -380,11 +379,10 @@ function verifyLink() {
 }
 
 function onValidate($localCon, $user, $textbookId, $textbookTitle) {
-    global $pageToLoad;
     mysqli_query($localCon, 'UPDATE textbooks SET status = "sold" WHERE `user_id` = '.$user.' AND `id` = '.$textbookId);
     createSession($user);
     printMessage('<i>'.$textbookTitle.'</i> was marked as sold.', "success");
-    $pageToLoad = "account";
+    $_GET['page'] = "account";
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter, $code = 1) {
@@ -705,7 +703,7 @@ function timeSince ($sinceDate) {
                 echo "miscMessage(".'"'. $_SESSION['status'].'"'. ", ".'"'.$_SESSION['priority'].'"'.");";
                 unset($_SESSION['status']);
             }
-                  echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).", ".json_encode($pageToLoad).");";
+                  echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).");";
         ?>'>
         <script src="/send-form.js" defer></script>
         <script src="/scripts/modernizr.min.js" defer></script>

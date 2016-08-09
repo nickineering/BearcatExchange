@@ -2,7 +2,6 @@ var condition = ["New", "Like New", "Very Good", "Good", "Acceptable", "Ask"];
 var pageTitles = {buy : 'Bearcat Exchange - Buy and sell textbooks at Binghamton', sell : 'Sell Textbooks On Bearcat Exchange', account : 'Edit Your Listings On Bearcat Exchange', faq : 'Common Questions About Bearcat Exchange', legal : 'Terms and Privacy For Bearcat Exchange', feedback : 'Give Feedback About Bearcat Exchange'};
 var textbooks;
 var selectedRows = [];
-window.onhashchange = pageChangeHandler;
 var errorMessageViews = 0;
 var subjectCodes = ["AAAS", "ACCT", "AFST", "ANTH", "ARAB", "ARTH", "ARTS", "ASTR", "BCHM", "BE", "BIOL", "BLS", "BME", "CCPA", "CDCI", "CHEM", "CHIN", "CINE", "CLAS", "COLI", "CQS", "CS", "CW", "DDPR", "DDP", "ECON", "EDUC", "EECE", "EGYN", "ELED", "ENG", "ENT", "ENVI", "ERED", "ESL", "EVOS", "FIN", "FREN", "GEOG", "GEOL", "GERM", "GLST", "GRD", "GRK", "HARP", "HDEV", "HEBR", "HIST", "HWS", "IBUS", "ISE", "ITAL", "JPN", "JUST", "KOR", "LACS", "LAT", "LEAD", "LING", "LTRC", "LXC", "MASS", "MATH", "MDVL", "ME", "MGMT", "MIS", "MKTG", "MSE", "MSL", "MUS", "MUSP", "NURS", "OPM", "OUT", "PAFF", "PERS", "PHIL", "PHYS", "PIC", "PLSC", "PPL", "PSYC", "RHET", "RLIT", "ROML", "RPHL", "RUSS", "SAA", "SCHL", "SCM", "SEC", "SOC", "SPAN", "SPED", "SSIE", "SW", "THEA", "THEP", "TRIP", "TURK", "UNIV", "VIET", "WGSS", "WRIT", "WTSN", "YIDD"];
 var loadDate= new Date();
@@ -18,7 +17,7 @@ var developmentServer = false;
 var buyScroll = 0;
 var shouldAutoselect = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) > 1200 || !$( "#open-html" ).hasClass( "touch" );
 
-function startJavascript (localErrorCode, data, devServer, pageToLoad){
+function startJavascript (localErrorCode, data, devServer){
     currentPage = window.location.pathname.replace(/\//g, '');
     window.scrollTo(0,0);
     $rows = $('#textbooks tbody tr:not(.soldUserItem)');
@@ -34,9 +33,7 @@ function startJavascript (localErrorCode, data, devServer, pageToLoad){
     }
     printPrefs();
     hideNewsletters();
-    if (pageToLoad != '.') {
-        window.location.hash = pageToLoad;
-    }
+    setFocus();
     //Start Google Analytics code
     try { //Turn off analytics if 'analytics=off' is included as a request parameter.
         if (getUrlVars()["analytics"] == 'off' || developmentServer == true) {
@@ -381,6 +378,12 @@ function pageChangeHandler (newPage){
         closeAlertBox();
     }
     $('title').text(pageTitles[currentPage]);
+    setFocus();
+    pageViews++;
+}
+
+function setFocus () {
+    currentPage = window.location.pathname.replace(/\//g, '');
     if(shouldAutoselect){
         if (currentPage == 'sell'){
             $('#name').focus();
@@ -392,7 +395,6 @@ function pageChangeHandler (newPage){
             $('#search-bar').focus();
         }
     }
-    pageViews++;
 }
 
 function loadAjax(name) {
@@ -587,7 +589,7 @@ function toggleLogout (){
         logout();
     }
     else {
-        window.location.hash = "account";
+        pageChangeHandler("account");
     }
 }
 
@@ -797,7 +799,7 @@ function receivedLoginFormResponse(data) {
         $.updateCookie('prefs', 'name', data.name, { expires: 90, path: '/' });
         $.updateCookie('prefs', 'email', data.email, { expires: 90, path: '/' });
         printPrefs();
-        window.location.hash ='#';
+        pageChangeHandler("buy");
         miscMessage('We sent you an email with a link. Click it to continue. ', 'success');
     }
     if(data.misc){
