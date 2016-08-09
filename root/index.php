@@ -45,20 +45,14 @@ if($_REQUEST['isjson'] == true && $errorCode != 0){
 }
 else {
     $loggedIn = false;
-    if(isset($_COOKIE['user-session'])){
-        if(ctype_alnum($_COOKIE['user-session'])) {
-            $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
-            if (mysqli_num_rows($session) != 0) {
-                $session = mysqli_fetch_array($session);
-                $diff = $startTimestamp - strtotime($session['time']);
-                if ($diff < 60 * 60 * 24 * 45) {
-                    if($session['status'] == 1){
-                        $theUser = findUser($con, $session['user']);
-                        $theUser['loggedIn'] = true;
-                        $theUser['accountEmail'] = $theUser['email'];
-                        $loggedIn = true;
-                    }
-                }
+    if(getSession()){
+        $diff = $startTimestamp - strtotime($session['time']);
+        if ($diff < 60 * 60 * 24 * 45) {
+            if($session['status'] == 1){
+                $theUser = findUser($con, $session['user']);
+                $theUser['loggedIn'] = true;
+                $theUser['accountEmail'] = $theUser['email'];
+                $loggedIn = true;
             }
         }
     }
@@ -341,7 +335,7 @@ function updateItem () {
             $overviewQuery = "SELECT `id`, `user_id`, `title`, `author`, `price`, `time`, `course`, `comments`, `status` FROM textbooks WHERE `id` = $itemId";
             $beginningState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
             $textbooksUpdate = "UPDATE `textbooks` SET";
-            $updates = "INSERT INTO `updates` (`textbook_id`, `update_time`, `update_session`";
+            $updates = "INSERT INTO `updates` (`textbook_id`, `time`, `session`";
             $updatesValues = "VALUES ($itemId, CURRENT_TIMESTAMP, '" . $session['hash'] . "'";
             $previousInTextbooks = false;
             foreach ($item as $key => $value) {
@@ -615,6 +609,7 @@ function createSession ($userId, $print, $code = 1){
     global $con;
     global $theUser;
     global $startTimestamp;
+    global $session;
     $theUser = findUser($con, $userId);
     if ($theUser['loggedIn'] == true){
         logout(3);
@@ -624,9 +619,26 @@ function createSession ($userId, $print, $code = 1){
     $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
     setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
     mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", $code, '".$theUser['session']."', '".get_ip()."')");
+    getSession();
     if($print == true) {
         printMessage("You are now logged in");
     }
+}
+
+function getSession () {
+    global $con;
+    global $session;
+    if(isset($_COOKIE['user-session'])){
+        if(ctype_alnum($_COOKIE['user-session'])) {
+            $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
+            if (mysqli_num_rows($session) != 0) {
+                $session = mysqli_fetch_array($session);
+                $theUser['loggedIn'] = true;
+                return $session;
+            }
+        }
+    }
+    return false;
 }
 
 function generateErrorText($localErrorCode, $makeDiv) {
