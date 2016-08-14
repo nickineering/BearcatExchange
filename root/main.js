@@ -183,7 +183,7 @@ function startJavascript (localErrorCode, data, devServer){
             }).addClass("hiddenRow");
             $visibleRows = $('#textbooks tbody tr:not(.hiddenRow):not(.soldUserItem)');
             if(!$visibleRows.exists()){
-                searchMessage('No one listed that textbook yet. <a href="/sell/" class="spaLink" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
+                searchMessage('No one listed that textbook yet. <a href="/sell/" class="spaLoad" onClick="sellItYourself(&quot;sell&quot;);">Try selling it yourself!</a>');
             }
             else {
                 searchMessage(false);
@@ -196,7 +196,7 @@ function startJavascript (localErrorCode, data, devServer){
     });
     $(document).on( "change", "input[cookie]", storePrefs);
     if(currentPage != 'sell' && !$(".alert-message").length){
-        miscMessage("<a href='/sell/' class='spaLink'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
+        miscMessage("<a href='/sell/' class='spaLoad'>Ready to get a head start on textbook selling? List your textbooks now!</a>", 'info');
     }
 }
 
@@ -255,7 +255,7 @@ function getUrlVars() {
 }
 
 function loggedIn () {
-    $('#toggleLogout p').html("Logout");
+    $('.toggleLogout p').html("Logout");
 }
 
 function closeInfoBox (id) {
@@ -332,17 +332,15 @@ function dateTimeToObject (dateTime) {
 }
 
 $(function() {
-    $('.spaLoad').click(function(e) {
+    $(document).on("click", ".spaLoad", function(e) {
         href = $(this).attr("href");
         pageChangeHandler(href);
         e.preventDefault();
     });
-
     // THIS EVENT MAKES SURE THAT THE BACK/FORWARD BUTTONS WORK AS WELL
     window.onpopstate = function(event) {
         pageChangeHandler(location.pathname);
     };
-
 });
 
 function pageChangeHandler (newPage){
