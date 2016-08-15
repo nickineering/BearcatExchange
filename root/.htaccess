@@ -1,85 +1,36 @@
-# TIME CHEAT SHEET
-#      300   5 MIN
-#      600  10 MIN
-#      900  15 MIN
-#     1800  30 MIN
-#     2700  45 MIN
-#
-#     3600   1 HR
-#     7200   2 HR
-#    10800   3 HR
-#    14400   4 HR
-#    18000   5 HR
-#    36000  10 HR
-#    39600  11 HR
-#    43200  12 HR
-#    46800  13 HR
-#    50400  14 HR
-#    54000  15 HR
-#    86400  24 HR
-#
-#    86400   1 DAY
-#   172800   2 DAY
-#   259200   3 DAY
-#   345600   4 DAY
-#   432000   5 DAY
-#   518400   6 DAY
-#   604800   7 DAY
-#
-#   604800   1 WEEK
-#  1209600   2 WEEK
-#  1814400   3 WEEK
-#  2419200   4 WEEK
-#
-#  2419200   1 MONTH
-#  4838400   2 MONTH
-#  7257600   3 MONTH
-#  9676800   4 MONTH
-# 12096000   5 MONTH
-# 14515200   6 MONTH
-# 16934400   7 MONTH
-# 19353600   8 MONTH
-# 21772800   9 MONTH
-# 24192000  10 MONTH
-# 26611200  11 MONTH
-# 29030400  12 MONTH
-
-ServerSignature Off
-
 SetEnv TZ America/New_York
-
-ServerSignature EMail
-SetEnv SERVER_ADMIN support@bearcatexchange.com
-
-#Options +FollowSymLinks
-
 AddDefaultCharset utf-8
 
 RewriteEngine On
 
-RewriteRule    ^sell/?$         index.php?page=sell         [NC,L]
-RewriteRule    ^account/?$      index.php?page=account      [NC,L]
-RewriteRule    ^faq/?$          index.php?page=faq          [NC,L]
-RewriteRule    ^feedback/?$     index.php?page=feedback     [NC,L]
-RewriteRule    ^legal/?$        index.php?page=legal        [NC,L]
+#Add trailing slash automatically
+RewriteCond %{REQUEST_URI} !(/$|\.)
+RewriteRule (.*) %{REQUEST_URI}/ [R=301,L]
 
+#Index SPA pages
+RewriteRule    ^sell/?$         /index.php?page=sell         [NC,L]
+RewriteRule    ^account/?$      /index.php?page=account      [NC,L]
+RewriteRule    ^faq/?$          /index.php?page=faq          [NC,L]
+RewriteRule    ^feedback/?$     /index.php?page=feedback     [NC,L]
+RewriteRule    ^legal/?$        /index.php?page=legal        [NC,L]
+
+#Remove .php from files
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php
 
+#Remove .html from files
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.html -f
 RewriteRule ^(.*)$ $1.html
 
-RewriteCond %{HTTP_HOST} ^www\.bearcatexchange\.com$ [NC]
-RewriteRule ^(.*)$ http://bearcatexchange.com/$1 [R=301,L]
-
-### Protect Files ####
+#Protect sensitive files
 <filesMatch ".(htaccess|htpasswd|ini|phps|fla|log|sh)$">
 Order Allow,Deny
 Deny from all
 </filesMatch>
 
+#Error Documents
 ErrorDocument 400 /?e=400
 ErrorDocument 401 /?e=401
 ErrorDocument 403 /?e=403
