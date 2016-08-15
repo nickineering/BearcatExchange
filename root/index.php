@@ -904,7 +904,7 @@ function get_rand_letters($length) {
                                           $even = false;
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                     ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
-                                        <td class="status"><input type="checkbox" name="status" value='sold' <?php if($row["status"] == "sold") echo "checked"; ?>><div></div></td>
+                                        <td class="status"><button type="button" name="status"><?php if($row["status"] == "sold") echo "Mark Unsold"; else echo "Mark Sold"; ?></button><div></div></td>
                                         <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>

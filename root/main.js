@@ -98,7 +98,7 @@ function startJavascript (localErrorCode, data, devServer){
                     var infoBoxEdit = false;
                     if($("[item=" + id + "]").hasClass("userItem")){
                         infoBoxEdit = true;
-                        var checked = $("#owned-items [item=" + id + "] .status input").prop('checked');
+                        var checked = $("#owned-items [item=" + id + "]").hasClass('sold');
                         rowData.checkedForSold = (checked)?"checked":"";
                         var renderedInfoBox = handlebarsInfoBoxEditCompilation(rowData);
                     }
@@ -122,18 +122,20 @@ function startJavascript (localErrorCode, data, devServer){
             }
         }
     });
-    $(".status input").change(function() {
-        var $checkbox = $(this);
-        var itemId = $checkbox.parent().parent().attr("item");
+    $(".status button").click(function() {
+        var $button = $(this);
+        var itemId = $button.parent().parent().attr("item");
         var status = '';
-        if ($checkbox.prop('checked')) {
+        if (!$button.parent().parent().hasClass("sold")) {
             status = "sold";
-            $checkbox.parent().parent().addClass("sold");
+            $button.parent().parent().addClass("sold");
             $('[item='+itemId+'].userItem').addClass("soldUserItem");
+            $('[item='+itemId+'] .status button').html("Mark Unsold");
         } else {
             status = "unsold";
-            $checkbox.parent().parent().removeClass("sold");
+            $button.parent().parent().removeClass("sold");
             $('[item='+itemId+'].userItem').removeClass("soldUserItem");
+            $('[item='+itemId+'] .status button').html("Mark Sold");
         }
         colorizeTextbooks();
         var soldInputs = {//get the values submit
@@ -202,7 +204,7 @@ function startJavascript (localErrorCode, data, devServer){
 
 function hideNewsletters () {
     if(userData.newsletter == "subscribed" && $.cookie("prefs").email == userData.email) {
-        $(".newsletter-form").addClass("hidden");
+        $("[name=newsletter]").parent().parent().addClass("hidden");
     }
 }
 
@@ -221,10 +223,10 @@ function storePrefs () {
     $.updateCookie('prefs', $(this).attr('cookie'), $( this ).val(), { expires: 90, path: '/'});
     $('input[cookie="' + $(this).attr('cookie') + '"]').val($( this ).val());
     if($.cookie("prefs").email != userData.email) {
-        $(".newsletter-form").removeClass("hidden");
+        $("[name=newsletter]").parent().parent().removeClass("hidden");
     }
     if($.cookie("prefs").email == userData.email) {
-        $(".newsletter-form").addClass("hidden");
+        $("[name=newsletter]").parent().parent().addClass("hidden");
     }
 }
 
@@ -844,11 +846,11 @@ function receivedUpdateFormResponse(data) {
         if(data.item.status == 'sold'){
             $('#owned-items [item='+data.item.id+']').addClass("sold");
             $('#textbooks [item='+data.item.id+']').addClass("soldUserItem");
-            $('[item='+data.item.id+'] .status input').attr("checked", "checked");
+            $('[item='+data.item.id+'] .status button').html("Mark Unsold");
         }
         else {
             $('[item='+data.item.id+']').removeClass("sold soldUserItem");
-            $('[item='+data.item.id+'] .status input').removeAttr("checked");
+            $('[item='+data.item.id+'] .status button').html("Mark Sold");
         }
         miscMessage("Your changes were saved.", 'success');
     }

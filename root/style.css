@@ -61,7 +61,7 @@ input[type="submit"] {
 .comments {
     display: none;
 }
-.course, .price, .time {
+.status, .course, .price, .time {
     white-space: nowrap;
 }
 .items td {
@@ -134,6 +134,9 @@ label {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+.newsletter-form {
+    color: #007a5e;
 }
 .newsletter-form label {
     font-weight: 400;
@@ -262,9 +265,6 @@ input[type="submit"] {
 }
 .info-box .form-message-wrapper {
     border-radius: 0;
-}
-.newsletter-form {
-    color: #007a5e;
 }
 .page-form input[type="text"],
 .page-form input[type="email"] {
