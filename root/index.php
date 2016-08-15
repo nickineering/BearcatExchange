@@ -384,7 +384,101 @@ function onValidate($localCon, $user, $textbookId, $textbookTitle) {
     mysqli_query($localCon, 'UPDATE textbooks SET status = "sold" WHERE `user_id` = '.$user.' AND `id` = '.$textbookId);
     createSession($user);
     printMessage('<i>'.$textbookTitle.'</i> was marked as sold.', "success");
-    $_GET['page'] = "account";
+    mysqli_close($con);
+    header('Location: /account/');
+    die();
+}
+
+function createHash($userid, $textbook) {
+    global $con;
+    $hash = $userid.get_rand_alphanumeric(20);
+    $hashInsert = "INSERT INTO  `hashes` (`user` ,  `hash`,  `textbook` ) VALUES ('$userid',  '$hash',  '$textbook')";
+    mysqli_query($con, $hashInsert);
+    return $hash;
+}
+
+function checkHash($localCon, $complete, $user, $hash) {
+    global $con;
+    global $getAnotherLinkInstructions;
+    global $theUser;
+    global $startTimestamp;
+    $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
+    $hashArray = mysqli_query($localCon, $hashSearch);
+    if (mysqli_num_rows($hashArray) == 1) {
+        $hashArray = mysqli_fetch_array($hashArray);
+        $textbookId = intval($hashArray['textbook']);
+        if ($textbookId == -1) {
+            createSession($hashArray['user'], true);
+        }
+        else {
+            $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
+            if (mysqli_num_rows($textbook) == 1) {
+                $textbook = mysqli_fetch_array($textbook);
+                if ($textbook['status'] == 'sold') {
+                    printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ', "warning");
+                }
+                else {
+                    $diff = $startTimestamp - strtotime($hashArray['time']);
+                    if ($diff < 60 * 60 * 24 * 30) {
+                        $complete($localCon, $user, $textbookId, $textbook['title']);
+                    }
+                    else {
+                        printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'error');
+                    }
+                }
+            }
+            else {
+                printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'error');
+            }
+        }
+    }
+    else {
+        printMessage('Your link did not work. Are you sure you copied it correctly from your email? If not, m'.$getAnotherLinkInstructions, 'error');
+    }
+}
+
+function printMessage($status, $priority = "info") {
+    $_SESSION['status'] = $status;
+    $_SESSION['priority'] = $priority;
+}
+
+function createSession ($userId, $print, $code = 1){
+    global $con;
+    global $theUser;
+    global $startTimestamp;
+    global $session;
+    $theUser = findUser($con, $userId);
+    if ($theUser['loggedIn'] == true){
+        logout(3);
+    }
+    $theUser['justLoggedIn'] = true;
+    $theUser['loggedIn'] = true;
+    $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
+    setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
+    mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", $code, '".$theUser['session']."', '".get_ip()."')");
+    getSession();
+    if($print == true) {
+        printMessage("You are now logged in");
+        mysqli_close($con);
+        header('Location: /account/');
+        die();
+    }
+}
+
+function getSession () {
+    global $con;
+    global $session;
+    if(isset($_COOKIE['user-session'])){
+        if(ctype_alnum($_COOKIE['user-session'])) {
+            $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
+            if (mysqli_num_rows($session) != 0) {
+                $session = mysqli_fetch_array($session);
+                $theUser['loggedIn'] = true;
+                return $session;
+            }
+        }
+    }
+    return false;
 }
 
 function getUser($localCon, $localEmail, $localName, $localNewsletter, $code = 1) {
@@ -406,18 +500,72 @@ function findUser($localCon, $identifier, $localNewsletter) {
         $userData = mysqli_query($localCon, "SELECT id, name, email, newsletter FROM users WHERE id = '$identifier'");
     }
     else {
-        $userData = mysqli_query($localCon, "SELECT id, name, email, newsletter FROM users WHERE email = '$identifier'");
+        $userData = mysqli_query($localCon, "SELECT id, name, email, newsletter FROM users WHERE email = '".check_input($identifier)."'");
     }
     if (mysqli_num_rows($userData) != 0) {
         $userData = mysqli_fetch_array($userData);
         if ($userData['newsletter'] == 'unsubscribed' && $localNewsletter == 'subscribed') {
-            mysqli_query($localCon, "UPDATE users SET newsletter = '$localNewsletter' WHERE email = '".$userData['email']."'");
+            mysqli_query($localCon, "UPDATE users SET newsletter = 'subscribed' WHERE email = '".$userData['email']."'");
         }
         return $userData;
     }
     else {
         return false;
     }
+}
+
+function generateErrorText($localErrorCode, $makeDiv) {
+    global $errorCodes;
+    if($localErrorCode != 0){
+        $resultMessage = ($makeDiv ? "<div id='server-messages'><p>" : "");
+        $resultMessage .= (isset($errorCodes[$localErrorCode][1]) ? $errorCodes[$localErrorCode][1] : $programingErrorMessage) . ' ';
+        $resultMessage .= (isset($errorCodes[$localErrorCode][0]) ? $errorCodes[$localErrorCode][0] : ('Error ' . $localErrorCode ));
+        $resultMessage .= ($makeDiv ? '.</p></div>' : "");
+        return $resultMessage;
+    }
+    else{
+        return false;
+    }
+}
+
+function timeSince ($sinceDate) {
+    global $startTimestamp;
+    $sinceTimestamp = strtotime($sinceDate);
+    $secondsSince = $startTimestamp - $sinceTimestamp;
+    $interval = floor($secondsSince / (60*60*24*10));
+    if ($interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
+        if(date("Y") != date("Y", $sinceTimestamp)){//If during a different year include the year in the return date.
+            return date("F j, Y", $sinceTimestamp);
+        }
+        else {
+            return date("F j", $sinceTimestamp);
+        }
+    }
+    $interval = floor($secondsSince / (60*60*24));
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " days ago":"1 day ago";
+    }
+    $interval = floor($secondsSince / (60*60));
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " hours ago":"1 hour ago";
+    }
+    $interval = floor($secondsSince / 60);
+    if ($interval >= 1) {
+        return ($interval >= 2)?$interval . " minutes ago":"1 minute ago";
+    }
+    return "Just now";//Less than one minute ago.
+}
+
+function check_input($data, $errorMessage = '', $error = '') {
+    global $errors;
+    global $con;
+    $data = strip_tags($data);
+    $data = trim($data);
+    $data = mysqli_real_escape_string($con, $data);
+    if ($errorMessage && strlen($data) == 0) {
+        $errors[$error].= ' ' . $errorMessage . ' ';
+    }
+    return $data;
 }
 
 function get_ip() {
@@ -459,18 +607,6 @@ function validateEmail($emailToValidate) {
     else {
         $errors['email'] = "That's not a valid e-mail address.";
     }
-}
-
-function check_input($data, $errorMessage = '', $error = '') {
-    global $errors;
-    global $con;
-    $data = strip_tags($data);
-    $data = trim($data);
-    $data = mysqli_real_escape_string($con, $data);
-    if ($errorMessage && strlen($data) == 0) {
-        $errors[$error].= ' ' . $errorMessage . ' ';
-    }
-    return $data;
 }
 
 function randomCharacter($num) {
@@ -550,137 +686,6 @@ function get_rand_letters($length) {
         }
     }
     return $rand_id;
-}
-
-function createHash($userid, $textbook) {
-    global $con;
-    $hash = $userid.get_rand_alphanumeric(20);
-    $hashInsert = "INSERT INTO  `hashes` (`user` ,  `hash`,  `textbook` ) VALUES ('$userid',  '$hash',  '$textbook')";
-    mysqli_query($con, $hashInsert);
-    return $hash;
-}
-
-function checkHash($localCon, $complete, $user, $hash) {
-    global $con;
-    global $getAnotherLinkInstructions;
-    global $theUser;
-    global $startTimestamp;
-    $hashSearch = "SELECT * FROM `hashes` WHERE `hash` =  '$hash'";
-    $hashArray = mysqli_query($localCon, $hashSearch);
-    if (mysqli_num_rows($hashArray) == 1) {
-        $hashArray = mysqli_fetch_array($hashArray);
-        $textbookId = intval($hashArray['textbook']);
-        if ($textbookId == -1) {
-            createSession($hashArray['user'], true);
-        }
-        else {
-            $textbook = mysqli_query($localCon, 'SELECT title, status FROM `textbooks` WHERE `user_id` = '.$user. ' AND `id` = '.$textbookId);
-            if (mysqli_num_rows($textbook) == 1) {
-                $textbook = mysqli_fetch_array($textbook);
-                if ($textbook['status'] == 'sold') {
-                    printMessage('You already removed '.$textbook['title']. ', but now it is really gone. Thanks for using Bearcat Exchange. ', "warning");
-                }
-                else {
-                    $diff = $startTimestamp - strtotime($hashArray['time']);
-                    if ($diff < 60 * 60 * 24 * 30) {
-                        $complete($localCon, $user, $textbookId, $textbook['title']);
-                    }
-                    else {
-                        printMessage('That link was from ancient history. M'.$getAnotherLinkInstructions, 'error');
-                    }
-                }
-            }
-            else {
-                printMessage('Hmmmm... That is funny. Your link has something wrong with it. M'.$getAnotherLinkInstructions, 'error');
-            }
-        }
-    }
-    else {
-        printMessage('Your link did not work. Are you sure you copied it correctly from your email? If not, m'.$getAnotherLinkInstructions, 'error');
-    }
-}
-
-function printMessage($status, $priority = "info") {
-    $_SESSION['status'] = $status;
-    $_SESSION['priority'] = $priority;
-}
-
-function createSession ($userId, $print, $code = 1){
-    global $con;
-    global $theUser;
-    global $startTimestamp;
-    global $session;
-    $theUser = findUser($con, $userId);
-    if ($theUser['loggedIn'] == true){
-        logout(3);
-    }
-    $theUser['justLoggedIn'] = true;
-    $theUser['loggedIn'] = true;
-    $theUser['session'] = $theUser['id'].get_rand_alphanumeric(20);
-    setcookie("user-session", $theUser['session'], $startTimestamp + (60*60*24*45), "/");
-    mysqli_query($con, "INSERT INTO `sessions` (`user`, `status`, `hash`, `ip_address`) VALUES (".$theUser['id'].", $code, '".$theUser['session']."', '".get_ip()."')");
-    getSession();
-    if($print == true) {
-        printMessage("You are now logged in");
-    }
-}
-
-function getSession () {
-    global $con;
-    global $session;
-    if(isset($_COOKIE['user-session'])){
-        if(ctype_alnum($_COOKIE['user-session'])) {
-            $session = mysqli_query($con, "SELECT user, time, status, hash FROM sessions WHERE hash = '".$_COOKIE['user-session']."'");
-            if (mysqli_num_rows($session) != 0) {
-                $session = mysqli_fetch_array($session);
-                $theUser['loggedIn'] = true;
-                return $session;
-            }
-        }
-    }
-    return false;
-}
-
-function generateErrorText($localErrorCode, $makeDiv) {
-    global $errorCodes;
-    if($localErrorCode != 0){
-        $resultMessage = ($makeDiv ? "<div id='server-messages'><p>" : "");
-        $resultMessage .= (isset($errorCodes[$localErrorCode][1]) ? $errorCodes[$localErrorCode][1] : $programingErrorMessage) . ' ';
-        $resultMessage .= (isset($errorCodes[$localErrorCode][0]) ? $errorCodes[$localErrorCode][0] : ('Error ' . $localErrorCode ));
-        $resultMessage .= ($makeDiv ? '.</p></div>' : "");
-        return $resultMessage;
-    }
-    else{
-        return false;
-    }
-}
-
-function timeSince ($sinceDate) {
-    global $startTimestamp;
-    $sinceTimestamp = strtotime($sinceDate);
-    $secondsSince = $startTimestamp - $sinceTimestamp;
-    $interval = floor($secondsSince / (60*60*24*10));
-    if ($interval >= 1) {//Returns true if sinceDate is more than 10 days ago.
-        if(date("Y") != date("Y", $sinceTimestamp)){//If during a different year include the year in the return date.
-            return date("F j, Y", $sinceTimestamp);
-        }
-        else {
-            return date("F j", $sinceTimestamp);
-        }
-    }
-    $interval = floor($secondsSince / (60*60*24));
-    if ($interval >= 1) {
-        return ($interval >= 2)?$interval . " days ago":"1 day ago";
-    }
-    $interval = floor($secondsSince / (60*60));
-    if ($interval >= 1) {
-        return ($interval >= 2)?$interval . " hours ago":"1 hour ago";
-    }
-    $interval = floor($secondsSince / 60);
-    if ($interval >= 1) {
-        return ($interval >= 2)?$interval . " minutes ago":"1 minute ago";
-    }
-    return "Just now";//Less than one minute ago.
 }
 
 ?>
@@ -862,7 +867,7 @@ function timeSince ($sinceDate) {
                                     <p class="input-text"><label for="login-email">Enter the same email you listed your item with to get started <span class="required">*</span></label></p>
                                     <p class="form-error"><label for="login-email"  id='login-email-message'></label></p>
                                     <input type="email" name="email" id='login-email' maxlength="254" cookie='email'>
-                                    <br><br>
+                                    <br>
                                 </div>
                                 <div id="login-form-message" class="page-form-message"><div id="login-form-message-wrapper" class='form-message-wrapper hidden'></div></div>
                                 <br>

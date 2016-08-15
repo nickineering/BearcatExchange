@@ -802,16 +802,16 @@ function receivedLoginFormResponse(data) {
     var submitButton = $('#login-submit');
     submitButton.removeAttr('disabled');
     submitButton.val('VERIFY');
-//    console.log(JSON.stringify(data, null, 2));
     if(data.email){
         $.updateCookie('prefs', 'name', data.name, { expires: 90, path: '/' });
         $.updateCookie('prefs', 'email', data.email, { expires: 90, path: '/' });
         printPrefs();
         pageChangeHandler("buy");
         miscMessage('We sent you an email with a link. Click it to continue. ', 'success');
+        loginFormMiscMessage("Click the link that was emailed to " + data.email + " to continue. ");
     }
     if(data.misc){
-        sellFormMiscMessage(data.misc);
+        loginFormMiscMessage(data.misc);
     }
 }
 
