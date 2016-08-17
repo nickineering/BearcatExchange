@@ -1,6 +1,6 @@
 <?php
-$startTime = date("Y-m-d H:i:s");
-$startTimestamp = strtotime($startTime);
+$startTime = new DateTime();
+$startTimestamp = strtotime(date("Y-m-d H:i:s"));
 require __DIR__ . '/vendor/autoload.php'; //Composer autoload feature
 $programingErrorMessage = "Someone made an mistake and it might have been us. But, hey, it could be you so try <a href='.'>refreshing the page</a>. If this message does not go away within a minute, please let us know by emailing us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a>.";
 $serverError = false;
@@ -130,6 +130,7 @@ function submitTextbook() {
     global $con;
     global $errors;
     global $theUser;
+    global $startTime;
     $name = ucwords(check_input($_POST['name'], "Enter your name.", "misc"));
     if (strlen($name) > 50) {
         $errors['misc'] .= "Abbreviate your name to 50 characters or less";
@@ -154,7 +155,7 @@ function submitTextbook() {
         echo json_encode($errors);
         die();
     }
-    $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `course`, `comments`) VALUES ('".$item['title']."', '".getUser($con, $email, $name, $newsletter). "', '".$item['author']."', '".$item['price']."', '".$item['course']."', '".$item['comments']."');";
+    $insert = "INSERT INTO `textbooks` (`title`, `user_id`, `author`, `price`, `renew`, `course`, `comments`) VALUES ('".$item['title']."', '".getUser($con, $email, $name, $newsletter). "', '".$item['author']."', '".$item['price']."', '".getNewExpirationDate()->format('Y-m-d H:i:s')."', '".$item['course']."', '".$item['comments']."');";
     mysqli_query($con, $insert);
     if ($theUser['loggedIn'] && $theUser['email'] != $email){
         logout(4, false);
@@ -165,6 +166,22 @@ function submitTextbook() {
     $result["misc"] = 'success';
     printMessage($item['title']." was listed successfully!", "success");
     die(json_encode($result));
+}
+
+function getNewExpirationDate () {
+    global $startTime;
+    $renew = new DateTime();
+    if ($startTime > new DateTime("September 10 11:59:59pm")){
+        $renew->modify('March 25 11:59:59pm');
+        $renew->modify('+1 year');
+    }
+    else if ($startTime > new DateTime("February 10 11:59:59pm")) {
+        $renew->modify('October 25 11:59:59pm');
+    }
+    else {
+        $renew->modify('March 25 11:59:59pm');
+    }
+    return $renew;
 }
 
 function getItemData () {
@@ -333,7 +350,10 @@ function updateItem () {
             if($_POST['status'] == "unsold") {
                 $item['status'] = "unsold";
             }
-            $overviewQuery = "SELECT `id`, `user_id`, `title`, `author`, `price`, `time`, `course`, `comments`, `status` FROM textbooks WHERE `id` = $itemId";
+            if($_POST['renew']){
+                $item['renew'] = getNewExpirationDate()->format('Y-m-d H:i:s');
+            }
+            $overviewQuery = "SELECT `id`, `user_id`, `title`, `author`, `price`, `time`, `renew`, `course`, `comments`, `status` FROM textbooks WHERE `id` = $itemId";
             $beginningState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
             $textbooksUpdate = "UPDATE `textbooks` SET";
             $updates = "INSERT INTO `updates` (`textbook_id`, `time`, `session`";
@@ -354,6 +374,8 @@ function updateItem () {
             $endingState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
             $result["misc"] = "success";
             $result['item'] = $endingState;
+            $renewDate = new Datetime($result['item']['renew']);
+            $result['item']['renewFormatted'] = $renewDate->format("F j, Y");
         }
         else {
             $result["misc"] = 'Wrong user';
@@ -811,11 +833,11 @@ function get_rand_letters($length) {
                         <table id="textbooks" class="items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
-                                    <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
-                                    <th class="authorHeader" title="Alphabetize by author">Author</th>
-                                    <th class="courseHeader" title="Sort by course">Course</th>
-                                    <th class="priceHeader" title="Lowest price first">Price</th>
-                                    <th class="timePostedHeader" title="Most recent first">Time Posted</th>
+                                    <th class="textbookHeader">Textbook</th>
+                                    <th class="authorHeader">Author</th>
+                                    <th class="courseHeader">Course</th>
+                                    <th class="priceHeader">Price</th>
+                                    <th class="timePostedHeader">Time Posted</th>
                                     <th class="commentsHeader"></th>
                                 </tr>
                             </thead>
@@ -887,18 +909,19 @@ function get_rand_letters($length) {
                             <table id="owned-items" class="items" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
-                                        <th class="statusHeader" title='Mark as sold'>Sold</th>
-                                        <th class="textbookHeader" title='Alphabetize textbooks'>Textbook</th>
-                                        <th class="authorHeader" title="Alphabetize by author">Author</th>
-                                        <th class="courseHeader" title="Sort by course">Course</th>
-                                        <th class="priceHeader" title="Lowest price first">Price</th>
-                                        <th class="timePostedHeader" title="Most recent first">Time Posted</th>
+                                        <th class="statusHeader">Sold</th>
+                                        <th class="textbookHeader">Textbook</th>
+                                        <th class="authorHeader">Author</th>
+                                        <th class="courseHeader">Course</th>
+                                        <th class="priceHeader">Price</th>
+                                        <th class="timePostedHeader">Time Posted</th>
+                                        <th class="expirationHeader">Expiration</th>
                                         <th class="commentsHeader never"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                      $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
+                                      $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`, `renew`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
                                       if (mysqli_num_rows($result) > 0) {
                                           $numOfRows = mysqli_num_rows($result);
                                           $even = false;
@@ -910,6 +933,13 @@ function get_rand_letters($length) {
                                         <td class="course"><?php echo $row["course"]; ?></td>
                                         <td class="price">$<span class='val'><?php echo $row["price"]; ?></span></td>
                                         <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
+                                        <td class="renew"><?php
+                                              $renew = new Datetime($row["renew"]);
+                                              echo $renew->format("F j, Y");
+                                              if ($renew->diff(new DateTime())->days < 30){
+                                                  echo '<br><button type="button" name="renew">Renew</button><div></div>';
+                                              }
+                                        ?></td>
                                         <td class="comments"><?php echo $row["comments"]; ?></td>
                                     </tr><?php
                                               $even = !$even;

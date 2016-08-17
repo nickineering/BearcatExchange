@@ -72,7 +72,7 @@ function startJavascript (localErrorCode, data, devServer){
     Handlebars.parse(infoBoxEdit);
     var handlebarsInfoBoxEditCompilation = Handlebars.compile(infoBoxEdit);
     $('.items tbody').on('click', 'td', function () {
-        if(!$(this).hasClass("status")) {
+        if(!$(this).hasClass("status") && !$(this).hasClass("renew")) {
             closeAlertBox();
             var id = $(this).parent().attr("item");
             var idInSelectedRows = selectedRows.indexOf(id);
@@ -154,6 +154,27 @@ function startJavascript (localErrorCode, data, devServer){
         };
         if(validateInputs(soldInputs, 'sold-form', receivedSoldFormResponse, miscMessage) == false) {
             miscMessage('There was a problem updating the status of your item.', "error");
+        }
+    });
+    $(".renew button").click(function() {
+        var $button = $(this);
+        var itemId = $button.parent().parent().attr("item");
+        var renewInputs = {//get the values submit
+            itemId : {
+                category : 'novalidate',
+                fieldValue : itemId
+            },
+            renew : {
+                category : 'novalidate',
+                fieldValue : "true"
+            },
+            request : {
+                category : 'novalidate',
+                fieldValue : 'update-item'
+            }
+        };
+        if(validateInputs(renewInputs, 'renew-form', receivedRenewFormResponse, miscMessage) == false) {
+            miscMessage('There was a problem renewing your item.', "error");
         }
     });
     $(function() {
@@ -832,6 +853,16 @@ function receivedSoldFormResponse (data) {
     }
     else {
         miscMessage("<i>" + data.item.title + "</i> was marked as " + data.item.status + ".", "success");
+    }
+}
+
+function receivedRenewFormResponse (data) {
+    if(data.misc != "success"){
+        miscMessage("There was a problem renewing your item. Refresh the page and try again.", "error");
+    }
+    else {
+        miscMessage("<i>" + data.item.title + "</i> was renewed.", "success");
+        $("[item="+data.item.id+"] .renew").html(data.item.renewFormatted);
     }
 }
 
