@@ -259,7 +259,7 @@ function contactSeller() {
         echo json_encode($errors);
         die();
     }
-    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `time` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter, 4). "', '$textbookId', '$message', CURRENT_TIMESTAMP , '".get_ip()."' );";
+    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter, 4). "', '$textbookId', '$message', '".get_ip()."' );";
     mysqli_query($con, $insert);
     $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, author, course, price, time, comments FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
@@ -339,6 +339,7 @@ function updateItem () {
     global $session;
     global $theUser;
     global $errors;
+    global $startTime;
     if($theUser['loggedIn']) {
         $itemId = intval($_POST['itemId']);
         $insert = "SELECT `user_id` FROM `textbooks` WHERE `id` = ".$itemId;
@@ -352,12 +353,14 @@ function updateItem () {
             }
             if($_POST['renew']){
                 $item['renew'] = getNewExpirationDate()->format('Y-m-d H:i:s');
+                $_POST['time'] = 'true';
+                $item['time'] = $startTime->format('Y-m-d H:i:s');
             }
             $overviewQuery = "SELECT `id`, `user_id`, `title`, `author`, `price`, `time`, `renew`, `course`, `comments`, `status` FROM textbooks WHERE `id` = $itemId";
             $beginningState = mysqli_fetch_array(mysqli_query($con, $overviewQuery));
             $textbooksUpdate = "UPDATE `textbooks` SET";
-            $updates = "INSERT INTO `updates` (`textbook_id`, `time`, `session`";
-            $updatesValues = "VALUES ($itemId, CURRENT_TIMESTAMP, '" . $session['hash'] . "'";
+            $updates = "INSERT INTO `updates` (`textbook_id`, `session`";
+            $updatesValues = "VALUES ($itemId, '" . $session['hash'] . "'";
             $previousInTextbooks = false;
             foreach ($item as $key => $value) {
                 if(isset($_POST[$key]) && $item[$key] != $beginningState[$key]){
@@ -506,7 +509,7 @@ function getSession () {
 function getUser($localCon, $localEmail, $localName, $localNewsletter, $code = 1) {
     $findUserResult = findUser($localCon, $localEmail, $localNewsletter);
     if($findUserResult == false) {
-        $userInsert = "INSERT INTO `users` (`email`, `name`, `joined`, `newsletter`) VALUES ('$localEmail', '$localName', CURRENT_TIMESTAMP, '$localNewsletter');";
+        $userInsert = "INSERT INTO `users` (`email`, `name`, `newsletter`) VALUES ('$localEmail', '$localName', '$localNewsletter');";
         mysqli_query($localCon, $userInsert);
         $userId = mysqli_insert_id($localCon);
         createSession($userId, false, $code);
@@ -843,7 +846,7 @@ function get_rand_letters($length) {
                             </thead>
                             <tbody>
                                 <?php
-                                $result = mysqli_query($con, "SELECT `id`, `user_id`, `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`, `status` FROM `textbooks` WHERE `status` = 'unsold'".(($theUser['loggedIn'] == true)?' OR `user_id` = ' . $theUser['id']:'')." ORDER BY `id` DESC");
+                                $result = mysqli_query($con, "SELECT `id`, `user_id`, `title`,  `author` ,  `price` ,  `time`,  `course` ,  `comments`, `status` FROM `textbooks` WHERE renew > CURRENT_TIMESTAMP AND (`status` = 'unsold'".(($theUser['loggedIn'] == true)?' OR `user_id` = ' . $theUser['id']:'').") ORDER BY `time` DESC");
                                 if (mysqli_num_rows($result) > 0) {
                                     $numOfRows = mysqli_num_rows($result);
                                     $even = false;
@@ -921,7 +924,7 @@ function get_rand_letters($length) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                      $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`, `renew`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `id` DESC");
+                                      $result = mysqli_query($con, "SELECT `id` , `title`,  `author` ,  `price` ,  `time`, `renew`,  `course` ,  `comments`,  `status` FROM `textbooks` WHERE  `id` > 0 AND user_id = ".$theUser['id']." ORDER BY `time` DESC");
                                       if (mysqli_num_rows($result) > 0) {
                                           $numOfRows = mysqli_num_rows($result);
                                           $even = false;
@@ -936,7 +939,7 @@ function get_rand_letters($length) {
                                         <td class="renew"><?php
                                               $renew = new Datetime($row["renew"]);
                                               echo $renew->format("F j, Y");
-                                              if ($renew->diff(new DateTime())->days < 30){
+                                              if (($renew->diff(new DateTime())->days <= 30) || $renew < $startTime){
                                                   echo '<br><button type="button" name="renew">Renew</button><div></div>';
                                               }
                                         ?></td>
