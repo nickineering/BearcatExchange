@@ -262,15 +262,17 @@ function contactSeller() {
         echo json_encode($errors);
         die();
     }
-    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `ip_address` ) VALUES ('".getUser($con, $email, $name, $newsletter, 4). "', '$textbookId', '$message', '".get_ip()."' );";
+    $userId = getUser($con, $email, $name, $newsletter, 4);
+    $insert = "INSERT INTO `messages` (`sender_id` , `textbook_id` , `message` , `ip_address` ) VALUES ('".$userId. "', '$textbookId', '$message', '".get_ip()."' );";
     mysqli_query($con, $insert);
     $textbookListing = mysqli_fetch_array(mysqli_query($con, "SELECT id, user_id, title, author, course, price, time, comments FROM textbooks WHERE id LIKE $textbookId"));
     $seller = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = ".intval($textbookListing['user_id'])));
     $removalLink = "https://bearcatexchange.com?email=".$seller['email']."&h=".createHash(intval($seller['id']), $textbookListing['id']);
     $mail->addAddress($seller['email'], $seller['name']);
     $mail->addReplyTo($email, $name);
-    $mail->Subject = 'A buyer for your textbook '.$textbookListing['title'];
-    $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'>
+    $subject = 'A buyer for your textbook '.$textbookListing['title'];
+    $mail->Subject = $subject;
+    $bodyText = "<div style='font-family: sans-serif; line-height: 2em;'>
         <h2 style='color: #007a5e'>A buyer sent you a message about your textbook <i>".$textbookListing['title']."</i>!</h2>
         <div style='font-size: 1.2em;'>
             <div style='color:#000'>
@@ -286,12 +288,10 @@ function contactSeller() {
                 You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
             </div>
         </div>
-    </div>";
-    if(!$mail->send()) {
-        printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
-        //echo 'Mailer Error: ' . $mail->ErrorInfo;
-    }
-    else {
+    </div>
+    ";
+    $mail->Body = $bodyText;
+    if(sendEmail($userId, $seller['id'], $subject, $bodyText, 2)){
         $result["misc"] = 'success';
     }
     if ($theUser['loggedIn'] && $theUser['email'] != $email){
@@ -324,12 +324,12 @@ function login () {
         $removalLink = "https://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
         $bodyMessage = "<p><a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it. If you did not request this email simply ignore it.</p > ";
         $mail->addAddress($userData['email'], $userData['name']);
-        $mail->Subject = 'Edit your textbook listings';
-        $mail->Body = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>";
-        if(!$mail->send()) {
-            printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
-        }
-        else {
+        $subject = 'Edit your textbook listings';
+        $mail->Subject = $subject;
+        $bodyText = "<div style='font-family: sans-serif; line-height: 2em;'><h2 style='color: #007a5e'>$bodyTitle</h2><div style='font-size: 1.2em;'><div style='color:#000'>$bodyMessage</div><div style='color:gray'><p>Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p></div></div></div>
+        ";
+        $mail->Body = $bodyText;
+        if(sendEmail(0, $userData['id'], $subject, $bodyText, 3)){
             $result["misc"] = 'success';
         }
         mysqli_close($con);
@@ -405,7 +405,8 @@ function notifyExpirations() {
         $errorCode = 403;
     }
     else {
-        $unrenewedTextbooksQuery = "SELECT * FROM `textbooks` WHERE `renew` < '2016-09-30 23:59:59'";//Need to make automated date finding eventually.
+        set_time_limit(0);
+        $unrenewedTextbooksQuery = "SELECT * FROM `textbooks` WHERE `renew` < '2016-09-30 23:59:59' AND `status` = 'unsold'";//Need to make automated date finding eventually.
         $unrenewedTextbooks = mysqli_query($con, $unrenewedTextbooksQuery);
         $i = 0;
         while ($row = mysqli_fetch_array($unrenewedTextbooks, MYSQLI_ASSOC)) {
@@ -419,15 +420,11 @@ function notifyExpirations() {
         }
         $numSent = 0;
         foreach($notifyUsers as $user => $value){
-            if($numSent >= $_REQUEST['first'] && $numSent < $_REQUEST['first'] + 200) {
+            $textbookTitles = array();
+            if($numSent >= $_REQUEST['first'] && $numSent < $_REQUEST['first'] + 100) {
                 foreach($notifyUsers[$user] as $textbookKey => $textbookId){
                     $textbookTitle = mysqli_fetch_array(mysqli_query($con, "SELECT title FROM textbooks WHERE id = $textbookId"));
-                    if(isset($textbookTitles)){
-                        array_push($textbookTitles, $textbookTitle);
-                    }
-                    else {
-                        $textbookTitles = array ($textbookTitle);
-                    }
+                    array_push($textbookTitles, $textbookTitle);
                 }
                 $userData = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = $user"));
                 $renewLink = "https://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
@@ -438,7 +435,8 @@ function notifyExpirations() {
                 <h2 style='color: #007a5e'>It's time to renew your textbook listings!</h2>
                 <div style='font-size: 1.2em;'>
                     <div style='color:#000'>
-                        <p>Your following listings are expiring on Bearcat Exchange. If you already sold them you can ignore this email. If not, <a href='$renewLink'>renew them now</a> for free. Renewing listings prevents them from being removed and automatically pushes them to the top of the website so more people will view them.</p>
+                        <p>The following listings are expiring on Bearcat Exchange. Once a listing is expired, it is automatically removed from the Bearcat Exchange to prevent older listings from cluttering your search. If you renew a listing, it will reappear at the top of Bearcat Exchange.</p>
+                        <p>If you've already sold these textbooks you may ignore this email. If not, <a href='$renewLink' style='color: #007a5e'>renew your textbooks now</a>!</p>
                         <strong><ol>
                         ";
                 foreach($textbookTitles as $title){
@@ -446,27 +444,37 @@ function notifyExpirations() {
                 }
                 $bodyText .= "
                         </ol></strong>
-                        <p>Renew any of your listings: <a href='$renewLink' style='color: #007a5e' >$renewLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
+                        <p>Edit or renew any of your listings at <a href='$renewLink' style='color: #007a5e' >$renewLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
                     </div>
                 </div>
-            </div>";
+            </div>
+            ";
                 $mail->Body = $bodyText;
                 echo "Sending " . $numSent . "<br>";
-                if(!$mail->send()) {
-                    printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
-                    //echo 'Mailer Error: ' . $mail->ErrorInfo;
-                    $insert = "INSERT INTO `emails` (`receiver_id`,`code`, `subject`, `body_text`, `success`, `server_message`) VALUES ('$user', '1', '$subject', '$bodyText', 0, '".$mail->ErrorInfo."');";
-                    mysqli_query($con, $insert);
-                }
-                else {
-                    $insert = 'INSERT INTO `emails` (`receiver_id`,`code`, `subject`, `body_text`, `success`) VALUES ("'.$user.'", "'. 1 .'", "'.$subject.'", "'.$bodyText.'", 1);';
-                    mysqli_query($con, $insert);
-                }
+                sendEmail(0, $user, $subject, $bodyText, 1);
                 $mail->clearAddresses();
             }
             $numSent++;
         }
         die("Success");
+    }
+}
+
+function sendEmail ($sender, $receiver, $subject, $bodyText, $code){
+    global $con;
+    global $mail;
+    $user = intval($user);
+    if(!$mail->send()) {
+        printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
+        //echo 'Mailer Error: ' . $mail->ErrorInfo;
+        $insert = "INSERT INTO `emails` (`sender_id`, `receiver_id`,`code`, `subject`, `body_text`, `success`, `server_message`) VALUES ('$sender', '$receiver', '$code', '$subject', '$bodyText', 0, '".$mail->ErrorInfo."');";
+        mysqli_query($con, $insert);
+        return false;
+    }
+    else {
+        $insert = 'INSERT INTO `emails` (`sender_id`, `receiver_id`,`code`, `subject`, `body_text`, `success`) VALUES ("'.$sender.'", "'.$receiver.'", "'. $code .'", "'.$subject.'", "'.$bodyText.'", 1);';
+        mysqli_query($con, $insert);
+        return true;
     }
 }
 
