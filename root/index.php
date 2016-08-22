@@ -94,6 +94,9 @@ else {
             case "logout";
                 logout();
                 break;
+            case "notify-expirations";
+                notifyExpirations();
+                break;
             default;
                 verifyLink();
                 break;
@@ -389,6 +392,73 @@ function updateItem () {
     }
     mysqli_close($con);
     die(json_encode($result));
+}
+
+function notifyExpirations() {
+    global $con;
+    global $startTime;
+    global $mail;
+    $unrenewedTextbooksQuery = "SELECT * FROM `textbooks` WHERE `renew` < '2016-09-30 23:59:59'";//Need to make automated date finding eventually.
+    $unrenewedTextbooks = mysqli_query($con, $unrenewedTextbooksQuery);
+    $i = 0;
+    while ($row = mysqli_fetch_array($unrenewedTextbooks, MYSQLI_ASSOC)) {
+        if(isset($notifyUsers[$row['user_id']])){
+            array_push($notifyUsers[$row['user_id']], $row['id']);
+        }
+        else {
+            $notifyUsers[$row['user_id']] = array($row['id']);
+        }
+        $i++;
+    }
+    $numSent = 0;
+    foreach($notifyUsers as $user => $value){
+        if($numSent > $_REQUEST['first'] && $numSent < $_REQUEST['first'] + 200) {
+            foreach($notifyUsers[$user] as $textbookKey => $textbookId){
+                $textbookTitle = mysqli_fetch_array(mysqli_query($con, "SELECT title FROM textbooks WHERE id = $textbookId"));
+                if(isset($textbookTitles)){
+                    array_push($textbookTitles, $textbookTitle);
+                }
+                else {
+                    $textbookTitles = array ($textbookTitle);
+                }
+            }
+            $userData = mysqli_fetch_array(mysqli_query($con, "SELECT id, email, name FROM users WHERE id = $user"));
+            $renewLink = "https://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
+            $mail->addAddress($userData['email'], $userData['name']);
+            $subject = 'Renew Your Textbook Listings';
+            $mail->Subject = $subject;
+            $bodyText = "<div style='font-family: sans-serif; line-height: 2em;'>
+            <h2 style='color: #007a5e'>It's time to renew your textbook listings!</h2>
+            <div style='font-size: 1.2em;'>
+                <div style='color:#000'>
+                    <p>Your following listings are expiring on Bearcat Exchange. If you already sold them you can ignore this email. If not, <a href='$renewLink''>renew them now</a> for free. Renewing listings prevents them from being removed and automatically pushes them to the top of the website so more people will view them.</p>
+                    <strong><ol>
+                    ";
+            foreach($textbookTitles as $title){
+                $bodyText .= "<li>" . $title[0] . "</li>";
+            }
+            $bodyText .= "
+                    </ol></strong>
+                    <p>Renew any of your listings: <a href='$renewLink' style='color: #007a5e' >$renewLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
+                </div>
+            </div>
+        </div>";
+            $mail->Body = $bodyText;
+            if(!$mail->send()) {
+                printMessage("Sorry, we had an internal error. Please try again. Email us at <a href='mailto:support@bearcatexchange.com'>support@bearcatexchange.com</a> if this message appears again.", "error");
+                //echo 'Mailer Error: ' . $mail->ErrorInfo;
+                $insert = "INSERT INTO `emails` (`receiver_id`,`code`, `subject`, `body_text`, `success`, `server_message`) VALUES ('$user', '1', '$subject', '$bodyText', 0, '".$mail->ErrorInfo."');";
+                mysqli_query($con, $insert);
+            }
+            else {
+                $insert = "INSERT INTO `emails` (`receiver_id`,`code`, `subject`, `body_text`, `success`) VALUES ('$user', '1', '$subject', '$bodyText', 1);";
+                mysqli_query($con, $insert);
+            }
+        }
+        $numSent++;
+    }
+    mysqli_close($con);
+    die("success");
 }
 
 function verifyLink() {
@@ -903,8 +973,8 @@ function get_rand_letters($length) {
                         <?php } else { ?>
                         <div id="account-form">
                             <h1>Edit Your Listings</h1>
-                            <h2>These are all of the items you've listed, <?php echo $theUser['name']; ?>. </h2>
-                            <p>Click a listing to edit it. To hide listings from shoppers click the sold checkbox. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
+                            <h2>These are all the items you've listed, <?php echo $theUser['name']; ?>. </h2>
+                            <p>Click a listing to edit it. To hide listings from shoppers click the sold button. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').className += " hidden";
