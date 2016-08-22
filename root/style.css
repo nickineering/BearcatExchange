@@ -876,6 +876,13 @@ div.alert-box span.close:focus {
         padding-left:15px;
     }
 }
+
+@media screen and (max-width: 1200px){
+    #account-form .authorHeader, #account-form .author, #account-form .courseHeader, #account-form .course {
+        display: none;
+    }
+}
+
 /*Tablet and Phone*/
 
 @media screen and (max-width: 960px) {
@@ -941,6 +948,12 @@ div.alert-box span.close:focus {
     }
     .top-right-button {
         display:none;
+    }
+}
+
+@media screen and (max-width: 800px){
+    #account-form .priceHeader, #account-form .price {
+        display: none;
     }
 }
 /*Phone Only*/
@@ -1079,6 +1092,9 @@ div.alert-box span.close:focus {
         margin: auto;
         height: 25px;
         border-radius: 3px;
+    }
+    #account-form .statusHeader, #account-form .status {
+        display: none;
     }
 }
 /* Tablet with Small Height and Phone */

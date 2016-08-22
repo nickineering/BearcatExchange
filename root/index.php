@@ -992,12 +992,12 @@ function get_rand_letters($length) {
                                 <thead>
                                     <tr>
                                         <th class="statusHeader">Sold</th>
+                                        <th class="renewHeader">Expiration</th>
                                         <th class="textbookHeader">Textbook</th>
                                         <th class="authorHeader">Author</th>
                                         <th class="courseHeader">Course</th>
                                         <th class="priceHeader">Price</th>
                                         <th class="timePostedHeader">Time Posted</th>
-                                        <th class="expirationHeader">Expiration</th>
                                         <th class="commentsHeader never"></th>
                                     </tr>
                                 </thead>
@@ -1010,11 +1010,6 @@ function get_rand_letters($length) {
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                     ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
                                         <td class="status"><button type="button" name="status"><?php if($row["status"] == "sold") echo "Mark Unsold"; else echo "Mark Sold"; ?></button><div></div></td>
-                                        <td class="title"><?php echo $row['title']; ?></td>
-                                        <td class="author"><?php echo $row["author"]; ?></td>
-                                        <td class="course"><?php echo $row["course"]; ?></td>
-                                        <td class="price">$<span class='val'><?php echo $row["price"]; ?></span></td>
-                                        <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                         <td class="renew"><?php
                                               $renew = new Datetime($row["renew"]);
                                               echo $renew->format("F j, Y");
@@ -1022,6 +1017,11 @@ function get_rand_letters($length) {
                                                   echo '<br><button type="button" name="renew">Renew</button><div></div>';
                                               }
                                         ?></td>
+                                        <td class="title"><?php echo $row['title']; ?></td>
+                                        <td class="author"><?php echo $row["author"]; ?></td>
+                                        <td class="course"><?php echo $row["course"]; ?></td>
+                                        <td class="price">$<span class='val'><?php echo $row["price"]; ?></span></td>
+                                        <td class="time" timestamp='<?php echo $row["time"]; ?>'><?php echo timeSince($row["time"]); ?></td>
                                         <td class="comments"><?php echo $row["comments"]; ?></td>
                                     </tr><?php
                                               $even = !$even;
