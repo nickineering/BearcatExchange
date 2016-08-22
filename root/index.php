@@ -983,7 +983,7 @@ function get_rand_letters($length) {
                         <div id="account-form">
                             <h1>Edit Your Listings</h1>
                             <h2>These are all the items you've listed, <?php echo $theUser['name']; ?>. </h2>
-                            <p>Click a listing to edit it. To hide listings from shoppers click the sold button. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
+                            <p>Click a listing's title to edit it. To hide listings from shoppers click the sold button. To sell another item vist the <a href='/sell/' class="spaLoad">selling page</a>. These listings were made with your email <?php echo $theUser['email']; ?>. To view listings from another email <a onclick="toggleLogout();" target='_blank'>logout</a> and then log back in with that email.</p>
                             <div><div id="account-noscript-warning" class='form-message-wrapper form-noscript-warning'>We are currently experiencing technical difficulties and may not be able to list your item. Try <a href=".">reloading this page</a> or check back later.</div></div>
                             <script>
                                 document.getElementById('account-noscript-warning').className += " hidden";
@@ -1010,13 +1010,13 @@ function get_rand_letters($length) {
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                                     ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
                                         <td class="status"><button type="button" name="status"><?php if($row["status"] == "sold") echo "Mark Unsold"; else echo "Mark Sold"; ?></button><div></div></td>
-                                        <td class="renew"><?php
+                                    <td class="renew"><span class="active<?php if($row["status"] != "unsold") echo " hidden"; ?>"><?php
                                               $renew = new Datetime($row["renew"]);
                                               echo $renew->format("F j, Y");
                                               if (($renew->diff(new DateTime())->days <= 30) || $renew < $startTime){
                                                   echo '<br><button type="button" name="renew">Renew</button><div></div>';
                                               }
-                                        ?></td>
+                                        ?></span><span class="inactive<?php if($row["status"] == "unsold") echo " hidden"; ?>">Already Sold</span></td>
                                         <td class="title"><?php echo $row['title']; ?></td>
                                         <td class="author"><?php echo $row["author"]; ?></td>
                                         <td class="course"><?php echo $row["course"]; ?></td>

@@ -128,15 +128,10 @@ function startJavascript (localErrorCode, data, devServer){
         var status = '';
         if (!$button.parent().parent().hasClass("sold")) {
             status = "sold";
-            $button.parent().parent().addClass("sold");
-            $('[item='+itemId+'].userItem').addClass("soldUserItem");
-            $('[item='+itemId+'] .status button').html("Mark Unsold");
         } else {
             status = "unsold";
-            $button.parent().parent().removeClass("sold");
-            $('[item='+itemId+'].userItem').removeClass("soldUserItem");
-            $('[item='+itemId+'] .status button').html("Mark Sold");
         }
+        changeItemStatus(status, itemId);
         colorizeTextbooks();
         var soldInputs = {//get the values submit
             itemId : {
@@ -158,7 +153,7 @@ function startJavascript (localErrorCode, data, devServer){
     });
     $(".renew button").click(function() {
         var $button = $(this);
-        var itemId = $button.parent().parent().attr("item");
+        var itemId = $button.parent().parent().parent().attr("item");
         var renewInputs = {//get the values submit
             itemId : {
                 category : 'novalidate',
@@ -862,7 +857,7 @@ function receivedRenewFormResponse (data) {
     }
     else {
         miscMessage("<i>" + data.item.title + "</i> was renewed.", "success");
-        $("[item="+data.item.id+"] .renew").html(data.item.renewFormatted);
+        $("[item="+data.item.id+"] .renew .active").html(data.item.renewFormatted);
     }
 }
 
@@ -874,19 +869,27 @@ function receivedUpdateFormResponse(data) {
         $('[item='+data.item.id+'] .course').html(data.item.course);
         $('[item='+data.item.id+'] .price .val').html(data.item.price);
         $('[item='+data.item.id+'] .comments').html(data.item.comments);
-        if(data.item.status == 'sold'){
-            $('#owned-items [item='+data.item.id+']').addClass("sold");
-            $('#textbooks [item='+data.item.id+']').addClass("soldUserItem");
-            $('[item='+data.item.id+'] .status button').html("Mark Unsold");
-        }
-        else {
-            $('[item='+data.item.id+']').removeClass("sold soldUserItem");
-            $('[item='+data.item.id+'] .status button').html("Mark Sold");
-        }
+        changeItemStatus(data.item.status, data.item.id);
         miscMessage("Your changes were saved.", 'success');
     }
     else{
         infoBoxMiscMessage(data.misc);
+    }
+}
+
+function changeItemStatus (status, item){
+    if(status == 'sold'){
+        $('#owned-items [item='+item+']').addClass("sold");
+        $('#textbooks [item='+item+']').addClass("soldUserItem");
+        $('[item='+item+'] .status button').html("Mark Unsold");
+        $("[item="+item+"] .renew .active").addClass("hidden");
+        $("[item="+item+"] .renew .inactive").removeClass("hidden");
+    }
+    else {
+        $('[item='+item+']').removeClass("sold soldUserItem");
+        $('[item='+item+'] .status button').html("Mark Sold");
+        $("[item="+item+"] .renew .active").removeClass("hidden");
+        $("[item="+item+"] .renew .inactive").addClass("hidden");
     }
 }
 
