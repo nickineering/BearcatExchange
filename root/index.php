@@ -816,6 +816,7 @@ function get_rand_letters($length) {
         <link href="/style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="/favicon.ico"/>
         <meta property="og:image" content="https://bearcatexchange.com/images/facebook-logo.jpg" />
+        <meta name="google-site-verification" content="ESm5C3qSc221nbRUhGD4CiCAvBeqVn4AX8_-u0FwY8g" />
     </head>
     <body onload='<?php
             if(isset($_SESSION['status'])){

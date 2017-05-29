@@ -1,9 +1,9 @@
 User-agent: *
 disallow: *
 allow: /$
-allow: /sell/
-allow: /account/
-allow: /faq/
-allow: /feedback/
-allow: /images/
+allow: /sell
+allow: /account
+allow: /faq
+allow: /feedback
+allow: /images/*
 allow: /favicon.ico
