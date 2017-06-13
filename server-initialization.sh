@@ -12,7 +12,9 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         apt-get install python-software-properties
         curl https://bootstrap.pypa.io/get-pip.py -o /home/ubuntu/automated/get-pip.py
         python3.4 /home/ubuntu/automated/get-pip.py
-        apt-get install ruby2.0 apache2 php7.0 libapache2-mod-php7.0 php7.0-mcrypt php7.0-cli php7.0-fpm php7.0-gd libssh2-php php7.0-mysqlnd git unzip zip php7.0-curl mailutils php7.0-json -y4
+        add-apt-repository ppa:certbot/certbot -y
+        apt-get update
+        apt-get install ruby2.0 apache2 php7.0 libapache2-mod-php7.0 php7.0-mcrypt php7.0-cli php7.0-fpm php7.0-gd libssh2-php php7.0-mysqlnd git unzip zip php7.0-curl mailutils php7.0-json python-certbot-apache software-properties-common -y
         debconf-set-selections <<< 'mysql-server mysql-server/root_password password $localDBPassword'
         debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password $localDBPassword'
         debconf-set-selections <<< "postfix postfix/mailname string 'bearcatexchange.com'"
@@ -23,7 +25,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         echo "phpmyadmin phpmyadmin/mysql/admin-pass password $localDBPassword" | debconf-set-selections
         echo "phpmyadmin phpmyadmin/mysql/app-pass password $localDBPassword" |debconf-set-selections
         echo "phpmyadmin phpmyadmin/app-password-confirm password $localDBPassword" | debconf-set-selections
-        apt-get install postfix phpmyadmin mysql-server python-letsencrypt-apache -y
+        apt-get install postfix phpmyadmin mysql-server -y
         php7.0enmod mcrypt
         pear install mail
         curl https://getcomposer.org/installer -o /var/www/be/live/composer.phar | php
@@ -41,11 +43,10 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         mv install automated/
         service codedeploy-agent start
         service codedeploy-agent status
-        echo -ne '\n $contactEmail \n \n ^[[1;5B \n \n' | letsencrypt --apache
-        touch /etc/cron.d/twicedaily
-        chmod 777 /etc/cron.d/twicedaily
-        echo "56 06,16 * * * letsencrypt renew --agree-tos -m $contactEmail" >> /etc/cron.d/twicedaily
-        rm mycron
+        certbot --apache
+        touch /etc/cron.d/server-initialization
+        chmod 777 /etc/cron.d/server-initialization
+        echo "56 06 16 * * * root /bin/sh certbot renew" >> /etc/cron.d/server-initialization
         echo "set number" > ~/.vimrc
         service apache2 restart
         mkdir /var/www/be/live/ -p
