@@ -10,7 +10,7 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         apt-get autoremove -y && apt-get autoclean -y
         add-apt-repository ppa:certbot/certbot -y
         apt-get update
-        apt-get install ruby2.0 apache2 php7.0 php7.0-fpm libapache2-mod-php7.0 php7.0-json php7.0-mcrypt php7.0-mysqlnd mysql-server phpmyadmin python-certbot-apache -y
+        apt-get install apache2 php7.0 php7.0-fpm libapache2-mod-php7.0 php7.0-json php7.0-mcrypt php7.0-mysqlnd mysql-server phpmyadmin software-properties-common python-certbot-apache -y
         debconf-set-selections <<< 'mysql-server mysql-server/root_password password myTempPass'
         debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password myTempPass'
         debconf-set-selections <<< "postfix postfix/mailname string 'bearcatexchange.com'"
@@ -22,7 +22,6 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
         echo "phpmyadmin phpmyadmin/mysql/app-pass password myTempPass" |debconf-set-selections
         echo "phpmyadmin phpmyadmin/app-password-confirm password myTempPass" | debconf-set-selections
         php7.0enmod mcrypt
-        pear install mail
         curl https://getcomposer.org/installer -o /var/www/be/live/composer.phar | php
         certbot --apache
         service apache2 restart
