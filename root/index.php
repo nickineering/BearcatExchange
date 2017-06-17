@@ -32,7 +32,7 @@ if(in_array($_SERVER['HTTP_HOST'], $serverList)) {
 }
 else {
     $sensitive = parse_ini_file("bearcatexchange.ini");
-    $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "main", $sensitive['remoteDBPassword'], "bearcatexchange", 3306);
+    $con = mysqli_connect("bearcat.cqfnkzrzji1p.us-east-1.rds.amazonaws.com", "root", $sensitive['remoteDBPassword'], "bearcatexchange", 3306);
 }
 if (!mysqli_set_charset($con, "utf8")) {
     $errorCode = 603;
@@ -939,13 +939,12 @@ function get_rand_letters($length) {
                                     $numOfRows = mysqli_num_rows($result);
                                     $even = false;
                                     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                                ?>
-                                <tr item="<?php echo $row['id'] .'" class="'. (($even)?'even':'odd');
+                                ?><tr item="<?php echo $row['id'] .'" class="'. (($even)?'even':'odd');
                                     if($row['status'] != 'unsold' && $theUser['loggedIn'] == true) {
                                         echo ' soldUserItem';
                                     }
                                     if($row['user_id'] == $theUser['id'] && $theUser['loggedIn'] == true) {
-                                            echo ' userItem';
+                                            echo 'userItem';
                                     }
                                     ?>">
                                     <td class="title"><?php echo $row['title']; ?></td>
@@ -1017,9 +1016,9 @@ function get_rand_letters($length) {
                                           $numOfRows = mysqli_num_rows($result);
                                           $even = false;
                                           while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                                    ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?>">
+                                    ?><tr item="<?php echo $row['id']; ?>" class="<?php echo (($even)?'even':'odd') . ' ' . (($row["status"] == "sold")?'sold':''); ?> userItem">
                                         <td class="status"><button type="button" name="status"><?php if($row["status"] == "sold") echo "Mark Unsold"; else echo "Mark Sold"; ?></button><div></div></td>
-                                    <td class="renew"><span class="active<?php if($row["status"] != "unsold") echo " hidden"; ?>"><?php
+                                        <td class="renew"><span class="active<?php if($row["status"] != "unsold") echo " hidden"; ?>"><?php
                                               $renew = new Datetime($row["renew"]);
                                               echo $renew->format("F j, Y");
                                               if (($renew->diff(new DateTime())->days <= 30) || $renew < $startTime){

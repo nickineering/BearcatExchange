@@ -1,6 +1,6 @@
 {
     "require": {
-        "pear/mail": ".4.1",
+        "pear/mail": "v1.4.1",
         "phpmailer/phpmailer": "~5.2"
     }
 }

@@ -4,3 +4,4 @@ root/composer.phar
 root/bearcatexchange-local.ini
 root/bearcatexchange.ini
 notes.html
+*.swp
