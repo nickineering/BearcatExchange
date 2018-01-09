@@ -1,5 +1,10 @@
 var condition = ["New", "Like New", "Very Good", "Good", "Acceptable", "Ask"];
-var pageTitles = {buy : 'Bearcat Exchange - Buy and sell textbooks at Binghamton', sell : 'Sell Textbooks On Bearcat Exchange', account : 'Edit Your Listings On Bearcat Exchange', faq : 'Common Questions About Bearcat Exchange', legal : 'Terms and Privacy For Bearcat Exchange', feedback : 'Give Feedback About Bearcat Exchange'};
+var pageTitles = {buy : 'Bearcat Exchange - Buy and sell textbooks at Binghamton',
+                  sell : 'Sell Textbooks On Bearcat Exchange',
+                  account : 'Edit Your Listings On Bearcat Exchange',
+                  faq : 'Common Questions About Bearcat Exchange',
+                  legal : 'Terms and Privacy For Bearcat Exchange',
+                  feedback : 'Give Feedback About Bearcat Exchange'};
 var textbooks;
 var selectedRows = [];
 var errorMessageViews = 0;

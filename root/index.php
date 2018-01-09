@@ -23,6 +23,26 @@ $errorCodes = array(
     602 => array("Error 602 Failed To Connect To Database", $programingErrorMessage),
     603 => array("Error 603 Failed to Load UTF8 Charsset in Database", $programingErrorMessage)
 );
+$pageTitles = array(
+    buy => 'Bearcat Exchange - Buy and sell textbooks at Binghamton',
+    sell => 'Sell Textbooks On Bearcat Exchange',
+    account => 'Edit Your Listings On Bearcat Exchange',
+    faq => 'Common Questions About Bearcat Exchange',
+    legal => 'Terms and Privacy For Bearcat Exchange',
+    feedback => 'Give Feedback About Bearcat Exchange'
+);
+$pageDescriptions = array(
+    buy => 'Avoid bookstore prices: Buy and sell textbooks faster and easier with our free website, created by and for Binghamton University students.',
+    sell => 'Quickly sell your textbooks for free on Bearcat Exchange.',
+    account => 'Edit your textbook listings or mark them as sold.',
+    faq => 'If you got stuck, need help, or just want to know more about Bearcat Exchange then this is the place for you.',
+    legal => 'Legally required fine print that all users consent to by using Bearcat Exchange.',
+    feedback => 'Have a suggestion or encountered a bug on Bearcat Exchange? Tell us here!'
+);
+$page = $_GET["page"];
+if($page == "") {
+    $page = "buy";
+}
 session_start();
 $serverList = array('localhost', '127.0.0.1');
 if(in_array($_SERVER['HTTP_HOST'], $serverList)) {
@@ -804,12 +824,12 @@ function get_rand_letters($length) {
 <!DOCTYPE html>
 <html lang="en" id='open-html'>
     <head>
-        <title>Bearcat Exchange - Buy and sell textbooks at Binghamton</title>
+        <title><?php echo $pageTitles[$page];?></title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="Avoid bookstore prices: Buy and sell textbooks faster and easier with our free website, created by and for Binghamton University students.">
         <meta name="viewport" content="initial-scale=1, width=device-width">
-        <meta name="page" content="<?php echo $_GET['page']; ?>">
+        <meta name="page" content="<?php echo $page; ?>">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
 <!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
@@ -840,27 +860,27 @@ function get_rand_letters($length) {
             <nav id="nav">
                 <div id="nav-wrap">
                 <a href='/' class="spaLoad">
-                    <div class="navbar-link<?php if(!$_GET['page']) echo " navBarCurrent"; ?>" id="buyLink">
+                    <div class="navbar-link<?php if($page == "buy") echo " navBarCurrent"; ?>" id="buyLink">
                         <h5>BUY<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
                 <a  href="/sell/" class="spaLoad">
-                    <div class="navbar-link<?php if($_GET['page'] == "sell") echo " navBarCurrent"; ?>" id="sellLink">
+                    <div class="navbar-link<?php if($page == "sell") echo " navBarCurrent"; ?>" id="sellLink">
                         <h5>SELL<span class="mobile-hidden"> A TEXTBOOK</span></h5>
                     </div>
                 </a>
                 <a href="/account/" class="spaLoad">
-                    <div class="navbar-link<?php if($_GET['page'] == "account") echo " navBarCurrent"; ?>" id="accountLink">
+                    <div class="navbar-link<?php if($page == "account") echo " navBarCurrent"; ?>" id="accountLink">
                         <h5>EDIT<span class="mobile-hidden"> YOUR LISTINGS</span></h5>
                     </div>
                 </a>
                 <a href="/faq/" class="spaLoad">
-                    <div class="navbar-link<?php if($_GET['page'] == "faq") echo " navBarCurrent"; ?>" id="faqLink">
+                    <div class="navbar-link<?php if($page == "faq") echo " navBarCurrent"; ?>" id="faqLink">
                         <h5><span class="mobile-hidden">COMMON </span> QUESTIONS</h5>
                     </div>
                 </a>
                 <a href="/feedback/" class="spaLoad">
-                    <div class="navbar-link<?php if($_GET['page'] == "feedback") echo " navBarCurrent"; ?>" id="feedbackLink">
+                    <div class="navbar-link<?php if($page == "feedback") echo " navBarCurrent"; ?>" id="feedbackLink">
                         <h5><span class="mobile-hidden">SEND US </span>FEEDBACK</h5>
                     </div>
                 </a>
@@ -920,7 +940,7 @@ function get_rand_letters($length) {
                     </script>
                 </div>
                 <div id="pages">
-                    <div id='buy-text'<?php if($_GET['page']) echo " class='hidden'"; ?>>
+                    <div id='buy-text'<?php if($page != "buy") echo " class='hidden'"; ?>>
                         <table id="textbooks" class="items" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
@@ -964,9 +984,9 @@ function get_rand_letters($length) {
                         </table>
                         <div class="odd hidden" id="search-message">There are currently no textbooks to display. Please come back later.</div>
                     </div>
-                    <div id='extra-page'<?php if($_GET['page'] != "legal") echo " class='hidden'"; ?>><?php if($_GET['page'] == "legal") include 'legal.html'; ?></div>
-                    <div id='sell-text'<?php if($_GET['page'] != "sell") echo " class='hidden'"; ?>><?php include 'sell-text.html'; ?></div>
-                    <div id='account-text'<?php if($_GET['page'] != "account") echo " class='hidden'"; ?>>
+                    <div id='extra-page'<?php if($page != "legal") echo " class='hidden'"; ?>><?php if($page == "legal") include 'legal.html'; ?></div>
+                    <div id='sell-text'<?php if($page != "sell") echo " class='hidden'"; ?>><?php include 'sell-text.html'; ?></div>
+                    <div id='account-text'<?php if($page != "account") echo " class='hidden'"; ?>>
                         <?php if(!$theUser['loggedIn']) { ?>
                         <form id="login-form" class="page-form" name="login" method="POST" action="/index.php" onsubmit="return submitLoginForm()">
                             <h1>Edit Your Listings</h1><h2>Edit your listings or mark them as sold</h2>
@@ -1041,8 +1061,8 @@ function get_rand_letters($length) {
                         </div>
                         <?php } ?>
                     </div>
-                    <div id='faq-text' <?php if($_GET['page'] != "faq") echo " class='hidden'"; ?>><?php include 'faq-text.html'; ?></div>
-                    <div id='feedback-text'<?php if($_GET['page'] != "feedback") echo " class='hidden'"; ?>><?php include 'feedback-text.html'; ?></div>
+                    <div id='faq-text' <?php if($page != "faq") echo " class='hidden'"; ?>><?php include 'faq-text.html'; ?></div>
+                    <div id='feedback-text'<?php if($page != "feedback") echo " class='hidden'"; ?>><?php include 'feedback-text.html'; ?></div>
                 </div>
             </div>
             <!--End page content area-->

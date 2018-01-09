@@ -48,5 +48,5 @@ if [ ! -f /home/ubuntu/automated/custom.log ]
 #$cfg['Servers'][$i]['compress']      = FALSE;
 #$cfg['Servers'][$i]['auth_type']     = 'config';
 #$cfg['Servers'][$i]['user']          = 'root';
-#$cfg['Servers'][$i]['password']      = '$localDBPassword';
+#$cfg['Servers'][$i]['password']      = '$localDBPassword'; #Needs to be the remote password when setting up the remote server
 fi
