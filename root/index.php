@@ -912,7 +912,7 @@ function get_rand_letters($length) {
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
             <div id="content" class="content">
                 <div id='buy-page-text'>
-                    <div id='welcome-text' class='hidden'>
+                    <div id='welcome-text' <?php if($page != "buy") echo " class='hidden'"; ?>>
                         <h1>Savings Ahoy<?php if($theUser['loggedIn'] == true) echo ", " . $theUser['name']; ?>!</h1>
                         <h2>Welcome to the new best place to buy and sell textbooks at Binghamton.</h2>
                         <p>It's completely free, made by and for Binghamton students. You can buy and sell textbooks online with people in Binghamton, not Seattle, without giving the bookstore a cut. Click a textbook and start saving now.</p>

@@ -322,6 +322,9 @@ nav a,
     z-index: 15;
     background-color: white;
 }
+.info-box textarea {
+    height: 100px;
+}
 .info-box-heading {
     background-color: #007a5e;
     -webkit-user-select: none;
@@ -355,7 +358,6 @@ nav a,
 }
 .info-box-contact textarea {
     margin-left: 10px;
-    height: 60px;
     border: 1px solid grey;
     border-radius: 5px;
     resize: none;
