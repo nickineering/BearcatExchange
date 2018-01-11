@@ -86,7 +86,7 @@ else {
     }
     if (isset($_REQUEST['request']) || (isset($_GET['email']) && isset($_GET['h']))) {
         $errors['misc'] = '';
-        $getAnotherLinkInstructions = "aybe you should use a newer link. Send yourself a message through your listing to get a link sent to your email now. ";
+        $getAnotherLinkInstructions = "aybe login instead. Click Edit Your Listings on the left to continue. ";
         $mail = new PHPMailer;
         //$mail->SMTPDebug = 3;                               // Enable verbose debug output
         $mail->isSMTP();
@@ -305,7 +305,7 @@ function contactSeller() {
                 <strong>Time Posted:</strong> ".timeSince($textbookListing['time'])."<br>
                 <strong>Comments:</strong> ".($textbookListing['comments']?$textbookListing['comments']:"None")."</p>
                 <p><strong>Instructions For You</strong><br>
-                You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a>. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
+                You can email this buyer directly through reply email or do nothing to remain anonymous. Once you sell your textbook, click the following link to mark it as sold and remove it from the website: <a href='$removalLink' style='color: #007a5e' >$removalLink</a>. You can also mark as sold by clicking Edit Your Listings on the site. Thank you for using <a href='https://bearcatexchange.com' style='color: #007a5e'>Bearcat Exchange</a>, the best way to buy and sell textbooks at Binghamton. If you experience technical difficulties, please contact us at <a href='mailto:support@bearcatexchange.com' style='color: #007a5e'>support@bearcatexchange.com</a>.</p>
             </div>
         </div>
     </div>
@@ -342,7 +342,7 @@ function login () {
     else {
         $bodyTitle = "Click the link below to edit your textbook listings!";
         $removalLink = "https://bearcatexchange.com?email=".$userData['email']."&h=".createHash(intval($userData['id']), -1);
-        $bodyMessage = "<p><a href='$removalLink' style='color: #007a5e' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it. If you did not request this email simply ignore it.</p > ";
+        $bodyMessage = "<p><a href='$removalLink' style='color: #007a5e; font-weight:bold;' >$removalLink</a> . You can also copy the link into your browser's address bar if you can not click it. If you did not request this email simply ignore it.</p > ";
         $mail->addAddress($userData['email'], $userData['name']);
         $subject = 'Edit your textbook listings';
         $mail->Subject = $subject;
@@ -426,7 +426,7 @@ function notifyExpirations() {
     }
     else {
         set_time_limit(0);
-        $unrenewedTextbooksQuery = "SELECT * FROM `textbooks` WHERE `renew` < '2016-09-30 23:59:59' AND `status` = 'unsold'";//Need to make automated date finding eventually.
+        $unrenewedTextbooksQuery = "SELECT * FROM `textbooks` WHERE `renew` > '2016-09-30 23:59:59' AND `renew` < '2018-01-25 23:59:59' AND `status` = 'unsold'";//Need to make automated date finding eventually.
         $unrenewedTextbooks = mysqli_query($con, $unrenewedTextbooksQuery);
         $i = 0;
         while ($row = mysqli_fetch_array($unrenewedTextbooks, MYSQLI_ASSOC)) {
@@ -452,11 +452,11 @@ function notifyExpirations() {
                 $subject = 'Renew Your Textbook Listings';
                 $mail->Subject = $subject;
                 $bodyText = "<div style='font-family: sans-serif; line-height: 2em;'>
-                <h2 style='color: #007a5e'>It's time to renew your textbook listings!</h2>
+                <h2 style='color: #007a5e'>Renew your textbook listings in two clicks!</h2>
                 <div style='font-size: 1.2em;'>
                     <div style='color:#000'>
-                        <p>The following listings are expiring on Bearcat Exchange. Once a listing is expired, it is automatically removed from the Bearcat Exchange to prevent older listings from cluttering your search. If you renew a listing, it will reappear at the top of Bearcat Exchange.</p>
-                        <p>If you've already sold these textbooks you may ignore this email. If not, <a href='$renewLink' style='color: #007a5e'>renew your textbooks now</a>!</p>
+                        <p>The following listings of yours have expired on Bearcat Exchange. Once a listing expires it is automatically removed. If you renew a listing it will reappear at the top of Bearcat Exchange.</p>
+                        <p>If you've already sold these textbooks you may ignore this email. If not, <a href='$renewLink' style='color: #007a5e; font-weight:bold;'>renew your listings in two clicks now</a>! Don't forget to bring them back to campus with you.</p>
                         <strong><ol>
                         ";
                 foreach($textbookTitles as $title){
@@ -1068,7 +1068,7 @@ function get_rand_letters($length) {
             <!--End page content area-->
             <!--Begin Copyright-->
             <footer id="other-nav">
-                <p id="copyright">&#169; 2016</p>
+                <p id="copyright">&#169; 2018</p>
                 <p>Nicholas Ferrara &amp; Rohit Kapur</p><p>Independent Student Website</p>
                 <hr>
                 <p id='legal-link'><a href='/legal/' class="spaLoad">Terms and Privacy</a></p>
