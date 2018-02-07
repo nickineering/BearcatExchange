@@ -414,6 +414,7 @@ function updateItem () {
     die(json_encode($result));
 }
 
+//Use the following to activate: https://bearcatexchange.com/?analytics=off&first=0&request=notify-expirations&pass=INSERT_PRIVATE_PASSCODE
 function notifyExpirations() {
     global $con;
     global $startTime;
