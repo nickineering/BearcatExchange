@@ -832,7 +832,7 @@ function get_rand_letters($length) {
         <meta name="viewport" content="initial-scale=1, width=device-width">
         <meta name="page" content="<?php echo $page; ?>">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
-<!--        <link href="scripts/normalize.css" rel="stylesheet" type="text/css"/>-->
+        <link href="https://unpkg.com/normalize.css@8.0.1/normalize.css" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
         <link href="/style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="/favicon.ico"/>
