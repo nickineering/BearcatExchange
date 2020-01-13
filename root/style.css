@@ -584,7 +584,7 @@ div.alert-box span.close:focus {
     }
     #search-bar {
         right: 497px;
-        width: calc(100% - 582px);
+        width: calc(100% - 512px);
     }
     .top-right-button {
         position: fixed;
@@ -622,16 +622,6 @@ div.alert-box span.close:focus {
     #facebook-link p {
         /*    background-color: #E03B33 ;*/
         margin-top: 11px;
-    }
-    #google-plus-link {
-        /*    background-color: #E03B33 ; */
-        right: 239px;
-        padding-bottom: 2px;
-    }
-    #google-plus-link p {
-        /*    background-color: #E03B33 ;*/
-        margin-top: 6px;
-        margin-bottom: 6px;
     }
     #clear img {
         right: 214px;

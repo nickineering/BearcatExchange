@@ -907,7 +907,6 @@ function get_rand_letters($length) {
             <!--Login Button-->
             <span id="clear" onclick='clearSearchBar();' class='hidden'><img src="/images/clear.svg"></span>
             <a class="top-right-button" id='facebook-link' href="https://facebook.com/bearcatexchange" target='_blank'><p>f</p></a>
-            <a class="top-right-button" id='google-plus-link' href="https://plus.google.com/104887107850990243147" rel="publisher" target='_blank'><p>g+</p></a>
             <a class="top-right-button toggle-logout" onclick="toggleLogout();" target='_blank'><p><?php echo ($theUser['loggedIn'] == true)?'Logout':'Login'; ?></p></a>
             <!--Begin page content area-->
             <input type="search" name="search" id="search-bar" aria-controls="textbooks" placeholder=" Search" autocorrect="off">
