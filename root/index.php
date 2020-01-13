@@ -1069,7 +1069,7 @@ function get_rand_letters($length) {
             <!--End page content area-->
             <!--Begin Copyright-->
             <footer id="other-nav">
-                <p id="copyright">&#169; 2018</p>
+                <p id="copyright">&#169; 2020</p>
                 <p>Nicholas Ferrara &amp; Rohit Kapur</p><p>Independent Student Website</p>
                 <hr>
                 <p id='legal-link'><a href='/legal/' class="spaLoad">Terms and Privacy</a></p>
