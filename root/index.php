@@ -833,7 +833,7 @@ function get_rand_letters($length) {
         <meta name="page" content="<?php echo $page; ?>">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
         <link href="https://unpkg.com/normalize.css@8.0.1/normalize.css" rel="stylesheet" type="text/css"/>
-        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
         <link href="/style.css" rel="stylesheet" type="text/css"/>
         <link rel="icon" type="image/ico" href="/favicon.ico"/>
         <meta property="og:image" content="https://bearcatexchange.com/images/facebook-logo.jpg" />
@@ -847,12 +847,12 @@ function get_rand_letters($length) {
                   echo "startJavascript($errorCode, " . json_encode($theUser) . ", ".json_encode($developmentServer).");";
         ?>'>
         <script src="/send-form.js" defer></script>
-        <script src="/scripts/modernizr.min.js" defer></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js" defer></script>
-        <script src="/scripts/jquery.cookie.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
 <!--        <script src="scripts/mustache.min.js" defer></script>-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.1/handlebars.min.js" defer></script>
         <script src="/main.js" defer></script>
         <div id='wrapper'>
             <!--Begin Nav Bar-->
