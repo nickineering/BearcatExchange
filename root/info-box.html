@@ -1,10 +1,18 @@
-<div class='info-box' id='info-box-{{id}}'>
+<div class="info-box" id="info-box-{{id}}">
     <div class="info-box-heading">
         <h3>{{boxTitle}}</h3>
-        <div class="info-box-minimize" onclick="minimizeInfoBox({{id}});" title='Minimize'>&ndash;</div>
-        <div class="info-box-close" onclick="closeInfoBox({{id}});" title='Close'>&times;</div>
+        <div
+            class="info-box-minimize"
+            onclick="minimizeInfoBox({{id}});"
+            title="Minimize"
+        >
+            &ndash;
+        </div>
+        <div class="info-box-close" onclick="closeInfoBox({{id}});" title="Close">
+            &times;
+        </div>
     </div>
-    <div class='info-box-body'>
+    <div class="info-box-body">
         <table class="info-box-data">
             <tr>
                 <td class="td-left"><strong>Textbook</strong></td>
@@ -27,46 +35,121 @@
                 <td class="td-right">{{course}}</td>
             </tr>
         </table>
-        <table class='info-box-data'>
+
+        <table class="info-box-data">
             <tr>
                 <td class="td-full">
                     <span class="info-box-comments">
-                        <div class="comments-div"><strong>Comments</strong></div>{{comments}}
+                        <div class="comments-div"><strong>Comments</strong></div>
+                        {{comments}}
                     </span>
                 </td>
             </tr>
         </table>
+
         <div class="info-box-contact">
             <h3>Contact Seller</h3>
-            <form id="info-box-form-{{id}}" name="info-box" method="POST" onsubmit='return infoBoxSubmit({{id}});' action="/index.php">
-                <div class='name-container'>
-                    <p class="input-text"><label for='info-box-{{id}}-name'>Your Name <span class="required">*</span></label></p>
-                    <p class="form-error" id='info-box-{{id}}-name-message'><label for='info-box-{{id}}-name'></label></p>
-                    <input type="text" name="name" id='info-box-{{id}}-name' maxlength='50' cookie='name'>
-                    <br>
+            <form
+                id="info-box-form-{{id}}"
+                name="info-box"
+                method="POST"
+                onsubmit="return infoBoxSubmit({{id}});"
+                action="/index.php"
+            >
+                <div class="name-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-name"
+                            >Your Name <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error" id="info-box-{{id}}-name-message">
+                        <label for="info-box-{{id}}-name"></label>
+                    </p>
+                    <input
+                        type="text"
+                        name="name"
+                        id="info-box-{{id}}-name"
+                        maxlength="50"
+                        cookie="name"
+                    />
+                    <br />
                 </div>
-                <div class='email-container'>
-                    <p class="input-text"><label for='info-box-{{id}}-email'>Your Email <span class="required">*</span></label></p>
-                    <p class="form-error" id='info-box-{{id}}-email-message'><label for='info-box-{{id}}-email'></label></p>
-                    <input type="email" name="email" id='info-box-{{id}}-email' maxlength="254" cookie='email'>
-                    <br>
+                <div class="email-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-email"
+                            >Your Email <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error" id="info-box-{{id}}-email-message">
+                        <label for="info-box-{{id}}-email"></label>
+                    </p>
+                    <input
+                        type="email"
+                        name="email"
+                        id="info-box-{{id}}-email"
+                        maxlength="254"
+                        cookie="email"
+                    />
+                    <br />
                 </div>
-                <div class='message-container'>
-                    <p class="input-text"><label for='info-box-{{id}}-message'>Your message to the seller <span class="required">*</span></label></p>
-                    <p class="form-error" id='info-box-{{id}}-body-message'><label for='info-box-{{id}}-message'></label></p>
-                    <textarea rows="5" name="message" id="info-box-{{id}}-message" maxlength='1000' spellcheck="true">Hi, I'd like to buy your textbook. When and where should we meet? Thanks!</textarea>
+                <div class="message-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-message"
+                            >Your message to the seller
+                            <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error" id="info-box-{{id}}-body-message">
+                        <label for="info-box-{{id}}-message"></label>
+                    </p>
+                    <textarea
+                        rows="5"
+                        name="message"
+                        id="info-box-{{id}}-message"
+                        maxlength="1000"
+                        spellcheck="true"
+                    >
+Hi, I'd like to buy your textbook. When and where should we meet? Thanks!</textarea
+                    >
                 </div>
                 <div class="newsletter-form">
                     <label>
-                        <input type="checkbox" name="newsletter" id='info-box-{{id}}-newsletter' value='subscribed' checked>
-                        <div>This is cool. Keep me informed. You can always unsubscribe, but you won't want to!</div>
+                        <input
+                            type="checkbox"
+                            name="newsletter"
+                            id="info-box-{{id}}-newsletter"
+                            value="subscribed"
+                            checked
+                        />
+                        <div>
+                            This is cool. Keep me informed. You can always unsubscribe,
+                            but you won't want to!
+                        </div>
                     </label>
                 </div>
-                <div id="info-box-{{id}}-message-wrapper" class='form-message-wrapper hidden'></div>
-                <input type="hidden" id="info-box-{{id}}-request-id" name="request" value="contact-seller"/>
-                <input type="hidden" name="textbookid" id="info-box-{{id}}-id" value="{{id}}"/>
-                <input type="hidden" name="didcheck" id="info-box-{{id}}-didcheck" value="false"/>
-                <input type="submit" value="SEND MESSAGE" id='info-box-{{id}}-submit'>
+                <div
+                    id="info-box-{{id}}-message-wrapper"
+                    class="form-message-wrapper hidden"
+                ></div>
+                <input
+                    type="hidden"
+                    id="info-box-{{id}}-request-id"
+                    name="request"
+                    value="contact-seller"
+                />
+                <input
+                    type="hidden"
+                    name="textbookid"
+                    id="info-box-{{id}}-id"
+                    value="{{id}}"
+                />
+                <input
+                    type="hidden"
+                    name="didcheck"
+                    id="info-box-{{id}}-didcheck"
+                    value="false"
+                />
+                <input type="submit" value="SEND MESSAGE" id="info-box-{{id}}-submit" />
             </form>
         </div>
     </div>

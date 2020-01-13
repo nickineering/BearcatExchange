@@ -1,48 +1,161 @@
-<div class='info-box info-box-edit' id='info-box-{{id}}'>
+<div class="info-box info-box-edit" id="info-box-{{id}}">
     <div class="info-box-heading">
         <h3>{{boxTitle}}</h3>
-        <div class="info-box-minimize" onclick="minimizeInfoBox({{id}});" title='Minimize'>&ndash;</div>
-        <div class="info-box-close" onclick="closeInfoBox({{id}});" title='Close'>&times;</div>
+        <div
+            class="info-box-minimize"
+            onclick="minimizeInfoBox({{id}});"
+            title="Minimize"
+        >
+            &ndash;
+        </div>
+        <div class="info-box-close" onclick="closeInfoBox({{id}});" title="Close">
+            &times;
+        </div>
     </div>
-    <div class='info-box-body'>
+    <div class="info-box-body">
         <div class="info-box-contact">
             <h3>Edit Your Listing</h3>
-            <form id="info-box-form-{{id}}" name="info-box" method="POST" onsubmit='return submitUpdateForm({{id}});' action="/index.php">
-                <div class='textbooktitle-container'>
-                    <p class="input-text"><label for="info-box-{{id}}-title">Title (include edition) <span class="required">*</span></label></p>
-                    <p class="form-error"><label for="info-box-{{id}}-title" id='info-box-{{id}}-title-message'></label></p>
-                    <input type="text" name="title" id='info-box-{{id}}-title' maxlength="75" spellcheck="true" value="{{title}}">
+            <form
+                id="info-box-form-{{id}}"
+                name="info-box"
+                method="POST"
+                onsubmit="return submitUpdateForm({{id}});"
+                action="/index.php"
+            >
+                <div class="textbooktitle-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-title"
+                            >Title (include edition)
+                            <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error">
+                        <label
+                            for="info-box-{{id}}-title"
+                            id="info-box-{{id}}-title-message"
+                        ></label>
+                    </p>
+                    <input
+                        type="text"
+                        name="title"
+                        id="info-box-{{id}}-title"
+                        maxlength="75"
+                        spellcheck="true"
+                        value="{{title}}"
+                    />
                 </div>
-                <div class='author-container'>
-                    <p class="input-text"><label for="info-box-{{id}}-author">Author <span class="required">*</span></label></p>
-                    <p class="form-error"><label for="info-box-{{id}}-author" id='info-box-{{id}}-author-message'></label></p>
-                    <input type="text" name="author" id='info-box-{{id}}-author' maxlength='50' value="{{author}}">
+                <div class="author-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-author"
+                            >Author <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error">
+                        <label
+                            for="info-box-{{id}}-author"
+                            id="info-box-{{id}}-author-message"
+                        ></label>
+                    </p>
+                    <input
+                        type="text"
+                        name="author"
+                        id="info-box-{{id}}-author"
+                        maxlength="50"
+                        value="{{author}}"
+                    />
                 </div>
                 <div class="course-container">
-                    <p class="input-text"><label for="info-box-{{id}}-course">Course  (ex: BIOL 380A)<span class="required">*</span></label></p>
-                    <p class="form-error"><label for="info-box-{{id}}-course" id='info-box-{{id}}-course-message'></label></p>
-                    <input type="text" name='course' class="courseEdit" id="info-box-{{id}}-course" maxlength='15' value="{{course}}">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-course"
+                            >Course (ex: BIOL 380A)<span class="required"
+                                >*</span
+                            ></label
+                        >
+                    </p>
+                    <p class="form-error">
+                        <label
+                            for="info-box-{{id}}-course"
+                            id="info-box-{{id}}-course-message"
+                        ></label>
+                    </p>
+                    <input
+                        type="text"
+                        name="course"
+                        class="courseEdit"
+                        id="info-box-{{id}}-course"
+                        maxlength="15"
+                        value="{{course}}"
+                    />
                 </div>
-                <div class='price-container'>
-                    <p class="input-text"><label for="info-box-{{id}}-price">Price <span class="required">*</span></label></p>
-                    <p class="form-error"><label for="info-box-{{id}}-price" id='info-box-{{id}}-price-message'></label></p>
-                    <input type="text" name="price" id='info-box-{{id}}-price' autocomplete="off" value="{{price}}">
+                <div class="price-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-price"
+                            >Price <span class="required">*</span></label
+                        >
+                    </p>
+                    <p class="form-error">
+                        <label
+                            for="info-box-{{id}}-price"
+                            id="info-box-{{id}}-price-message"
+                        ></label>
+                    </p>
+                    <input
+                        type="text"
+                        name="price"
+                        id="info-box-{{id}}-price"
+                        autocomplete="off"
+                        value="{{price}}"
+                    />
                 </div>
-                <div class='comments-container'>
-                    <p class="input-text"><label for="info-box-{{id}}-comments">Comments</label></p>
-                    <p class="form-error"><label for="info-box-{{id}}-comments"  id='info-box-{{id}}-comments-message'></label></p>
-                    <textarea rows="6" name="comments" id="info-box-{{id}}-comments" maxlength='1000' spellcheck="true">{{comments}}</textarea>
+                <div class="comments-container">
+                    <p class="input-text">
+                        <label for="info-box-{{id}}-comments">Comments</label>
+                    </p>
+                    <p class="form-error">
+                        <label
+                            for="info-box-{{id}}-comments"
+                            id="info-box-{{id}}-comments-message"
+                        ></label>
+                    </p>
+                    <textarea
+                        rows="6"
+                        name="comments"
+                        id="info-box-{{id}}-comments"
+                        maxlength="1000"
+                        spellcheck="true"
+                    >
+{{comments}}</textarea
+                    >
                 </div>
                 <div class="newsletter-form">
                     <label>
-                        <input type="checkbox" id="info-box-status-{{id}}" name="status" value='sold' {{checkedForSold}}>
+                        <input
+                            type="checkbox"
+                            id="info-box-status-{{id}}"
+                            name="status"
+                            value="sold"
+                            {{checkedForSold}}
+                        />
                         <div>This item was sold</div>
                     </label>
                 </div>
-                <div id="info-box-{{id}}-message-wrapper" class='form-message-wrapper hidden'></div>
-                <input type="hidden" id="info-box-{{id}}-request-id" name="request" value="update-item"/>
-                <input type="hidden" name="itemId" id="info-box-id-{{id}}" value="{{id}}"/>
-                <input type="submit" value="SAVE CHANGES" id='info-box-submit-{{id}}'>
+                <div
+                    id="info-box-{{id}}-message-wrapper"
+                    class="form-message-wrapper hidden"
+                ></div>
+                <input
+                    type="hidden"
+                    id="info-box-{{id}}-request-id"
+                    name="request"
+                    value="update-item"
+                />
+                <input
+                    type="hidden"
+                    name="itemId"
+                    id="info-box-id-{{id}}"
+                    value="{{id}}"
+                />
+                <input type="submit" value="SAVE CHANGES" id="info-box-submit-{{id}}" />
             </form>
         </div>
     </div>

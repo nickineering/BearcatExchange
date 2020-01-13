@@ -1,20 +1,19 @@
-#This is a configuration file for AWS CodeDeploy which automates deployment from GitHub to the live server. Learn how to edit it here: http://docs.aws.amazon.com/codedeploy/latest/userguide/app-spec-ref.html
+# This is a configuration file for AWS CodeDeploy which automates deployment from GitHub to the live server. Learn how to edit it here: http://docs.aws.amazon.com/codedeploy/latest/userguide/app-spec-ref.html
 version: 0.0
 os: linux
 files:
-- source: /root/
-  destination: /var/www/be/live
-- source: /bearcatexchange.com.conf
-  destination: /etc/apache2/sites-available/
-- source: /backup_database.sh
-  destination: /home/ubuntu/automated/
+    - source: /root/
+      destination: /var/www/be/live
+    - source: /bearcatexchange.com.conf
+      destination: /etc/apache2/sites-available/
+    - source: /backup_database.sh
+      destination: /home/ubuntu/automated/
 hooks:
-  BeforeInstall:
-  - location: server-initialization.sh
-    timeout: 3000
-    runas: root
-  AfterInstall:
-  - location: server-after-install.sh
-    timeout: 3000
-    runas: root
-    
+    BeforeInstall:
+        - location: server-initialization.sh
+          timeout: 3000
+          runas: root
+    AfterInstall:
+        - location: server-after-install.sh
+          timeout: 3000
+          runas: root
