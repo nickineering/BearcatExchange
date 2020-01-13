@@ -17,6 +17,16 @@ bearcatexchange-local.ini.
 If you have any questions about this repository please contact Nicholas Ferrara at
 support@bearcatexchange.com.
 
+## Disable analytics when developing
+
+Go to the following link to put a temporary cookie in your browser to turn off analytics
+when developing. Otherwise it will look like the site is experiencing heavy traffic when
+really it is just you editing code.
+
+```
+https://bearcatexchange.com/?analytics=off
+```
+
 ## Installation
 
 While updates are fully automated the initial installation is not. In future, it should
